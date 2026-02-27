@@ -9,6 +9,7 @@ import { BackgroundRenderer } from './renderers/BackgroundRenderer';
 import { FillRenderer } from './renderers/FillRenderer';
 import { LabelRenderer } from './renderers/LabelRenderer';
 import { DrawingLineRenderer } from './renderers/DrawingLineRenderer';
+import { LinefillRenderer } from './renderers/LinefillRenderer';
 
 export class SeriesRendererFactory {
     private static renderers: Map<string, SeriesRenderer> = new Map();
@@ -28,6 +29,7 @@ export class SeriesRendererFactory {
         this.register('fill', new FillRenderer());
         this.register('label', new LabelRenderer());
         this.register('drawing_line', new DrawingLineRenderer());
+        this.register('linefill', new LinefillRenderer());
     }
 
     public static register(style: string, renderer: SeriesRenderer) {
