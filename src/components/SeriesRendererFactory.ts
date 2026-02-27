@@ -8,6 +8,7 @@ import { ShapeRenderer } from './renderers/ShapeRenderer';
 import { BackgroundRenderer } from './renderers/BackgroundRenderer';
 import { FillRenderer } from './renderers/FillRenderer';
 import { LabelRenderer } from './renderers/LabelRenderer';
+import { DrawingLineRenderer } from './renderers/DrawingLineRenderer';
 
 export class SeriesRendererFactory {
     private static renderers: Map<string, SeriesRenderer> = new Map();
@@ -26,6 +27,7 @@ export class SeriesRendererFactory {
         this.register('background', new BackgroundRenderer());
         this.register('fill', new FillRenderer());
         this.register('label', new LabelRenderer());
+        this.register('drawing_line', new DrawingLineRenderer());
     }
 
     public static register(style: string, renderer: SeriesRenderer) {
