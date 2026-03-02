@@ -29,7 +29,7 @@ export class DrawingLineRenderer implements SeriesRenderer {
                 if (ln && typeof ln === 'object' && !ln._deleted) {
                     lineObjects.push(ln);
                     // Apply padding offset for bar_index-based coordinates
-                    const xOff = ln.xloc === 'bar_index' ? offset : 0;
+                    const xOff = (ln.xloc === 'bar_index' || ln.xloc === 'bi') ? offset : 0;
                     lineData.push([ln.x1 + xOff, ln.y1, ln.x2 + xOff, ln.y2]);
                 }
             }

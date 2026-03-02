@@ -480,7 +480,7 @@ export class LayoutManager {
 
                         // Check if this is a shape with price-relative positioning
                         const isShapeWithPriceLocation =
-                            plot.options.style === 'shape' && (plot.options.location === 'abovebar' || plot.options.location === 'belowbar');
+                            plot.options.style === 'shape' && (plot.options.location === 'abovebar' || plot.options.location === 'AboveBar' || plot.options.location === 'belowbar' || plot.options.location === 'BelowBar');
 
                         if (visualOnlyStyles.includes(plot.options.style)) {
                             // Assign these to a separate Y-axis so they don't affect price scale

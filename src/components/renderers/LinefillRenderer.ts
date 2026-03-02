@@ -33,8 +33,8 @@ export class LinefillRenderer implements SeriesRenderer {
                 fillObjects.push(lf);
 
                 // Store all 8 coordinates for the two lines
-                const xOff1 = line1.xloc === 'bar_index' ? offset : 0;
-                const xOff2 = line2.xloc === 'bar_index' ? offset : 0;
+                const xOff1 = (line1.xloc === 'bar_index' || line1.xloc === 'bi') ? offset : 0;
+                const xOff2 = (line2.xloc === 'bar_index' || line2.xloc === 'bi') ? offset : 0;
                 fillData.push([
                     line1.x1 + xOff1, line1.y1,
                     line1.x2 + xOff1, line1.y2,
