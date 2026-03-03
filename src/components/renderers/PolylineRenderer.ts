@@ -34,24 +34,23 @@ export class PolylineRenderer implements SeriesRenderer {
             return { name: seriesName, type: 'custom', xAxisIndex, yAxisIndex, data: [], silent: true };
         }
 
-        // For each polyline, provide representative coordinate data so ECharts
-        // includes the polyline's y-range in axis scaling. We store [x_first, y_min, x_last, y_max]
-        // using actual point coordinates. renderItem accesses the full polyline via polyObjects[idx].
-        const polyData: number[][] = [];
+        // Compute y-range across all polylines for axis scaling
+        let yMin = Infinity, yMax = -Infinity;
         for (const pl of polyObjects) {
-            const pts = pl.points;
-            const useBi = pl.xloc === 'bi' || pl.xloc === 'bar_index';
-            const xOff = useBi ? offset : 0;
-            const firstX = useBi ? (pts[0].index ?? 0) + xOff : (pts[0].time ?? 0);
-            const lastX = useBi ? (pts[pts.length - 1].index ?? 0) + xOff : (pts[pts.length - 1].time ?? 0);
-            let yMin = Infinity, yMax = -Infinity;
-            for (const pt of pts) {
+            for (const pt of pl.points) {
                 const p = pt.price ?? 0;
                 if (p < yMin) yMin = p;
                 if (p > yMax) yMax = p;
             }
-            polyData.push([firstX, yMin, lastX, yMax]);
         }
+
+        // Use a SINGLE data entry spanning the full x-range so renderItem is always called.
+        // ECharts filters a data item only when ALL its x-dimensions are on the same side
+        // of the visible window.  With dims 0=0 and 1=lastBar the item always straddles
+        // the viewport, so renderItem fires exactly once regardless of scroll position.
+        // Dims 2/3 are yMin/yMax for axis scaling.
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
 
         return {
             name: seriesName,
@@ -59,102 +58,77 @@ export class PolylineRenderer implements SeriesRenderer {
             xAxisIndex,
             yAxisIndex,
             renderItem: (params: any, api: any) => {
-                const idx = params.dataIndex;
-                const pl = polyObjects[idx];
-                if (!pl || pl._deleted) return;
-
-                const points = pl.points;
-                if (!points || points.length < 2) return;
-
-                const useBi = pl.xloc === 'bi' || pl.xloc === 'bar_index';
-                const xOff = useBi ? offset : 0;
-
-                // Convert chart.point objects to pixel coordinates
-                const pixelPoints: number[][] = [];
-                for (const pt of points) {
-                    const x = useBi ? (pt.index ?? 0) + xOff : (pt.time ?? 0);
-                    const y = pt.price ?? 0;
-                    const px = api.coord([x, y]);
-                    pixelPoints.push(px);
-                }
-
-                if (pixelPoints.length < 2) return;
-
                 const children: any[] = [];
-                const lineColor = pl.line_color || '#2962ff';
-                const lineWidth = pl.line_width || 1;
-                const dashPattern = this.getDashPattern(pl.line_style);
 
-                // Fill shape (rendered behind stroke)
-                if (pl.fill_color && pl.fill_color !== '' && pl.fill_color !== 'na') {
-                    const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(pl.fill_color);
-                    const fillPoints = pl.closed
-                        ? pixelPoints
-                        : pixelPoints;
+                for (const pl of polyObjects) {
+                    if (pl._deleted) continue;
+                    const points = pl.points;
+                    if (!points || points.length < 2) continue;
 
+                    const useBi = pl.xloc === 'bi' || pl.xloc === 'bar_index';
+                    const xOff = useBi ? offset : 0;
+
+                    // Convert chart.point objects to pixel coordinates
+                    const pixelPoints: number[][] = [];
+                    for (const pt of points) {
+                        const x = useBi ? (pt.index ?? 0) + xOff : (pt.time ?? 0);
+                        const y = pt.price ?? 0;
+                        pixelPoints.push(api.coord([x, y]));
+                    }
+
+                    if (pixelPoints.length < 2) continue;
+
+                    const lineColor = pl.line_color || '#2962ff';
+                    const lineWidth = pl.line_width || 1;
+                    const dashPattern = this.getDashPattern(pl.line_style);
+
+                    // Fill shape (rendered behind stroke)
+                    if (pl.fill_color && pl.fill_color !== '' && pl.fill_color !== 'na') {
+                        const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(pl.fill_color);
+
+                        if (pl.curved) {
+                            const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
+                            children.push({
+                                type: 'path',
+                                shape: { pathData: pathData + ' Z' },
+                                style: { fill: fillColor, opacity: fillOpacity, stroke: 'none' },
+                                silent: true,
+                            });
+                        } else {
+                            children.push({
+                                type: 'polygon',
+                                shape: { points: pixelPoints },
+                                style: { fill: fillColor, opacity: fillOpacity, stroke: 'none' },
+                                silent: true,
+                            });
+                        }
+                    }
+
+                    // Stroke (line segments)
                     if (pl.curved) {
-                        // Curved fill: use the same smooth path but as a filled polygon
-                        const pathData = this.buildCurvedPath(fillPoints, pl.closed);
+                        const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
                         children.push({
                             type: 'path',
-                            shape: { pathData: pathData + ' Z' },
-                            style: {
-                                fill: fillColor,
-                                opacity: fillOpacity,
-                                stroke: 'none',
-                            },
+                            shape: { pathData },
+                            style: { fill: 'none', stroke: lineColor, lineWidth, lineDash: dashPattern },
                             silent: true,
                         });
                     } else {
+                        const allPoints = pl.closed ? [...pixelPoints, pixelPoints[0]] : pixelPoints;
                         children.push({
-                            type: 'polygon',
-                            shape: { points: fillPoints },
-                            style: {
-                                fill: fillColor,
-                                opacity: fillOpacity,
-                                stroke: 'none',
-                            },
+                            type: 'polyline',
+                            shape: { points: allPoints },
+                            style: { fill: 'none', stroke: lineColor, lineWidth, lineDash: dashPattern },
                             silent: true,
                         });
                     }
                 }
 
-                // Stroke (line segments)
-                if (pl.curved) {
-                    const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
-                    children.push({
-                        type: 'path',
-                        shape: { pathData },
-                        style: {
-                            fill: 'none',
-                            stroke: lineColor,
-                            lineWidth,
-                            lineDash: dashPattern,
-                        },
-                        silent: true,
-                    });
-                } else {
-                    // Straight polyline
-                    const allPoints = pl.closed
-                        ? [...pixelPoints, pixelPoints[0]]
-                        : pixelPoints;
-
-                    children.push({
-                        type: 'polyline',
-                        shape: { points: allPoints },
-                        style: {
-                            fill: 'none',
-                            stroke: lineColor,
-                            lineWidth,
-                            lineDash: dashPattern,
-                        },
-                        silent: true,
-                    });
-                }
-
                 return { type: 'group', children };
             },
-            data: polyData,
+            data: [[0, lastBarIndex, yMin, yMax]],
+            clip: true,
+            encode: { x: [0, 1], y: [2, 3] },
             z: 12,
             silent: true,
             emphasis: { disabled: true },

@@ -33,7 +33,6 @@ export class BoxRenderer implements SeriesRenderer {
 
         // Collect all non-deleted box objects from the sparse dataArray.
         const boxObjects: any[] = [];
-        const boxData: number[][] = [];
 
         for (let i = 0; i < dataArray.length; i++) {
             const val = dataArray[i];
@@ -43,15 +42,30 @@ export class BoxRenderer implements SeriesRenderer {
             for (const bx of items) {
                 if (bx && typeof bx === 'object' && !bx._deleted) {
                     boxObjects.push(bx);
-                    const xOff = (bx.xloc === 'bar_index' || bx.xloc === 'bi') ? offset : 0;
-                    boxData.push([bx.left + xOff, bx.top, bx.right + xOff, bx.bottom]);
                 }
             }
         }
 
-        if (boxData.length === 0) {
+        if (boxObjects.length === 0) {
             return { name: seriesName, type: 'custom', xAxisIndex, yAxisIndex, data: [], silent: true };
         }
+
+        // Compute y-range for axis scaling
+        let yMin = Infinity, yMax = -Infinity;
+        for (const bx of boxObjects) {
+            if (bx.top < yMin) yMin = bx.top;
+            if (bx.top > yMax) yMax = bx.top;
+            if (bx.bottom < yMin) yMin = bx.bottom;
+            if (bx.bottom > yMax) yMax = bx.bottom;
+        }
+
+        // Use a SINGLE data entry spanning the full x-range so renderItem is always called.
+        // ECharts filters a data item only when ALL its x-dimensions are on the same side
+        // of the visible window.  With dims 0=0 and 1=lastBar the item always straddles
+        // the viewport, so renderItem fires exactly once regardless of scroll position.
+        // Dims 2/3 are yMin/yMax for axis scaling.
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
 
         return {
             name: seriesName,
@@ -59,93 +73,86 @@ export class BoxRenderer implements SeriesRenderer {
             xAxisIndex,
             yAxisIndex,
             renderItem: (params: any, api: any) => {
-                const idx = params.dataIndex;
-                const bx = boxObjects[idx];
-                if (!bx || bx._deleted) return;
-
-                const left = api.value(0);
-                const top = api.value(1);
-                const right = api.value(2);
-                const bottom = api.value(3);
-
-                const pTopLeft = api.coord([left, top]);
-                const pBottomRight = api.coord([right, bottom]);
-
-                let x = pTopLeft[0];
-                let y = pTopLeft[1];
-                let w = pBottomRight[0] - pTopLeft[0];
-                let h = pBottomRight[1] - pTopLeft[1];
-
-                // Handle extend (horizontal borders)
-                const extend = bx.extend || 'none';
-                if (extend !== 'none') {
-                    const cs = params.coordSys;
-                    if (extend === 'left' || extend === 'both') {
-                        x = cs.x;
-                        w = (extend === 'both')
-                            ? cs.width
-                            : (pBottomRight[0] - cs.x);
-                    }
-                    if (extend === 'right' || extend === 'both') {
-                        if (extend === 'right') {
-                            w = cs.x + cs.width - pTopLeft[0];
-                        }
-                    }
-                }
-
                 const children: any[] = [];
 
-                // Background fill rect
-                const bgColor = normalizeColor(bx.bgcolor) || '#2962ff';
-                children.push({
-                    type: 'rect',
-                    shape: { x, y, width: w, height: h },
-                    style: {
-                        fill: bgColor,
-                    },
-                });
+                for (const bx of boxObjects) {
+                    if (bx._deleted) continue;
 
-                // Border rect (on top of fill)
-                const borderColor = normalizeColor(bx.border_color) || '#2962ff';
-                const borderWidth = bx.border_width ?? 1;
-                if (borderWidth > 0) {
+                    const xOff = (bx.xloc === 'bar_index' || bx.xloc === 'bi') ? offset : 0;
+                    const pTopLeft = api.coord([bx.left + xOff, bx.top]);
+                    const pBottomRight = api.coord([bx.right + xOff, bx.bottom]);
+
+                    let x = pTopLeft[0];
+                    let y = pTopLeft[1];
+                    let w = pBottomRight[0] - pTopLeft[0];
+                    let h = pBottomRight[1] - pTopLeft[1];
+
+                    // Handle extend (horizontal borders)
+                    const extend = bx.extend || 'none';
+                    if (extend !== 'none') {
+                        const cs = params.coordSys;
+                        if (extend === 'left' || extend === 'both') {
+                            x = cs.x;
+                            w = (extend === 'both') ? cs.width : (pBottomRight[0] - cs.x);
+                        }
+                        if (extend === 'right' || extend === 'both') {
+                            if (extend === 'right') {
+                                w = cs.x + cs.width - pTopLeft[0];
+                            }
+                        }
+                    }
+
+                    // Background fill rect
+                    const bgColor = normalizeColor(bx.bgcolor) || '#2962ff';
                     children.push({
                         type: 'rect',
                         shape: { x, y, width: w, height: h },
-                        style: {
-                            fill: 'none',
-                            stroke: borderColor,
-                            lineWidth: borderWidth,
-                            lineDash: this.getDashPattern(bx.border_style),
-                        },
+                        style: { fill: bgColor },
                     });
-                }
 
-                // Text inside box
-                if (bx.text) {
-                    const textX = this.getTextX(x, w, bx.text_halign);
-                    const textY = this.getTextY(y, h, bx.text_valign);
+                    // Border rect (on top of fill)
+                    const borderColor = normalizeColor(bx.border_color) || '#2962ff';
+                    const borderWidth = bx.border_width ?? 1;
+                    if (borderWidth > 0) {
+                        children.push({
+                            type: 'rect',
+                            shape: { x, y, width: w, height: h },
+                            style: {
+                                fill: 'none',
+                                stroke: borderColor,
+                                lineWidth: borderWidth,
+                                lineDash: this.getDashPattern(bx.border_style),
+                            },
+                        });
+                    }
 
-                    children.push({
-                        type: 'text',
-                        style: {
-                            x: textX,
-                            y: textY,
-                            text: bx.text,
-                            fill: normalizeColor(bx.text_color) || '#000000',
-                            fontSize: this.getSizePixels(bx.text_size),
-                            fontFamily: bx.text_font_family === 'monospace' ? 'monospace' : 'sans-serif',
-                            fontWeight: (bx.text_formatting === 'format_bold') ? 'bold' : 'normal',
-                            fontStyle: (bx.text_formatting === 'format_italic') ? 'italic' : 'normal',
-                            textAlign: this.mapHAlign(bx.text_halign),
-                            textVerticalAlign: this.mapVAlign(bx.text_valign),
-                        },
-                    });
+                    // Text inside box
+                    if (bx.text) {
+                        const textX = this.getTextX(x, w, bx.text_halign);
+                        const textY = this.getTextY(y, h, bx.text_valign);
+                        children.push({
+                            type: 'text',
+                            style: {
+                                x: textX,
+                                y: textY,
+                                text: bx.text,
+                                fill: normalizeColor(bx.text_color) || '#000000',
+                                fontSize: this.getSizePixels(bx.text_size),
+                                fontFamily: bx.text_font_family === 'monospace' ? 'monospace' : 'sans-serif',
+                                fontWeight: (bx.text_formatting === 'format_bold') ? 'bold' : 'normal',
+                                fontStyle: (bx.text_formatting === 'format_italic') ? 'italic' : 'normal',
+                                textAlign: this.mapHAlign(bx.text_halign),
+                                textVerticalAlign: this.mapVAlign(bx.text_valign),
+                            },
+                        });
+                    }
                 }
 
                 return { type: 'group', children };
             },
-            data: boxData,
+            data: [[0, lastBarIndex, yMin, yMax]],
+            clip: true,
+            encode: { x: [0, 1], y: [2, 3] },
             z: 14,
             silent: true,
             emphasis: { disabled: true },
