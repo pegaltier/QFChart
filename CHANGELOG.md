@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2026-03-05 - Gradient Fill Support
+
+### Added
+
+- **Gradient Fill (`FillRenderer`)**: Added support for Pine Script's gradient fill variant — `fill(plot1, plot2, top_value, bottom_value, top_color, bottom_color)`. The renderer detects `plotOptions.gradient === true` and renders each polygon segment with a vertical ECharts linear gradient, mapping `top_color` to the higher-value boundary and `bottom_color` to the lower-value boundary. Gracefully falls back to a semi-transparent grey if per-bar color data is missing.
+- **`ColorUtils.toRgba()`**: Added a new utility method to convert any parsed color + opacity pair into a reliable `rgba()` string, handling `rgb()`, 6-digit hex, and 8-digit hex (`#RRGGBBAA`) inputs.
+- **`ColorUtils.parseColor()` — 8-digit Hex**: Extended `parseColor()` to handle `#RRGGBBAA` colors (the format PineTS emits for `color.new()` with alpha), correctly extracting the alpha channel as opacity.
+
+### Fixed
+
+- **Fill References Broken by `color: na`**: Fixed fill plots losing their reference data when the source plot had segments with `color: na` (invisible segments). Previously, `plotDataArrays` stored the post-nullification array (where `na`-color points were set to `null`), so the fill had gaps wherever the source plot was invisible. Now a separate `rawDataArray` is stored with the original numeric values, ensuring fills always see the underlying data regardless of visibility.
+
 ## [0.7.1] - 2026-03-04 - Rendering Hotfixes
 
 ### Fixed
