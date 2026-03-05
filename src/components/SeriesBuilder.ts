@@ -158,6 +158,7 @@ export class SeriesBuilder {
                 // Prepare data arrays
                 // For 'fill' style, we don't use plot.data directly in the same way, but we initialize generic arrays
                 const dataArray = new Array(totalDataLength).fill(null);
+                const rawDataArray = new Array(totalDataLength).fill(null); // Unmodified values for fill references
                 const colorArray = new Array(totalDataLength).fill(null);
                 const optionsArray = new Array(totalDataLength).fill(null); // Store per-point options
 
@@ -170,6 +171,10 @@ export class SeriesBuilder {
                         if (offsetIndex >= 0 && offsetIndex < totalDataLength) {
                             let value = point.value;
                             const pointColor = point.options?.color;
+
+                            // Always store the raw value for fill plots to reference
+                            // (fills need the actual data even when the line is invisible via color=na)
+                            rawDataArray[offsetIndex] = value;
 
                             // TradingView compatibility: if color is 'na' (NaN, null, undefined, or "na"), break the line
                             // When the options object explicitly has a 'color' key set to undefined,
@@ -193,9 +198,9 @@ export class SeriesBuilder {
                     }
                 });
 
-                // Store data array for fill plots to reference
-                // Only store for non-fill plots as fill plots don't produce data to be referenced by other fills (usually)
-                plotDataArrays.set(`${id}::${plotName}`, dataArray);
+                // Store raw data array (before na-color nullification) for fill plots to reference
+                // Fill plots need the actual numeric values even when the referenced plot is invisible (color=na)
+                plotDataArrays.set(`${id}::${plotName}`, rawDataArray);
 
                 if (plot.options?.style?.startsWith('style_')) {
                     plot.options.style = plot.options.style.replace('style_', '') as IndicatorStyle;
