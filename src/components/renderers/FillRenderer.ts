@@ -3,7 +3,7 @@ import { ColorUtils } from '../../utils/ColorUtils';
 
 export class FillRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName, optionsArray } = context;
         const totalDataLength = context.dataArray.length; // Use length from dataArray placeholder
 
         // Fill plots reference other plots to fill the area between them
@@ -23,7 +23,18 @@ export class FillRenderer implements SeriesRenderer {
             return null;
         }
 
-        // Parse color to extract opacity
+        // Detect gradient fill mode
+        const isGradient = plotOptions.gradient === true;
+
+        if (isGradient) {
+            return this.renderGradientFill(
+                seriesName, xAxisIndex, yAxisIndex,
+                plot1Data, plot2Data, totalDataLength,
+                optionsArray, plotOptions
+            );
+        }
+
+        // --- Simple (solid color) fill ---
         const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(plotOptions.color || 'rgba(128, 128, 128, 0.2)');
 
         // Create fill data with previous values for smooth polygon rendering
@@ -37,54 +48,37 @@ export class FillRenderer implements SeriesRenderer {
             fillDataWithPrev.push([i, y1, y2, prevY1, prevY2]);
         }
 
-        // Add fill series with smooth area rendering
         return {
             name: seriesName,
             type: 'custom',
             xAxisIndex: xAxisIndex,
             yAxisIndex: yAxisIndex,
-            z: 1, // Behind plot lines (z=2) and candles (z=5), above grid background
+            z: 1,
             renderItem: (params: any, api: any) => {
                 const index = params.dataIndex;
-
-                // Skip first point (no previous to connect to)
                 if (index === 0) return null;
 
-                const y1 = api.value(1); // Current upper
-                const y2 = api.value(2); // Current lower
-                const prevY1 = api.value(3); // Previous upper
-                const prevY2 = api.value(4); // Previous lower
+                const y1 = api.value(1);
+                const y2 = api.value(2);
+                const prevY1 = api.value(3);
+                const prevY2 = api.value(4);
 
-                // Skip if any value is null/NaN
                 if (
-                    y1 === null ||
-                    y2 === null ||
-                    prevY1 === null ||
-                    prevY2 === null ||
-                    isNaN(y1) ||
-                    isNaN(y2) ||
-                    isNaN(prevY1) ||
-                    isNaN(prevY2)
+                    y1 === null || y2 === null || prevY1 === null || prevY2 === null ||
+                    isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)
                 ) {
                     return null;
                 }
 
-                // Get pixel coordinates for all 4 points
-                const p1Prev = api.coord([index - 1, prevY1]); // Previous upper
-                const p1Curr = api.coord([index, y1]); // Current upper
-                const p2Curr = api.coord([index, y2]); // Current lower
-                const p2Prev = api.coord([index - 1, prevY2]); // Previous lower
+                const p1Prev = api.coord([index - 1, prevY1]);
+                const p1Curr = api.coord([index, y1]);
+                const p2Curr = api.coord([index, y2]);
+                const p2Prev = api.coord([index - 1, prevY2]);
 
-                // Create a smooth polygon connecting the segments
                 return {
                     type: 'polygon',
                     shape: {
-                        points: [
-                            p1Prev, // Top-left
-                            p1Curr, // Top-right
-                            p2Curr, // Bottom-right
-                            p2Prev, // Bottom-left
-                        ],
+                        points: [p1Prev, p1Curr, p2Curr, p2Prev],
                     },
                     style: {
                         fill: fillColor,
@@ -96,4 +90,117 @@ export class FillRenderer implements SeriesRenderer {
             data: fillDataWithPrev,
         };
     }
+
+    /**
+     * Render a gradient fill between two plots.
+     * Uses a vertical linear gradient from top_color (at the upper boundary)
+     * to bottom_color (at the lower boundary) for each polygon segment.
+     */
+    private renderGradientFill(
+        seriesName: string,
+        xAxisIndex: number,
+        yAxisIndex: number,
+        plot1Data: (number | null)[],
+        plot2Data: (number | null)[],
+        totalDataLength: number,
+        optionsArray: any[],
+        plotOptions: any
+    ): any {
+        // Build per-bar gradient color arrays from optionsArray
+        // Each entry in optionsArray has: { top_value, bottom_value, top_color, bottom_color }
+        const gradientColors: { topColor: string; topOpacity: number; bottomColor: string; bottomOpacity: number }[] = [];
+
+        for (let i = 0; i < totalDataLength; i++) {
+            const opts = optionsArray?.[i];
+            if (opts && opts.top_color !== undefined) {
+                const top = ColorUtils.parseColor(opts.top_color);
+                const bottom = ColorUtils.parseColor(opts.bottom_color);
+                gradientColors[i] = {
+                    topColor: top.color,
+                    topOpacity: top.opacity,
+                    bottomColor: bottom.color,
+                    bottomOpacity: bottom.opacity,
+                };
+            } else {
+                // Fallback: use a default semi-transparent fill
+                gradientColors[i] = {
+                    topColor: 'rgba(128,128,128,0.2)',
+                    topOpacity: 0.2,
+                    bottomColor: 'rgba(128,128,128,0.2)',
+                    bottomOpacity: 0.2,
+                };
+            }
+        }
+
+        // Create fill data with previous values
+        const fillDataWithPrev: any[] = [];
+        for (let i = 0; i < totalDataLength; i++) {
+            const y1 = plot1Data[i];
+            const y2 = plot2Data[i];
+            const prevY1 = i > 0 ? plot1Data[i - 1] : null;
+            const prevY2 = i > 0 ? plot2Data[i - 1] : null;
+            fillDataWithPrev.push([i, y1, y2, prevY1, prevY2]);
+        }
+
+        return {
+            name: seriesName,
+            type: 'custom',
+            xAxisIndex: xAxisIndex,
+            yAxisIndex: yAxisIndex,
+            z: 1,
+            renderItem: (params: any, api: any) => {
+                const index = params.dataIndex;
+                if (index === 0) return null;
+
+                const y1 = api.value(1);
+                const y2 = api.value(2);
+                const prevY1 = api.value(3);
+                const prevY2 = api.value(4);
+
+                if (
+                    y1 === null || y2 === null || prevY1 === null || prevY2 === null ||
+                    isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)
+                ) {
+                    return null;
+                }
+
+                const p1Prev = api.coord([index - 1, prevY1]);
+                const p1Curr = api.coord([index, y1]);
+                const p2Curr = api.coord([index, y2]);
+                const p2Prev = api.coord([index - 1, prevY2]);
+
+                // Get gradient colors for this bar
+                const gc = gradientColors[index] || gradientColors[index - 1];
+                if (!gc) return null;
+
+                // Convert colors to rgba strings with their opacities
+                const topRgba = ColorUtils.toRgba(gc.topColor, gc.topOpacity);
+                const bottomRgba = ColorUtils.toRgba(gc.bottomColor, gc.bottomOpacity);
+
+                // Determine if plot1 is above plot2 (in value space, higher value = higher on chart)
+                // We want top_color at the higher value, bottom_color at the lower value
+                const plot1IsAbove = y1 >= y2;
+
+                return {
+                    type: 'polygon',
+                    shape: {
+                        points: [p1Prev, p1Curr, p2Curr, p2Prev],
+                    },
+                    style: {
+                        fill: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1, // vertical gradient
+                            colorStops: [
+                                { offset: 0, color: plot1IsAbove ? topRgba : bottomRgba },
+                                { offset: 1, color: plot1IsAbove ? bottomRgba : topRgba },
+                            ],
+                        },
+                    },
+                    silent: true,
+                };
+            },
+            data: fillDataWithPrev,
+        };
+    }
+
 }
