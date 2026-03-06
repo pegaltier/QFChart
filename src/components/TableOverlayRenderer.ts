@@ -75,7 +75,7 @@ export class TableOverlayRenderer {
         } else {
             table.style.borderCollapse = 'collapse';
         }
-        table.style.pointerEvents = 'auto';
+        table.style.pointerEvents = 'none';
         table.style.fontSize = '14px';
         table.style.lineHeight = '1.4';
         table.style.fontFamily = 'sans-serif';
