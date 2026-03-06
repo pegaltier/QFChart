@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.3] - 2026-03-06 - Histogram Rewrite, Table Fixes & Drawing Object Improvements
+
+### Added
+
+- **Histogram `histbase` Support**: Rewrote `HistogramRenderer` from ECharts `bar` type to a `custom` series so bars extend from the configured `histbase` value (e.g., 50) instead of always from 0. This matches TradingView behavior for indicators like RSI histograms centered on 50.
+- **Thin Histogram vs Thick Columns**: `style: 'histogram'` now renders as thin line-like bars whose pixel width is controlled by `linewidth`, while `style: 'columns'` renders as thick bars at 60% of candle width — matching the visual distinction TradingView makes between the two styles.
+
+### Fixed
+
+- **Fill Overlay Inheritance**: Fill plots now automatically inherit `overlay: true` when both of their referenced plots are overlay. Previously a fill in an overlay indicator (e.g., Bollinger Bands) had `overlay` undefined, so it was placed in the indicator's sub-pane, stretching the Y-axis to extreme price-scale ranges.
+- **Table Placement for Sub-Pane Indicators**: Tables from non-overlay indicators were always positioned relative to the main chart grid (pane 0). Each table is now tagged with its indicator's `_paneIndex` and the `TableOverlayRenderer` receives a `getGridRect(paneIndex)` callback to position the table overlay relative to the correct pane's grid rect.
+- **Table Border Rendering Conditions**: Fixed spurious hairlines appearing between table cells. When no border or frame colors are set, `border-collapse: collapse` is now used instead of `border-collapse: separate`, eliminating sub-pixel gaps. Frame and cell borders are now only drawn when an explicit color is provided — previously a missing color fell back to `#999`.
+- **Box `border_color: na`**: Boxes with `border_color` set to `na`, `null`, or `NaN` now correctly render without a border instead of falling back to the default blue (`#2962ff`).
+- **Box & Line Extend Shorthand Values**: `BoxRenderer` and `DrawingLineRenderer` now accept single-letter extend values (`'n'`, `'l'`, `'r'`, `'b'`) in addition to the full words (`'none'`, `'left'`, `'right'`, `'both'`), matching the shorthand constants PineTS emits.
+- **Drawing Line Spurious Fill**: Added `fill: 'none'` to the line element style in `DrawingLineRenderer` to prevent ECharts from accidentally filling the area under the line shape.
+- **ECharts Palette Color Overrides**: Added `itemStyle: { color: 'transparent', borderColor: 'transparent' }` to the custom series config for `DrawingLineRenderer`, `BoxRenderer`, and `PolylineRenderer`. Without this, ECharts' visual system was overriding element colors set inside `renderItem` with its automatic color palette on re-renders.
+
 ## [0.7.2] - 2026-03-05 - Gradient Fill Support
 
 ### Added
