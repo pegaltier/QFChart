@@ -162,8 +162,10 @@ export class TableOverlayRenderer {
                     // Cell text
                     td.textContent = cellData.text || '';
 
-                    // Cell background
-                    if (cellData.bgcolor) {
+                    // Cell background — only apply if an explicit color string is set.
+                    // Empty string or na (NaN) means "no color" → transparent,
+                    // so the table's own bgcolor shows through.
+                    if (cellData.bgcolor && typeof cellData.bgcolor === 'string' && cellData.bgcolor.length > 0) {
                         const { color: bg, opacity: bgOp } = TableOverlayRenderer.safeParseColor(cellData.bgcolor);
                         td.style.backgroundColor = bg;
                         if (bgOp < 1) {

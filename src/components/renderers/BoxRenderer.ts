@@ -96,12 +96,19 @@ export class BoxRenderer implements SeriesRenderer {
                     }
 
                     // Background fill rect
-                    const bgColor = normalizeColor(bx.bgcolor) || '#2962ff';
-                    children.push({
-                        type: 'rect',
-                        shape: { x, y, width: w, height: h },
-                        style: { fill: bgColor, stroke: 'none' },
-                    });
+                    // bgcolor = na means no fill (na resolves to NaN or undefined)
+                    const rawBgColor = bx.bgcolor;
+                    const isNaBgColor = rawBgColor === null || rawBgColor === undefined ||
+                        (typeof rawBgColor === 'number' && isNaN(rawBgColor)) ||
+                        rawBgColor === 'na' || rawBgColor === 'NaN' || rawBgColor === '';
+                    const bgColor = isNaBgColor ? null : (normalizeColor(rawBgColor) || '#2962ff');
+                    if (bgColor) {
+                        children.push({
+                            type: 'rect',
+                            shape: { x, y, width: w, height: h },
+                            style: { fill: bgColor, stroke: 'none' },
+                        });
+                    }
 
                     // Border rect (on top of fill)
                     // border_color = na means no border (na resolves to NaN or undefined)
