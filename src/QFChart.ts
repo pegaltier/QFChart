@@ -878,15 +878,6 @@ export class QFChart implements ChartContext {
                     markLine: candlestickSeries.markLine, // Ensure markLine is updated
                 },
                 ...indicatorSeries.map((s) => {
-                    // Custom series (drawing objects: boxes, polylines, lines, labels)
-                    // use a renderItem closure that captures the current drawing objects.
-                    // During streaming, these objects are rebuilt on each tick, but
-                    // ECharts merge-mode may skip re-rendering if the data array
-                    // (e.g. [[0, lastBarIndex]]) hasn't changed. Pass the FULL series
-                    // config so ECharts fully processes the updated renderItem.
-                    if (s.type === 'custom') {
-                        return s;
-                    }
                     const update: any = { data: s.data };
                     if (s.renderItem) {
                         update.renderItem = s.renderItem;
@@ -928,14 +919,23 @@ export class QFChart implements ChartContext {
         // Stop existing timer
         this.stopCountdown();
 
-        if (!this.options.lastPriceLine?.showCountdown || !this.options.interval || this.marketData.length === 0) {
+        if (!this.options.lastPriceLine?.showCountdown || this.marketData.length === 0) {
             return;
         }
+
+        // Auto-detect interval from market data if not explicitly set
+        let interval = this.options.interval;
+        if (!interval && this.marketData.length >= 2) {
+            const last = this.marketData[this.marketData.length - 1];
+            const prev = this.marketData[this.marketData.length - 2];
+            interval = last.time - prev.time;
+        }
+        if (!interval) return;
 
         const updateLabel = () => {
             if (this.marketData.length === 0) return;
             const lastBar = this.marketData[this.marketData.length - 1];
-            const nextCloseTime = lastBar.time + (this.options.interval || 0);
+            const nextCloseTime = lastBar.time + interval!;
             const now = Date.now();
             const diff = nextCloseTime - now;
 
