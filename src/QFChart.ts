@@ -79,6 +79,12 @@ export class QFChart implements ChartContext {
     private readonly defaultPadding = 0.0;
     private padding: number;
     private dataIndexOffset: number = 0; // Offset for phantom padding data
+    private _paddingPoints: number = 0; // Current symmetric padding (empty bars per side)
+    private readonly LAZY_MIN_PADDING = 5;     // Always have a tiny buffer so edge scroll triggers
+    private readonly LAZY_MAX_PADDING = 500;   // Hard cap per side
+    private readonly LAZY_CHUNK_SIZE = 50;     // Bars added per expansion
+    private readonly LAZY_EDGE_THRESHOLD = 10; // Bars from edge to trigger
+    private _expandScheduled: boolean = false; // Debounce flag
 
     // DOM Elements for Layout
     private rootContainer: HTMLElement;
@@ -209,11 +215,11 @@ export class QFChart implements ChartContext {
             const triggerOn = this.options.databox?.triggerOn;
             const position = this.options.databox?.position;
             if (triggerOn === 'click' && position === 'floating') {
-                // Hide tooltip by dispatching a hideTooltip action
-                this.chart.dispatchAction({
-                    type: 'hideTip',
-                });
+                this.chart.dispatchAction({ type: 'hideTip' });
             }
+
+            // Lazy padding: check if user scrolled near an edge
+            this._checkEdgeAndExpand();
         });
         // @ts-ignore - ECharts event handler type mismatch
         this.chart.on('finished', (params: any) => this.events.emit('chart:updated', params)); // General chart update
@@ -1133,10 +1139,177 @@ export class QFChart implements ChartContext {
             this.timeToIndex.set(k.time, index);
         });
 
-        // Update dataIndexOffset whenever data changes
+        // Calculate initial padding from user-configured ratio
         const dataLength = this.marketData.length;
-        const paddingPoints = Math.ceil(dataLength * this.padding);
-        this.dataIndexOffset = paddingPoints;
+        const initialPadding = Math.ceil(dataLength * this.padding);
+
+        // _paddingPoints can only grow (lazy expansion), never shrink below initial or minimum
+        this._paddingPoints = Math.max(this._paddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        this.dataIndexOffset = this._paddingPoints;
+    }
+
+    /**
+     * Expand symmetric padding to the given number of points per side.
+     * No-op if newPaddingPoints <= current. Performs a full render() and
+     * restores the viewport position so there is no visual jump.
+     */
+    public expandPadding(newPaddingPoints: number): void {
+        this._resizePadding(newPaddingPoints);
+    }
+
+    /**
+     * Resize symmetric padding to the given number of points per side.
+     * Works for both growing and shrinking. Clamps to [min, max].
+     * Uses merge-mode setOption to preserve drag/interaction state.
+     */
+    private _resizePadding(newPaddingPoints: number): void {
+        // Clamp to bounds
+        const initialPadding = Math.ceil(this.marketData.length * this.padding);
+        newPaddingPoints = Math.max(newPaddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        newPaddingPoints = Math.min(newPaddingPoints, this.LAZY_MAX_PADDING);
+        if (newPaddingPoints === this._paddingPoints) return;
+
+        // 1. Capture current viewport as absolute bar indices
+        const oldPadding = this._paddingPoints;
+        const oldTotal = this.marketData.length + 2 * oldPadding;
+        const currentOption = this.chart.getOption() as any;
+        const zoomComp = currentOption?.dataZoom
+            ?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
+        const oldStartIdx = zoomComp ? (zoomComp.start / 100) * oldTotal : 0;
+        const oldEndIdx = zoomComp ? (zoomComp.end / 100) * oldTotal : oldTotal;
+
+        // 2. Update padding state (delta can be positive or negative)
+        const delta = newPaddingPoints - oldPadding;
+        this._paddingPoints = newPaddingPoints;
+        this.dataIndexOffset = this._paddingPoints;
+        const paddingPoints = this._paddingPoints;
+
+        // 3. Rebuild all data arrays with new padding
+        const emptyCandle = { value: [NaN, NaN, NaN, NaN], itemStyle: { opacity: 0 } };
+        const candlestickSeries = SeriesBuilder.buildCandlestickSeries(this.marketData, this.options);
+        const paddedCandlestickData = [
+            ...Array(paddingPoints).fill(emptyCandle),
+            ...candlestickSeries.data,
+            ...Array(paddingPoints).fill(emptyCandle),
+        ];
+        const categoryData = [
+            ...Array(paddingPoints).fill(''),
+            ...this.marketData.map((k) => new Date(k.time).toLocaleString()),
+            ...Array(paddingPoints).fill(''),
+        ];
+        const paddedOHLCVForShapes = [
+            ...Array(paddingPoints).fill(null),
+            ...this.marketData,
+            ...Array(paddingPoints).fill(null),
+        ];
+
+        // Rebuild indicator series with new offset
+        const layout = LayoutManager.calculate(
+            this.chart.getHeight(),
+            this.indicators,
+            this.options,
+            this.isMainCollapsed,
+            this.maximizedPaneId,
+            this.marketData,
+            this._mainHeightOverride ?? undefined,
+        );
+        const { series: indicatorSeries, barColors } = SeriesBuilder.buildIndicatorSeries(
+            this.indicators,
+            this.timeToIndex,
+            layout.paneLayout,
+            categoryData.length,
+            paddingPoints,
+            paddedOHLCVForShapes,
+            layout.overlayYAxisMap,
+            layout.separatePaneYAxisOffset,
+        );
+
+        // Apply barColors
+        const coloredCandlestickData = paddedCandlestickData.map((candle: any, i: number) => {
+            if (barColors[i]) {
+                return {
+                    value: candle.value || candle,
+                    itemStyle: {
+                        color: barColors[i], color0: barColors[i],
+                        borderColor: barColors[i], borderColor0: barColors[i],
+                    },
+                };
+            }
+            return candle;
+        });
+
+        // 4. Calculate corrected zoom for new total length
+        const newTotal = this.marketData.length + 2 * newPaddingPoints;
+        const newStart = Math.max(0, ((oldStartIdx + delta) / newTotal) * 100);
+        const newEnd = Math.min(100, ((oldEndIdx + delta) / newTotal) * 100);
+
+        // 5. Merge update — preserves drag/interaction state
+        const updateOption: any = {
+            xAxis: currentOption.xAxis.map(() => ({ data: categoryData })),
+            dataZoom: [
+                { start: newStart, end: newEnd },
+                { start: newStart, end: newEnd },
+            ],
+            series: [
+                { data: coloredCandlestickData, markLine: candlestickSeries.markLine },
+                ...indicatorSeries.map((s) => {
+                    const update: any = { data: s.data };
+                    if (s.renderItem) update.renderItem = s.renderItem;
+                    return update;
+                }),
+            ],
+        };
+        this.chart.setOption(updateOption, { notMerge: false });
+    }
+
+    /**
+     * Check if user scrolled near an edge (expand) or away from edges (contract).
+     * Uses requestAnimationFrame to avoid cascading re-renders inside
+     * the ECharts dataZoom event callback.
+     */
+    private _checkEdgeAndExpand(): void {
+        if (this._expandScheduled) return;
+
+        const zoomComp = (this.chart.getOption() as any)?.dataZoom
+            ?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
+        if (!zoomComp) return;
+
+        const paddingPoints = this._paddingPoints;
+        const dataLength = this.marketData.length;
+        const totalLength = dataLength + 2 * paddingPoints;
+        const startIdx = Math.round((zoomComp.start / 100) * totalLength);
+        const endIdx = Math.round((zoomComp.end / 100) * totalLength);
+
+        const nearLeftEdge = startIdx < this.LAZY_EDGE_THRESHOLD;
+        const nearRightEdge = endIdx > totalLength - this.LAZY_EDGE_THRESHOLD;
+
+        // Expand if near either edge
+        if ((nearLeftEdge || nearRightEdge) && paddingPoints < this.LAZY_MAX_PADDING) {
+            this._expandScheduled = true;
+            requestAnimationFrame(() => {
+                this._expandScheduled = false;
+                this._resizePadding(paddingPoints + this.LAZY_CHUNK_SIZE);
+            });
+            return;
+        }
+
+        // Contract if far from both edges and padding is larger than needed
+        // Calculate how many padding bars are visible/near-visible on each side
+        const leftPadUsed = Math.max(0, paddingPoints - startIdx);
+        const rightPadUsed = Math.max(0, endIdx - (paddingPoints + dataLength - 1));
+        const neededPadding = Math.max(
+            leftPadUsed + this.LAZY_CHUNK_SIZE,  // keep one chunk of buffer
+            rightPadUsed + this.LAZY_CHUNK_SIZE,
+        );
+
+        // Only contract if we have at least one full chunk of excess
+        if (paddingPoints > neededPadding + this.LAZY_CHUNK_SIZE) {
+            this._expandScheduled = true;
+            requestAnimationFrame(() => {
+                this._expandScheduled = false;
+                this._resizePadding(neededPadding);
+            });
+        }
     }
 
     private render(): void {
