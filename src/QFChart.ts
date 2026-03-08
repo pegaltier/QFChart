@@ -879,13 +879,7 @@ export class QFChart implements ChartContext {
                     data: coloredCandlestickData,
                     markLine: candlestickSeries.markLine, // Ensure markLine is updated
                 },
-                ...indicatorSeries.map((s) => {
-                    const update: any = { data: s.data };
-                    if (s.renderItem) {
-                        update.renderItem = s.renderItem;
-                    }
-                    return update;
-                }),
+                ...indicatorSeries,
             ],
         };
 
