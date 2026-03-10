@@ -123,6 +123,10 @@ export class SeriesBuilder {
 
             sortedPlots.forEach((plotName) => {
                 const plot = indicator.plots[plotName];
+
+                // Honor display.none — skip rendering entirely
+                if (plot.options.display === 'none') return;
+
                 const seriesName = `${id}::${plotName}`;
 
                 // Find axis index for THIS SPECIFIC PLOT

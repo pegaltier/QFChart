@@ -854,15 +854,16 @@ export class QFChart implements ChartContext {
         );
 
         // Apply barColors to candlestick data
+        // TradingView behavior: barcolor() only changes body fill; borders/wicks keep default colors (green/red)
         const coloredCandlestickData = paddedCandlestickData.map((candle: any, i: number) => {
             if (barColors[i]) {
+                const vals = candle.value || candle;
                 return {
-                    value: candle.value || candle,
+                    value: vals,
                     itemStyle: {
-                        color: barColors[i],
-                        color0: barColors[i],
-                        borderColor: barColors[i],
-                        borderColor0: barColors[i],
+                        color: barColors[i],       // up-candle body fill
+                        color0: barColors[i],      // down-candle body fill
+                        // borderColor/borderColor0 intentionally omitted → inherits series default (green/red)
                     },
                 };
             }
@@ -1226,14 +1227,15 @@ export class QFChart implements ChartContext {
             layout.separatePaneYAxisOffset,
         );
 
-        // Apply barColors
+        // Apply barColors (TradingView: barcolor() only changes body fill, borders/wicks stay default)
         const coloredCandlestickData = paddedCandlestickData.map((candle: any, i: number) => {
             if (barColors[i]) {
+                const vals = candle.value || candle;
                 return {
-                    value: candle.value || candle,
+                    value: vals,
                     itemStyle: {
-                        color: barColors[i], color0: barColors[i],
-                        borderColor: barColors[i], borderColor0: barColors[i],
+                        color: barColors[i],
+                        color0: barColors[i],
                     },
                 };
             }
@@ -1460,16 +1462,15 @@ export class QFChart implements ChartContext {
             layout.separatePaneYAxisOffset // Pass Y-axis offset for separate panes
         );
 
-        // Apply barColors to candlestick data
+        // Apply barColors (TradingView: barcolor() only changes body fill, borders/wicks stay default)
         candlestickSeries.data = candlestickSeries.data.map((candle: any, i: number) => {
             if (barColors[i]) {
+                const vals = candle.value || candle;
                 return {
-                    value: candle.value || candle,
+                    value: vals,
                     itemStyle: {
                         color: barColors[i],
                         color0: barColors[i],
-                        borderColor: barColors[i],
-                        borderColor0: barColors[i],
                     },
                 };
             }
