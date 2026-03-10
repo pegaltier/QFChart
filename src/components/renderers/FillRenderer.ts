@@ -1,6 +1,15 @@
 import { SeriesRenderer, RenderContext } from './SeriesRenderer';
 import { ColorUtils } from '../../utils/ColorUtils';
 
+/**
+ * Configuration for a single fill band within a batched render.
+ */
+export interface BatchedFillEntry {
+    plot1Data: (number | null)[];
+    plot2Data: (number | null)[];
+    barColors: { color: string; opacity: number }[];
+}
+
 export class FillRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
         const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName, optionsArray } = context;
@@ -71,6 +80,9 @@ export class FillRenderer implements SeriesRenderer {
             xAxisIndex: xAxisIndex,
             yAxisIndex: yAxisIndex,
             z: 1,
+            clip: true,
+            encode: { x: 0 },
+            animation: false,
             renderItem: (params: any, api: any) => {
                 const index = params.dataIndex;
                 if (index === 0) return null;
@@ -87,12 +99,16 @@ export class FillRenderer implements SeriesRenderer {
                     return null;
                 }
 
+                const fc = barColors ? barColors[index] : null;
+
+                // Skip fully transparent fills
+                const fillOpacity = fc ? fc.opacity : defaultFillOpacity;
+                if (fillOpacity < 0.01) return null;
+
                 const p1Prev = api.coord([index - 1, prevY1]);
                 const p1Curr = api.coord([index, y1]);
                 const p2Curr = api.coord([index, y2]);
                 const p2Prev = api.coord([index - 1, prevY2]);
-
-                const fc = barColors ? barColors[index] : null;
 
                 return {
                     type: 'polygon',
@@ -101,12 +117,85 @@ export class FillRenderer implements SeriesRenderer {
                     },
                     style: {
                         fill: fc ? fc.color : defaultFillColor,
-                        opacity: fc ? fc.opacity : defaultFillOpacity,
+                        opacity: fillOpacity,
                     },
                     silent: true,
                 };
             },
             data: fillDataWithPrev,
+            silent: true,
+        };
+    }
+
+    /**
+     * Batch-render multiple fill bands as a single ECharts custom series.
+     * Instead of N separate series (one per fill), this creates ONE series
+     * where each renderItem call draws all fill bands as a group of children.
+     *
+     * Performance: reduces series count from N to 1, eliminates per-series
+     * ECharts overhead, and enables viewport culling via clip + encode.
+     */
+    renderBatched(
+        seriesName: string,
+        xAxisIndex: number,
+        yAxisIndex: number,
+        totalDataLength: number,
+        fills: BatchedFillEntry[]
+    ): any {
+        // Simple index-only data for ECharts — encode: {x:0} enables dataZoom filtering
+        const data = Array.from({ length: totalDataLength }, (_, i) => [i]);
+
+        return {
+            name: seriesName,
+            type: 'custom',
+            xAxisIndex,
+            yAxisIndex,
+            z: 1,
+            clip: true,
+            encode: { x: 0 },
+            animation: false,
+            renderItem: (params: any, api: any) => {
+                const index = params.dataIndex;
+                if (index === 0) return null;
+
+                const children: any[] = [];
+
+                for (let f = 0; f < fills.length; f++) {
+                    const fill = fills[f];
+                    const y1 = fill.plot1Data[index];
+                    const y2 = fill.plot2Data[index];
+                    const prevY1 = fill.plot1Data[index - 1];
+                    const prevY2 = fill.plot2Data[index - 1];
+
+                    if (
+                        y1 == null || y2 == null || prevY1 == null || prevY2 == null ||
+                        isNaN(y1 as number) || isNaN(y2 as number) ||
+                        isNaN(prevY1 as number) || isNaN(prevY2 as number)
+                    ) {
+                        continue;
+                    }
+
+                    // Skip fully transparent fills
+                    const fc = fill.barColors[index];
+                    if (!fc || fc.opacity < 0.01) continue;
+
+                    const p1Prev = api.coord([index - 1, prevY1]);
+                    const p1Curr = api.coord([index, y1]);
+                    const p2Curr = api.coord([index, y2]);
+                    const p2Prev = api.coord([index - 1, prevY2]);
+
+                    children.push({
+                        type: 'polygon',
+                        shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
+                        style: { fill: fc.color, opacity: fc.opacity },
+                        silent: true,
+                    });
+                }
+
+                return children.length > 0 ? { type: 'group', children, silent: true } : null;
+            },
+            data,
+            silent: true,
         };
     }
 
@@ -167,6 +256,9 @@ export class FillRenderer implements SeriesRenderer {
             xAxisIndex: xAxisIndex,
             yAxisIndex: yAxisIndex,
             z: 1,
+            clip: true,
+            encode: { x: 0 },
+            animation: false,
             renderItem: (params: any, api: any) => {
                 const index = params.dataIndex;
                 if (index === 0) return null;
@@ -191,6 +283,9 @@ export class FillRenderer implements SeriesRenderer {
                 // Get gradient colors for this bar
                 const gc = gradientColors[index] || gradientColors[index - 1];
                 if (!gc) return null;
+
+                // Skip fully transparent gradient fills
+                if (gc.topOpacity < 0.01 && gc.bottomOpacity < 0.01) return null;
 
                 // Convert colors to rgba strings with their opacities
                 const topRgba = ColorUtils.toRgba(gc.topColor, gc.topOpacity);
@@ -219,6 +314,7 @@ export class FillRenderer implements SeriesRenderer {
                 };
             },
             data: fillDataWithPrev,
+            silent: true,
         };
     }
 
