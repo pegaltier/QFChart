@@ -10,6 +10,7 @@ import { DrawingEditor } from './components/DrawingEditor';
 import { EventBus } from './utils/EventBus';
 import { AxisUtils } from './utils/AxisUtils';
 import { TableOverlayRenderer } from './components/TableOverlayRenderer';
+import { TableCanvasRenderer } from './components/TableCanvasRenderer';
 
 export class QFChart implements ChartContext {
     private chart: echarts.ECharts;
@@ -97,6 +98,9 @@ export class QFChart implements ChartContext {
     private chartContainer: HTMLElement;
     private overlayContainer: HTMLElement;
     private _lastTables: any[] = [];
+    private _tableGraphicIds: string[] = []; // Track canvas table graphic IDs for cleanup
+    private _baseGraphics: any[] = []; // Non-table graphic elements (title, watermark, pane labels)
+    private _labelTooltipEl: HTMLElement | null = null; // Floating tooltip for label.set_tooltip()
 
     // Pane drag-resize state
     private _lastLayout: (LayoutResult & { overlayYAxisMap: Map<string, number>; separatePaneYAxisOffset: number }) | null = null;
@@ -604,6 +608,45 @@ export class QFChart implements ChartContext {
                     this.selectedDrawingId = null;
                     this.render();
                 }
+            }
+        });
+
+        // --- Label Tooltip ---
+        // Create floating tooltip overlay for Pine Script label.set_tooltip()
+        this._labelTooltipEl = document.createElement('div');
+        this._labelTooltipEl.style.cssText =
+            'position:absolute;display:none;pointer-events:none;z-index:200;' +
+            'background:rgba(30,41,59,0.95);color:#fff;border:1px solid #475569;' +
+            'border-radius:4px;padding:6px 10px;font-size:12px;line-height:1.5;' +
+            'white-space:pre-wrap;max-width:350px;box-shadow:0 2px 8px rgba(0,0,0,0.3);' +
+            'font-family:' + (this.options.fontFamily || 'sans-serif') + ';';
+        this.chartContainer.appendChild(this._labelTooltipEl);
+
+        // Show tooltip on scatter item hover (labels with tooltip text)
+        this.chart.on('mouseover', { seriesType: 'scatter' }, (params: any) => {
+            const tooltipText = params.data?._tooltipText;
+            if (!tooltipText || !this._labelTooltipEl) return;
+
+            this._labelTooltipEl.textContent = tooltipText;
+            this._labelTooltipEl.style.display = 'block';
+
+            // Position below the scatter point
+            const chartRect = this.chartContainer.getBoundingClientRect();
+            const event = params.event?.event;
+            if (event) {
+                const x = event.clientX - chartRect.left;
+                const y = event.clientY - chartRect.top;
+                // Show below and slightly left of cursor
+                const tipWidth = this._labelTooltipEl.offsetWidth;
+                const left = Math.min(x - tipWidth / 2, chartRect.width - tipWidth - 8);
+                this._labelTooltipEl.style.left = Math.max(4, left) + 'px';
+                this._labelTooltipEl.style.top = (y + 18) + 'px';
+            }
+        });
+
+        this.chart.on('mouseout', { seriesType: 'scatter' }, () => {
+            if (this._labelTooltipEl) {
+                this._labelTooltipEl.style.display = 'none';
             }
         });
     }
@@ -1119,11 +1162,46 @@ export class QFChart implements ChartContext {
         this._renderTableOverlays();
     }
 
-    private _renderTableOverlays(): void {
+    /**
+     * Build table canvas graphic elements from the current _lastTables.
+     * Must be called AFTER setOption so grid rects are available from ECharts.
+     * Returns an array of ECharts graphic elements.
+     */
+    private _buildTableGraphics(): any[] {
         const model = this.chart.getModel() as any;
         const getGridRect = (paneIndex: number) =>
             model.getComponent('grid', paneIndex)?.coordinateSystem?.getRect();
-        TableOverlayRenderer.render(this.overlayContainer, this._lastTables, getGridRect);
+        const elements = TableCanvasRenderer.buildGraphicElements(this._lastTables, getGridRect);
+        // Assign stable IDs for future merge/replace
+        this._tableGraphicIds = [];
+        for (let i = 0; i < elements.length; i++) {
+            const id = `__qf_table_${i}`;
+            elements[i].id = id;
+            this._tableGraphicIds.push(id);
+        }
+        return elements;
+    }
+
+    /**
+     * Render table overlays after a non-replacing setOption (updateData, resize).
+     * Uses replaceMerge to cleanly replace all graphic elements without disrupting
+     * other interactive components (dataZoom, tooltip, etc.).
+     */
+    private _renderTableOverlays(): void {
+        // Build new table graphics
+        const tableGraphics = this._buildTableGraphics();
+
+        // Combine base graphics (title, watermark) + table graphics and replace all at once.
+        // Using replaceMerge: ['graphic'] replaces ONLY the graphic component,
+        // leaving dataZoom, tooltip, series etc. untouched.
+        const allGraphics = [...this._baseGraphics, ...tableGraphics];
+        this.chart.setOption(
+            { graphic: allGraphics },
+            { replaceMerge: ['graphic'] } as any,
+        );
+
+        // Clear DOM overlays (legacy) — keep overlay container empty
+        TableOverlayRenderer.clearAll(this.overlayContainer);
     }
 
     public destroy(): void {
@@ -1842,8 +1920,27 @@ export class QFChart implements ChartContext {
 
         this.chart.setOption(option, true); // true = not merge, replace.
 
-        // Render table overlays AFTER setOption so we can query the computed grid rect
+        // Store base graphics (title, watermark, pane labels) for later re-use
+        // in _renderTableOverlays so we can do a clean replaceMerge.
+        this._baseGraphics = graphic;
+
+        // Render table graphics AFTER setOption so we can query the computed grid rects.
+        // Uses replaceMerge to cleanly set all graphics without disrupting interactive components.
         this._lastTables = allTables;
-        this._renderTableOverlays();
+        if (allTables.length > 0) {
+            const tableGraphics = this._buildTableGraphics();
+            if (tableGraphics.length > 0) {
+                const allGraphics = [...graphic, ...tableGraphics];
+                this.chart.setOption(
+                    { graphic: allGraphics },
+                    { replaceMerge: ['graphic'] } as any,
+                );
+            }
+        } else {
+            this._tableGraphicIds = [];
+        }
+
+        // Clear DOM overlays (legacy)
+        TableOverlayRenderer.clearAll(this.overlayContainer);
     }
 }

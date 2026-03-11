@@ -130,8 +130,9 @@ export class SeriesBuilder {
             sortedPlots.forEach((plotName) => {
                 const plot = indicator.plots[plotName];
 
-                // Honor display.none — skip rendering entirely
-                if (plot.options.display === 'none') return;
+                // display.none: don't render visually, but still populate data arrays
+                // so that fill() plots referencing this plot can find the data.
+                const isDisplayNone = plot.options.display === 'none';
 
                 const seriesName = `${id}::${plotName}`;
 
@@ -228,6 +229,9 @@ export class SeriesBuilder {
                 // Store raw data array (before na-color nullification) for fill plots to reference
                 // Fill plots need the actual numeric values even when the referenced plot is invisible (color=na)
                 plotDataArrays.set(`${id}::${plotName}`, rawDataArray);
+
+                // display.none plots: data is now stored for fill references, skip rendering
+                if (isDisplayNone) return;
 
                 if (plot.options?.style?.startsWith('style_')) {
                     plot.options.style = plot.options.style.replace('style_', '') as IndicatorStyle;
