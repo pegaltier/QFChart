@@ -83,9 +83,9 @@ export class QFChart implements ChartContext {
     private padding: number;
     private dataIndexOffset: number = 0; // Offset for phantom padding data
     private _paddingPoints: number = 0; // Current symmetric padding (empty bars per side)
-    private readonly LAZY_MIN_PADDING = 5;     // Always have a tiny buffer so edge scroll triggers
-    private readonly LAZY_MAX_PADDING = 500;   // Hard cap per side
-    private readonly LAZY_CHUNK_SIZE = 50;     // Bars added per expansion
+    private readonly LAZY_MIN_PADDING = 5; // Always have a tiny buffer so edge scroll triggers
+    private readonly LAZY_MAX_PADDING = 500; // Hard cap per side
+    private readonly LAZY_CHUNK_SIZE = 50; // Bars added per expansion
     private readonly LAZY_EDGE_THRESHOLD = 10; // Bars from edge to trigger
     private _expandScheduled: boolean = false; // Debounce flag
 
@@ -207,7 +207,8 @@ export class QFChart implements ChartContext {
         // Overlay container for table rendering (positioned above ECharts canvas)
         this.chartContainer.style.position = 'relative';
         this.overlayContainer = document.createElement('div');
-        this.overlayContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;overflow:hidden;';
+        this.overlayContainer.style.cssText =
+            'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;overflow:hidden;';
         this.chartContainer.appendChild(this.overlayContainer);
 
         this.pluginManager = new PluginManager(this, this.toolbarContainer);
@@ -230,13 +231,19 @@ export class QFChart implements ChartContext {
         // @ts-ignore - ECharts event handler type mismatch
         this.chart.on('finished', (params: any) => this.events.emit('chart:updated', params)); // General chart update
         // @ts-ignore - ECharts ZRender event handler type mismatch
-        this.chart.getZr().on('mousedown', (params: any) => { if (!this._paneDragState) this.events.emit('mouse:down', params); });
+        this.chart.getZr().on('mousedown', (params: any) => {
+            if (!this._paneDragState) this.events.emit('mouse:down', params);
+        });
         // @ts-ignore - ECharts ZRender event handler type mismatch
-        this.chart.getZr().on('mousemove', (params: any) => { if (!this._paneDragState) this.events.emit('mouse:move', params); });
+        this.chart.getZr().on('mousemove', (params: any) => {
+            if (!this._paneDragState) this.events.emit('mouse:move', params);
+        });
         // @ts-ignore - ECharts ZRender event handler type mismatch
         this.chart.getZr().on('mouseup', (params: any) => this.events.emit('mouse:up', params));
         // @ts-ignore - ECharts ZRender event handler type mismatch
-        this.chart.getZr().on('click', (params: any) => { if (!this._paneDragState) this.events.emit('mouse:click', params); });
+        this.chart.getZr().on('click', (params: any) => {
+            if (!this._paneDragState) this.events.emit('mouse:click', params);
+        });
 
         const zr = this.chart.getZr();
         const originalSetCursorStyle = zr.setCursorStyle;
@@ -287,9 +294,9 @@ export class QFChart implements ChartContext {
 
     // ── Pane border drag-resize ────────────────────────────────
     private bindPaneResizeEvents(): void {
-        const MIN_MAIN = 10;   // minimum main pane height %
+        const MIN_MAIN = 10; // minimum main pane height %
         const MIN_INDICATOR = 5; // minimum indicator pane height %
-        const HIT_ZONE = 6;   // hit-zone in pixels (±3px from boundary center)
+        const HIT_ZONE = 6; // hit-zone in pixels (±3px from boundary center)
 
         const zr = this.chart.getZr();
 
@@ -619,7 +626,9 @@ export class QFChart implements ChartContext {
             'background:rgba(30,41,59,0.95);color:#fff;border:1px solid #475569;' +
             'border-radius:4px;padding:6px 10px;font-size:12px;line-height:1.5;' +
             'white-space:pre-wrap;max-width:350px;box-shadow:0 2px 8px rgba(0,0,0,0.3);' +
-            'font-family:' + (this.options.fontFamily || 'sans-serif') + ';';
+            'font-family:' +
+            (this.options.fontFamily || 'sans-serif') +
+            ';';
         this.chartContainer.appendChild(this._labelTooltipEl);
 
         // Show tooltip on scatter item hover (labels with tooltip text)
@@ -640,7 +649,7 @@ export class QFChart implements ChartContext {
                 const tipWidth = this._labelTooltipEl.offsetWidth;
                 const left = Math.min(x - tipWidth / 2, chartRect.width - tipWidth - 8);
                 this._labelTooltipEl.style.left = Math.max(4, left) + 'px';
-                this._labelTooltipEl.style.top = (y + 18) + 'px';
+                this._labelTooltipEl.style.top = y + 18 + 'px';
             }
         });
 
@@ -893,7 +902,7 @@ export class QFChart implements ChartContext {
             paddingPoints,
             paddedOHLCVForShapes, // Pass padded OHLCV data
             layout.overlayYAxisMap, // Pass overlay Y-axis mapping
-            layout.separatePaneYAxisOffset // Pass Y-axis offset for separate panes
+            layout.separatePaneYAxisOffset, // Pass Y-axis offset for separate panes
         );
 
         // Apply barColors to candlestick data
@@ -904,8 +913,8 @@ export class QFChart implements ChartContext {
                 return {
                     value: vals,
                     itemStyle: {
-                        color: barColors[i],       // up-candle body fill
-                        color0: barColors[i],      // down-candle body fill
+                        color: barColors[i], // up-candle body fill
+                        color0: barColors[i], // down-candle body fill
                         // borderColor/borderColor0 intentionally omitted → inherits series default (green/red)
                     },
                 };
@@ -940,7 +949,7 @@ export class QFChart implements ChartContext {
                         tables.forEach((t: any) => {
                             if (t && !t._deleted) {
                                 // Tag table with its indicator's pane for correct positioning
-                                t._paneIndex = (t.force_overlay) ? 0 : indicator.paneIndex;
+                                t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
                                 allTables.push(t);
                             }
                         });
@@ -1026,9 +1035,8 @@ export class QFChart implements ChartContext {
             if (this.options.yAxisLabelFormatter) {
                 priceStr = this.options.yAxisLabelFormatter(price);
             } else {
-                const decimals = this.options.yAxisDecimalPlaces !== undefined
-                    ? this.options.yAxisDecimalPlaces
-                    : AxisUtils.autoDetectDecimals(this.marketData);
+                const decimals =
+                    this.options.yAxisDecimalPlaces !== undefined ? this.options.yAxisDecimalPlaces : AxisUtils.autoDetectDecimals(this.marketData);
                 priceStr = AxisUtils.formatValue(price, decimals);
             }
 
@@ -1082,10 +1090,10 @@ export class QFChart implements ChartContext {
             height?: number;
             titleColor?: string;
             controls?: { collapse?: boolean; maximize?: boolean };
-        } = {}
+        } = {},
     ): Indicator {
         // Handle backward compatibility: prefer 'overlay' over 'isOverlay'
-        const isOverlay = options.overlay !== undefined ? options.overlay : options.isOverlay ?? false;
+        const isOverlay = options.overlay !== undefined ? options.overlay : (options.isOverlay ?? false);
         let paneIndex = 0;
         if (!isOverlay) {
             // Find the next available pane index
@@ -1169,8 +1177,7 @@ export class QFChart implements ChartContext {
      */
     private _buildTableGraphics(): any[] {
         const model = this.chart.getModel() as any;
-        const getGridRect = (paneIndex: number) =>
-            model.getComponent('grid', paneIndex)?.coordinateSystem?.getRect();
+        const getGridRect = (paneIndex: number) => model.getComponent('grid', paneIndex)?.coordinateSystem?.getRect();
         const elements = TableCanvasRenderer.buildGraphicElements(this._lastTables, getGridRect);
         // Assign stable IDs for future merge/replace
         this._tableGraphicIds = [];
@@ -1195,10 +1202,7 @@ export class QFChart implements ChartContext {
         // Using replaceMerge: ['graphic'] replaces ONLY the graphic component,
         // leaving dataZoom, tooltip, series etc. untouched.
         const allGraphics = [...this._baseGraphics, ...tableGraphics];
-        this.chart.setOption(
-            { graphic: allGraphics },
-            { replaceMerge: ['graphic'] } as any,
-        );
+        this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ['graphic'] } as any);
 
         // Clear DOM overlays (legacy) — keep overlay container empty
         TableOverlayRenderer.clearAll(this.overlayContainer);
@@ -1254,8 +1258,7 @@ export class QFChart implements ChartContext {
         const oldPadding = this._paddingPoints;
         const oldTotal = this.marketData.length + 2 * oldPadding;
         const currentOption = this.chart.getOption() as any;
-        const zoomComp = currentOption?.dataZoom
-            ?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
+        const zoomComp = currentOption?.dataZoom?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
         const oldStartIdx = zoomComp ? (zoomComp.start / 100) * oldTotal : 0;
         const oldEndIdx = zoomComp ? (zoomComp.end / 100) * oldTotal : oldTotal;
 
@@ -1278,11 +1281,7 @@ export class QFChart implements ChartContext {
             ...this.marketData.map((k) => new Date(k.time).toLocaleString()),
             ...Array(paddingPoints).fill(''),
         ];
-        const paddedOHLCVForShapes = [
-            ...Array(paddingPoints).fill(null),
-            ...this.marketData,
-            ...Array(paddingPoints).fill(null),
-        ];
+        const paddedOHLCVForShapes = [...Array(paddingPoints).fill(null), ...this.marketData, ...Array(paddingPoints).fill(null)];
 
         // Rebuild indicator series with new offset
         const layout = LayoutManager.calculate(
@@ -1337,8 +1336,10 @@ export class QFChart implements ChartContext {
         drawingsByPane.forEach((paneDrawings) => {
             drawingSeriesUpdates.push({
                 data: paneDrawings.map((d) => [
-                    d.points[0].timeIndex + this.dataIndexOffset, d.points[0].value,
-                    d.points[1].timeIndex + this.dataIndexOffset, d.points[1].value,
+                    d.points[0].timeIndex + this.dataIndexOffset,
+                    d.points[0].value,
+                    d.points[1].timeIndex + this.dataIndexOffset,
+                    d.points[1].value,
                 ]),
             });
         });
@@ -1371,8 +1372,7 @@ export class QFChart implements ChartContext {
     private _checkEdgeAndExpand(): void {
         if (this._expandScheduled) return;
 
-        const zoomComp = (this.chart.getOption() as any)?.dataZoom
-            ?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
+        const zoomComp = (this.chart.getOption() as any)?.dataZoom?.find((dz: any) => dz.type === 'slider' || dz.type === 'inside');
         if (!zoomComp) return;
 
         const paddingPoints = this._paddingPoints;
@@ -1404,7 +1404,7 @@ export class QFChart implements ChartContext {
         const leftPadUsed = Math.max(0, paddingPoints - startIdx);
         const rightPadUsed = Math.max(0, endIdx - (paddingPoints + dataLength - 1));
         const neededPadding = Math.max(
-            leftPadUsed + this.LAZY_CHUNK_SIZE,  // keep one chunk of buffer
+            leftPadUsed + this.LAZY_CHUNK_SIZE, // keep one chunk of buffer
             rightPadUsed + this.LAZY_CHUNK_SIZE,
         );
 
@@ -1537,7 +1537,7 @@ export class QFChart implements ChartContext {
             paddingPoints,
             paddedOHLCVForShapes, // Pass padded OHLCV
             layout.overlayYAxisMap, // Pass overlay Y-axis mapping
-            layout.separatePaneYAxisOffset // Pass Y-axis offset for separate panes
+            layout.separatePaneYAxisOffset, // Pass Y-axis offset for separate panes
         );
 
         // Apply barColors (TradingView: barcolor() only changes body fill, borders/wicks stay default)
@@ -1556,7 +1556,20 @@ export class QFChart implements ChartContext {
         });
 
         // 3. Build Graphics
-        const graphic = GraphicBuilder.build(layout, this.options, this.toggleIndicator.bind(this), this.isMainCollapsed, this.maximizedPaneId);
+        const overlayIndicators: { id: string; titleColor?: string }[] = [];
+        this.indicators.forEach((ind, id) => {
+            if (ind.paneIndex === 0) {
+                overlayIndicators.push({ id, titleColor: ind.titleColor });
+            }
+        });
+        const graphic = GraphicBuilder.build(
+            layout,
+            this.options,
+            this.toggleIndicator.bind(this),
+            this.isMainCollapsed,
+            this.maximizedPaneId,
+            overlayIndicators,
+        );
 
         // 4. Build Drawings Series (One Custom Series per Pane used)
         const drawingsByPane = new Map<number, import('./types').DrawingElement[]>();
@@ -1827,7 +1840,12 @@ export class QFChart implements ChartContext {
                         };
                     }
                 },
-                data: drawings.map((d) => [d.points[0].timeIndex + this.dataIndexOffset, d.points[0].value, d.points[1].timeIndex + this.dataIndexOffset, d.points[1].value]),
+                data: drawings.map((d) => [
+                    d.points[0].timeIndex + this.dataIndexOffset,
+                    d.points[0].value,
+                    d.points[1].timeIndex + this.dataIndexOffset,
+                    d.points[1].value,
+                ]),
                 encode: { x: [0, 2], y: [1, 3] },
                 z: 100,
                 silent: false,
@@ -1866,7 +1884,7 @@ export class QFChart implements ChartContext {
                         tables.forEach((t: any) => {
                             if (t && !t._deleted) {
                                 // Tag table with its indicator's pane for correct positioning
-                                t._paneIndex = (t.force_overlay) ? 0 : indicator.paneIndex;
+                                t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
                                 allTables.push(t);
                             }
                         });
@@ -1931,10 +1949,7 @@ export class QFChart implements ChartContext {
             const tableGraphics = this._buildTableGraphics();
             if (tableGraphics.length > 0) {
                 const allGraphics = [...graphic, ...tableGraphics];
-                this.chart.setOption(
-                    { graphic: allGraphics },
-                    { replaceMerge: ['graphic'] } as any,
-                );
+                this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ['graphic'] } as any);
             }
         } else {
             this._tableGraphicIds = [];
