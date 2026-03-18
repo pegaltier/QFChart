@@ -3378,6 +3378,7 @@
           this.createEditGraphic();
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
+          window.addEventListener("mouseup", this.onWindowMouseUp);
         });
         __publicField$q(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
@@ -3396,6 +3397,7 @@
           this.createEditGraphic();
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
+          window.addEventListener("mouseup", this.onWindowMouseUp);
         });
         __publicField$q(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
@@ -3438,6 +3440,24 @@
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
+        });
+        /**
+         * Safety net: catches mouseup when the cursor leaves the canvas area.
+         * Uses the last known pixel positions to compute the final drop location
+         * relative to the chart container.
+         */
+        __publicField$q(this, "onWindowMouseUp", (e) => {
+          if (!this.isEditing)
+            return;
+          const dom = this.zr.dom;
+          if (dom) {
+            const rect = dom.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+            this.finishEditing(offsetX, offsetY);
+          } else {
+            this.finishEditing(this.dragStart?.x ?? 0, this.dragStart?.y ?? 0);
+          }
         });
         this.context = context;
         this.zr = this.context.getChart().getZr();
@@ -3484,14 +3504,41 @@
         }
         this.zr.add(this.editGroup);
       }
+      /**
+       * Convert pixel to data, falling back to the drawing's known pane
+       * when the point is outside the grid (e.g., dragged beyond viewport).
+       * Uses convertFromPixel with the specific gridIndex directly, bypassing
+       * the containPixel check that would return null for out-of-bounds points.
+       */
+      pixelToDataForPane(x, y, paneIndex) {
+        const normal = this.context.coordinateConversion.pixelToData({ x, y });
+        if (normal)
+          return normal;
+        try {
+          const chart = this.context.getChart();
+          const p = chart.convertFromPixel({ gridIndex: paneIndex }, [x, y]);
+          if (p) {
+            const option = chart.getOption();
+            const xAxisData = option?.xAxis?.[paneIndex]?.data;
+            const marketData = this.context.getMarketData();
+            const dataIndexOffset = xAxisData ? Math.round((xAxisData.length - marketData.length) / 2) : 0;
+            return { timeIndex: Math.round(p[0]) - dataIndexOffset, value: p[1], paneIndex };
+          }
+        } catch (_) {
+        }
+        return null;
+      }
       finishEditing(finalX, finalY) {
-        if (!this.currentDrawing)
+        if (!this.currentDrawing) {
+          this.cleanup();
           return;
+        }
+        const paneIndex = this.currentDrawing.paneIndex || 0;
         if (this.isMovingShape && this.dragStart) {
           const dx = finalX - this.dragStart.x;
           const dy = finalY - this.dragStart.y;
           const newPoints = this.initialPixelPoints.map(
-            (p) => this.context.coordinateConversion.pixelToData({ x: p.x + dx, y: p.y + dy })
+            (p) => this.pixelToDataForPane(p.x + dx, p.y + dy, paneIndex)
           );
           if (newPoints.every((p) => p !== null)) {
             for (let i = 0; i < newPoints.length; i++) {
@@ -3503,10 +3550,7 @@
             this.context.updateDrawing(this.currentDrawing);
           }
         } else if (this.editingPointIndex !== null) {
-          const newData = this.context.coordinateConversion.pixelToData({
-            x: finalX,
-            y: finalY
-          });
+          const newData = this.pixelToDataForPane(finalX, finalY, paneIndex);
           if (newData) {
             this.currentDrawing.points[this.editingPointIndex] = newData;
             if (this.editingPointIndex === 0 && newData.paneIndex !== void 0) {
@@ -3515,6 +3559,9 @@
             this.context.updateDrawing(this.currentDrawing);
           }
         }
+        this.cleanup();
+      }
+      cleanup() {
         this.isEditing = false;
         this.isMovingShape = false;
         this.dragStart = null;
@@ -3529,6 +3576,7 @@
         }
         this.zr.off("mousemove", this.onMouseMove);
         this.zr.off("mouseup", this.onMouseUp);
+        window.removeEventListener("mouseup", this.onWindowMouseUp);
         this.context.unlockChart();
       }
     }

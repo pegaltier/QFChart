@@ -50,6 +50,8 @@ export class DrawingEditor {
 
         this.zr.on('mousemove', this.onMouseMove);
         this.zr.on('mouseup', this.onMouseUp);
+        // Safety net: catch mouseup outside the canvas
+        window.addEventListener('mouseup', this.onWindowMouseUp);
     };
 
     private onPointMouseDown = (payload: { id: string; pointIndex: number }) => {
@@ -73,6 +75,8 @@ export class DrawingEditor {
 
         this.zr.on('mousemove', this.onMouseMove);
         this.zr.on('mouseup', this.onMouseUp);
+        // Safety net: catch mouseup outside the canvas
+        window.addEventListener('mouseup', this.onWindowMouseUp);
     };
 
     private createEditGraphic() {
@@ -174,16 +178,71 @@ export class DrawingEditor {
         this.finishEditing(e.offsetX, e.offsetY);
     };
 
+    /**
+     * Safety net: catches mouseup when the cursor leaves the canvas area.
+     * Uses the last known pixel positions to compute the final drop location
+     * relative to the chart container.
+     */
+    private onWindowMouseUp = (e: MouseEvent) => {
+        if (!this.isEditing) return;
+
+        // Convert page coordinates to offset relative to the chart canvas
+        const dom = this.zr.dom as HTMLElement;
+        if (dom) {
+            const rect = dom.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+            this.finishEditing(offsetX, offsetY);
+        } else {
+            // Fallback: just clean up without committing the move
+            this.finishEditing(this.dragStart?.x ?? 0, this.dragStart?.y ?? 0);
+        }
+    };
+
+    /**
+     * Convert pixel to data, falling back to the drawing's known pane
+     * when the point is outside the grid (e.g., dragged beyond viewport).
+     * Uses convertFromPixel with the specific gridIndex directly, bypassing
+     * the containPixel check that would return null for out-of-bounds points.
+     */
+    private pixelToDataForPane(x: number, y: number, paneIndex: number): DataCoordinate | null {
+        // First try the normal conversion (respects pane boundaries)
+        const normal = this.context.coordinateConversion.pixelToData({ x, y });
+        if (normal) return normal;
+
+        // Fallback: force conversion using the drawing's known pane
+        try {
+            const chart = this.context.getChart();
+            const p = chart.convertFromPixel({ gridIndex: paneIndex }, [x, y]);
+            if (p) {
+                // We need the dataIndexOffset — read from the chart's xAxis data length
+                const option = chart.getOption() as any;
+                const xAxisData = option?.xAxis?.[paneIndex]?.data;
+                const marketData = this.context.getMarketData();
+                const dataIndexOffset = xAxisData ? Math.round((xAxisData.length - marketData.length) / 2) : 0;
+                return { timeIndex: Math.round(p[0]) - dataIndexOffset, value: p[1], paneIndex };
+            }
+        } catch (_) {
+            // Ignore conversion errors
+        }
+        return null;
+    }
+
     private finishEditing(finalX: number, finalY: number) {
-        if (!this.currentDrawing) return;
+        if (!this.currentDrawing) {
+            this.cleanup();
+            return;
+        }
+
+        const paneIndex = this.currentDrawing.paneIndex || 0;
 
         if (this.isMovingShape && this.dragStart) {
             const dx = finalX - this.dragStart.x;
             const dy = finalY - this.dragStart.y;
 
-            // Update all points
+            // Update all points using pane-aware conversion
             const newPoints = this.initialPixelPoints.map((p) =>
-                this.context.coordinateConversion.pixelToData({ x: p.x + dx, y: p.y + dy }),
+                this.pixelToDataForPane(p.x + dx, p.y + dy, paneIndex),
             );
 
             if (newPoints.every((p) => p !== null)) {
@@ -198,10 +257,7 @@ export class DrawingEditor {
                 this.context.updateDrawing(this.currentDrawing);
             }
         } else if (this.editingPointIndex !== null) {
-            const newData = this.context.coordinateConversion.pixelToData({
-                x: finalX,
-                y: finalY,
-            });
+            const newData = this.pixelToDataForPane(finalX, finalY, paneIndex);
 
             if (newData) {
                 this.currentDrawing.points[this.editingPointIndex] = newData;
@@ -214,7 +270,10 @@ export class DrawingEditor {
             }
         }
 
-        // Cleanup
+        this.cleanup();
+    }
+
+    private cleanup() {
         this.isEditing = false;
         this.isMovingShape = false;
         this.dragStart = null;
@@ -231,6 +290,7 @@ export class DrawingEditor {
 
         this.zr.off('mousemove', this.onMouseMove);
         this.zr.off('mouseup', this.onMouseUp);
+        window.removeEventListener('mouseup', this.onWindowMouseUp);
 
         this.context.unlockChart();
     }
