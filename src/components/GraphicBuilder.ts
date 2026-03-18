@@ -8,7 +8,7 @@ export class GraphicBuilder {
         onToggle: (id: string, action?: 'collapse' | 'maximize' | 'fullscreen') => void,
         isMainCollapsed: boolean = false,
         maximizedPaneId: string | null = null,
-        overlayIndicators: { id: string; titleColor?: string }[] = []
+        overlayIndicators: { id: string; titleColor?: string }[] = [],
     ): any[] {
         const graphic: any[] = [];
         const pixelToPercent = layout.pixelToPercent;
@@ -29,7 +29,7 @@ export class GraphicBuilder {
                 top: mainPaneTop + titleTopMargin + '%',
                 z: 10,
                 style: {
-                    text: options.title || 'Market',
+                    text: options.title || '',
                     fill: options.titleColor || '#fff',
                     font: `bold 16px ${options.fontFamily || 'sans-serif'}`,
                     textVerticalAlign: 'top',

@@ -1,5 +1,6 @@
 import * as echarts from "echarts";
-import { AbstractPlugin } from "../components/AbstractPlugin";
+import { AbstractPlugin } from "../../components/AbstractPlugin";
+import { FibonacciDrawingRenderer } from "./FibonacciDrawingRenderer";
 
 export class FibonacciTool extends AbstractPlugin {
   private startPoint: number[] | null = null;
@@ -29,6 +30,10 @@ export class FibonacciTool extends AbstractPlugin {
         options.icon ||
         `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Z"/></svg>`,
     });
+  }
+
+  protected onInit(): void {
+    this.context.registerDrawingRenderer(new FibonacciDrawingRenderer());
   }
 
   public onActivate(): void {
@@ -63,13 +68,13 @@ export class FibonacciTool extends AbstractPlugin {
   private onClick = (params: any) => {
     if (this.state === "idle") {
       this.state = "drawing";
-      this.startPoint = [params.offsetX, params.offsetY];
-      this.endPoint = [params.offsetX, params.offsetY];
+      this.startPoint = this.getPoint(params);
+      this.endPoint = this.getPoint(params);
       this.initGraphic();
       this.updateGraphic();
     } else if (this.state === "drawing") {
       this.state = "finished";
-      this.endPoint = [params.offsetX, params.offsetY];
+      this.endPoint = this.getPoint(params);
       this.updateGraphic();
       this.saveDrawing();
 
@@ -81,7 +86,7 @@ export class FibonacciTool extends AbstractPlugin {
 
   private onMouseMove = (params: any) => {
     if (this.state === "drawing") {
-      this.endPoint = [params.offsetX, params.offsetY];
+      this.endPoint = this.getPoint(params);
       this.updateGraphic();
     }
   };
@@ -124,15 +129,13 @@ export class FibonacciTool extends AbstractPlugin {
     const endX = Math.max(x1, x2);
     const width = endX - startX;
 
-    // Y range
-    const diffY = y2 - y1; // Pixel difference
+    const diffY = y2 - y1;
 
     this.levels.forEach((level, index) => {
       const levelY = y2 - diffY * level;
 
       const color = this.colors[index % this.colors.length];
 
-      // Line
       const line = new echarts.graphic.Line({
         shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
         style: {
@@ -152,7 +155,7 @@ export class FibonacciTool extends AbstractPlugin {
         const rect = new echarts.graphic.Rect({
           shape: { x: startX, y: rectY, width, height: rectH },
           style: {
-            fill: this.colors[(index + 1) % this.colors.length], // Use next level's color
+            fill: this.colors[(index + 1) % this.colors.length],
             opacity: 0.1,
           },
           silent: true,
@@ -183,7 +186,7 @@ export class FibonacciTool extends AbstractPlugin {
         points: [start, end],
         paneIndex: paneIndex,
         style: {
-          color: "#3b82f6", // Default color, though individual lines use specific colors
+          color: "#3b82f6",
           lineWidth: 1,
         },
       });

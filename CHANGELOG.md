@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-03-18 - Plugin System Refactor, Chart Patterns & Drawing Tool Improvements
+
+### Added
+
+- **Plugin System Refactor**: Each plugin now lives in its own folder (`LineTool/`, `FibonacciTool/`, `MeasureTool/`, etc.) with a dedicated `DrawingRenderer` class, tool class, and `index.ts` barrel. Key architectural changes:
+  - New `DrawingRenderer` / `DrawingRenderContext` interfaces exported from `types.ts` — renderers receive typed pixel coordinates and selection state, returning an ECharts graphic element.
+  - New `DrawingRendererRegistry` — maps drawing type strings to their renderer; plugins self-register on init.
+  - `DrawingType` widened from a fixed union to `string`, allowing fully custom drawing types.
+  - `ChartContext` gains `registerDrawingRenderer()` so plugins can extend the render pipeline.
+  - New `ToolGroup` class — wraps multiple plugins into a single toolbar button with a chevron-indicator dropdown.
+- **Chart Pattern Tools**: Seven new pattern tools, each with its own multi-point drawing renderer:
+  - `ABCDPatternTool` — classic 4-point ABCD harmonic pattern
+  - `XABCDPatternTool` — 5-point XABCD harmonic pattern
+  - `CypherPatternTool` — Cypher harmonic pattern
+  - `HeadAndShouldersTool` — Head & Shoulders / Inverse H&S
+  - `ThreeDrivesPatternTool` — Three Drives pattern
+  - `TrianglePatternTool` — Triangle (ascending / descending / symmetrical)
+  - `FibSpeedResistanceFanTool` — Fibonacci Speed & Resistance Fan
+- **Fibonacci Channel Tool** (`FibonacciChannelTool`): Multi-segment channel drawn from two anchor points with configurable Fibonacci levels.
+- **Fibonacci Trend Extension Tool** (`FibTrendExtensionTool`): Three-point trend extension tool projecting Fibonacci price targets beyond the impulse move.
+- **Drawing Tool Point Snapping**: Holding `Ctrl` while placing or dragging a drawing point snaps it to nearby OHLC levels on the closest candle. Implemented in `AbstractPlugin` and active across all drawing tools.
+
+### Fixed
+
+- **DataZoom Hidden Mode**: When the DataZoom widget was configured with `show: false`, pan and zoom interactions stopped working entirely. Fixed by keeping the underlying event listeners active regardless of visibility.
+- **Empty Chart Title**: Setting an empty string as the chart title now works correctly — previously an empty title was silently replaced with a default value.
+- **Drawing Editor Point Placement**: Fixed a bug in `DrawingEditor` causing incorrect point snapping and state transitions when placing and editing multi-point drawing tools.
+
+---
+
 ## [0.8.0] - 2026-03-11 - Canvas Table Renderer, Lazy Padding, Streaming Fixes & Rendering Overhaul
 
 ### Added

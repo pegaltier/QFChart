@@ -1,4 +1,5 @@
-import { AbstractPlugin } from '../components/AbstractPlugin';
+import { AbstractPlugin } from '../../components/AbstractPlugin';
+import { LineDrawingRenderer } from './LineDrawingRenderer';
 import * as echarts from 'echarts';
 
 type PluginState = 'idle' | 'drawing' | 'finished';
@@ -15,7 +16,7 @@ export class LineTool extends AbstractPlugin {
     private startCircle: any = null;
     private endCircle: any = null;
 
-    constructor(options: { name?: string; icon?: string }) {
+    constructor(options: { name?: string; icon?: string } = {}) {
         super({
             id: 'trend-line',
             name: options?.name || 'Trend Line',
@@ -27,6 +28,7 @@ export class LineTool extends AbstractPlugin {
 
     protected onInit(): void {
         this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new LineDrawingRenderer());
     }
 
     protected onActivate(): void {
@@ -44,9 +46,6 @@ export class LineTool extends AbstractPlugin {
         this.zr.off('click', this.onClick);
         this.zr.off('mousemove', this.onMouseMove);
 
-        // Clean up clear listeners
-        this.disableClearListeners();
-
         // @ts-ignore - state type comparison
         if (this.state === 'drawing') {
             this.removeGraphic();
@@ -59,24 +58,16 @@ export class LineTool extends AbstractPlugin {
 
     // --- Interaction Handlers ---
 
-    private onMouseDown = () => {
-        // No longer needed
-    };
-
-    private onChartInteraction = () => {
-        // No longer needed
-    };
-
     private onClick = (params: any) => {
         if (this.state === 'idle') {
             this.state = 'drawing';
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
         } else if (this.state === 'drawing') {
             this.state = 'finished';
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
 
             // Convert to native chart drawing
@@ -91,7 +82,6 @@ export class LineTool extends AbstractPlugin {
                 });
 
                 if (start && end) {
-                    // Use the pane index from the start point (assume drawing starts and ends in same pane or use start pane)
                     const paneIndex = start.paneIndex || 0;
 
                     this.context.addDrawing({
@@ -113,27 +103,9 @@ export class LineTool extends AbstractPlugin {
         }
     };
 
-    private saveDataCoordinates() {
-        // No longer needed
-    }
-
-    private updateGraphicFromData() {
-        // No longer needed
-    }
-
-    private enableClearListeners(): void {
-        // No longer needed
-    }
-
-    private clearHandlers: any = {};
-
-    private disableClearListeners(): void {
-        // No longer needed
-    }
-
     private onMouseMove = (params: any) => {
         if (this.state !== 'drawing') return;
-        this.endPoint = [params.offsetX, params.offsetY];
+        this.endPoint = this.getPoint(params);
         this.updateGraphic();
     };
 
@@ -173,7 +145,6 @@ export class LineTool extends AbstractPlugin {
         if (this.group) {
             this.zr.remove(this.group);
             this.group = null;
-            this.disableClearListeners();
         }
     }
 

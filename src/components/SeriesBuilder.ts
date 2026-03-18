@@ -35,9 +35,7 @@ export class SeriesBuilder {
             if (lineStyleType.startsWith('linestyle_')) {
                 lineStyleType = lineStyleType.replace('linestyle_', '') as any;
             }
-            const decimals = options.yAxisDecimalPlaces !== undefined
-                ? options.yAxisDecimalPlaces
-                : AxisUtils.autoDetectDecimals(marketData);
+            const decimals = options.yAxisDecimalPlaces !== undefined ? options.yAxisDecimalPlaces : AxisUtils.autoDetectDecimals(marketData);
 
             markLine = {
                 symbol: ['none', 'none'],
@@ -77,7 +75,8 @@ export class SeriesBuilder {
 
         return {
             type: 'candlestick',
-            name: options.title || 'Market',
+            id: '__candlestick__',
+            name: options.title,
             data: data,
             itemStyle: {
                 color: upColor,
@@ -100,7 +99,7 @@ export class SeriesBuilder {
         dataIndexOffset: number = 0,
         candlestickData?: OHLCV[], // Add candlestick data to access High/Low for positioning
         overlayYAxisMap?: Map<string, number>, // Map of overlay indicator IDs to their Y-axis indices
-        separatePaneYAxisOffset: number = 1 // Offset for separate pane Y-axes (accounts for overlay axes)
+        separatePaneYAxisOffset: number = 1, // Offset for separate pane Y-axes (accounts for overlay axes)
     ): { series: any[]; barColors: (string | null)[] } {
         const series: any[] = [];
         const barColors: (string | null)[] = new Array(totalDataLength).fill(null);
@@ -220,7 +219,7 @@ export class SeriesBuilder {
                             }
 
                             dataArray[offsetIndex] = value;
-                            colorArray[offsetIndex] = isNaColor ? null : (pointColor || plot.options.color || SeriesBuilder.DEFAULT_COLOR);
+                            colorArray[offsetIndex] = isNaColor ? null : pointColor || plot.options.color || SeriesBuilder.DEFAULT_COLOR;
                             optionsArray[offsetIndex] = point.options || {};
                         }
                     }
@@ -281,8 +280,9 @@ export class SeriesBuilder {
 
                         if (plot1Data && plot2Data) {
                             // Parse per-bar colors
-                            const { color: defaultColor, opacity: defaultOpacity } =
-                                ColorUtils.parseColor(plot.options.color || 'rgba(128, 128, 128, 0.2)');
+                            const { color: defaultColor, opacity: defaultOpacity } = ColorUtils.parseColor(
+                                plot.options.color || 'rgba(128, 128, 128, 0.2)',
+                            );
                             const hasPerBarColor = optionsArray.some((o: any) => o && o.color !== undefined);
 
                             const fillBarColors: { color: string; opacity: number }[] = [];
@@ -359,7 +359,7 @@ export class SeriesBuilder {
                             xAxisIndex,
                             yAxisIndex,
                             totalDataLength,
-                            entries
+                            entries,
                         );
                         if (batchedConfig) {
                             series.push(batchedConfig);
@@ -371,7 +371,7 @@ export class SeriesBuilder {
                             xAxisIndex,
                             yAxisIndex,
                             totalDataLength,
-                            entries
+                            entries,
                         );
                         if (batchedConfig) {
                             series.push(batchedConfig);

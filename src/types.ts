@@ -106,6 +106,7 @@ export interface QFChartOptions {
     };
     dataZoom?: {
         visible?: boolean;
+        pannable?: boolean; // Keep pan/drag when visible=false (default true)
         position?: 'top' | 'bottom';
         height?: number; // height in %, default 6
         start?: number; // 0-100, default 50
@@ -117,17 +118,17 @@ export interface QFChartOptions {
         triggerOn?: 'mousemove' | 'click' | 'none'; // When to show tooltip/crosshair, default 'mousemove'
     };
     grid?: {
-        show?: boolean;             // Show/hide split lines (default true)
-        lineColor?: string;         // Split line color (default '#334155')
-        lineOpacity?: number;       // Split line opacity (default 0.5 main, 0.3 indicator panes)
-        borderColor?: string;       // Axis line color (default '#334155')
-        borderShow?: boolean;       // Show/hide axis border lines (default true)
+        show?: boolean; // Show/hide split lines (default true)
+        lineColor?: string; // Split line color (default '#334155')
+        lineOpacity?: number; // Split line opacity (default 0.5 main, 0.3 indicator panes)
+        borderColor?: string; // Axis line color (default '#334155')
+        borderShow?: boolean; // Show/hide axis border lines (default true)
     };
     layout?: {
-        mainPaneHeight?: string;    // e.g. "60%"
-        gap?: number;               // Gap between panes in % (default ~5)
-        left?: string;              // Grid left margin (default '10%')
-        right?: string;             // Grid right margin (default '10%')
+        mainPaneHeight?: string; // e.g. "60%"
+        gap?: number; // Gap between panes in % (default ~5)
+        left?: string; // Grid left margin (default '10%')
+        right?: string; // Grid right margin (default '10%')
     };
     watermark?: boolean; // Default true
 }
@@ -176,19 +177,44 @@ export interface ChartContext {
     // Interaction Locking
     lockChart(): void;
     unlockChart(): void;
+
+    // Drawing Renderer Registration
+    registerDrawingRenderer(renderer: DrawingRenderer): void;
+
+    // Snap to nearest candle OHLC value
+    snapToCandle(point: Coordinate): Coordinate;
 }
 
-export type DrawingType = 'line' | 'fibonacci';
+export type DrawingType = string;
 
 export interface DrawingElement {
     id: string;
     type: DrawingType;
-    points: DataCoordinate[]; // [start, end]
+    points: DataCoordinate[];
     paneIndex?: number; // Pane where this drawing belongs (default 0)
     style?: {
         color?: string;
         lineWidth?: number;
     };
+}
+
+// Drawing Renderer System
+
+export interface DrawingRenderContext {
+    drawing: DrawingElement;
+    /** Pixel coords for each point, in the same order as drawing.points */
+    pixelPoints: [number, number][];
+    /** Whether this drawing is currently selected */
+    isSelected: boolean;
+    /** The ECharts custom series api object */
+    api: any;
+}
+
+export interface DrawingRenderer {
+    /** The drawing type this renderer handles */
+    type: string;
+    /** Return an ECharts custom series renderItem group element */
+    render(ctx: DrawingRenderContext): any;
 }
 
 export interface PluginConfig {
