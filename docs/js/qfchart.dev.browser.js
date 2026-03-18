@@ -39,21 +39,21 @@
 
     var echarts__namespace = /*#__PURE__*/_interopNamespaceDefault(echarts);
 
-    var __defProp$u = Object.defineProperty;
-    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$u = (obj, key, value) => {
-      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$w = Object.defineProperty;
+    var __defNormalProp$w = (obj, key, value) => key in obj ? __defProp$w(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$w = (obj, key, value) => {
+      __defNormalProp$w(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class Indicator {
       constructor(id, plots, paneIndex, options = {}) {
-        __publicField$u(this, "id");
-        __publicField$u(this, "plots");
-        __publicField$u(this, "paneIndex");
-        __publicField$u(this, "height");
-        __publicField$u(this, "collapsed");
-        __publicField$u(this, "titleColor");
-        __publicField$u(this, "controls");
+        __publicField$w(this, "id");
+        __publicField$w(this, "plots");
+        __publicField$w(this, "paneIndex");
+        __publicField$w(this, "height");
+        __publicField$w(this, "collapsed");
+        __publicField$w(this, "titleColor");
+        __publicField$w(this, "controls");
         this.id = id;
         this.plots = plots;
         this.paneIndex = paneIndex;
@@ -2513,10 +2513,10 @@
       }
     }
 
-    var __defProp$t = Object.defineProperty;
-    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$t = (obj, key, value) => {
-      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$v = Object.defineProperty;
+    var __defNormalProp$v = (obj, key, value) => key in obj ? __defProp$v(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$v = (obj, key, value) => {
+      __defNormalProp$v(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesRendererFactory = class _SeriesRendererFactory {
@@ -2527,7 +2527,7 @@
         return this.renderers.get(style) || this.renderers.get("line");
       }
     };
-    __publicField$t(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
+    __publicField$v(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
     _SeriesRendererFactory.register("line", new LineRenderer());
     _SeriesRendererFactory.register("step", new StepRenderer());
     _SeriesRendererFactory.register("histogram", new HistogramRenderer());
@@ -2547,10 +2547,10 @@
     _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
-    var __defProp$s = Object.defineProperty;
-    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$s = (obj, key, value) => {
-      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$u = Object.defineProperty;
+    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$u = (obj, key, value) => {
+      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesBuilder = class _SeriesBuilder {
@@ -2829,7 +2829,7 @@
         return { series, barColors };
       }
     };
-    __publicField$s(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
+    __publicField$u(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
@@ -3143,20 +3143,20 @@
       }
     }
 
-    var __defProp$r = Object.defineProperty;
-    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$r = (obj, key, value) => {
-      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$t = Object.defineProperty;
+    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$t = (obj, key, value) => {
+      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class PluginManager {
       constructor(context, toolbarContainer) {
-        __publicField$r(this, "plugins", /* @__PURE__ */ new Map());
-        __publicField$r(this, "activePluginId", null);
-        __publicField$r(this, "context");
-        __publicField$r(this, "toolbarContainer");
-        __publicField$r(this, "tooltipElement", null);
-        __publicField$r(this, "hideTimeout", null);
+        __publicField$t(this, "plugins", /* @__PURE__ */ new Map());
+        __publicField$t(this, "activePluginId", null);
+        __publicField$t(this, "context");
+        __publicField$t(this, "toolbarContainer");
+        __publicField$t(this, "tooltipElement", null);
+        __publicField$t(this, "hideTimeout", null);
         this.context = context;
         this.toolbarContainer = toolbarContainer;
         this.createTooltip();
@@ -3340,27 +3340,27 @@
       }
     }
 
-    var __defProp$q = Object.defineProperty;
-    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$q = (obj, key, value) => {
-      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$s = Object.defineProperty;
+    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$s = (obj, key, value) => {
+      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingEditor {
       constructor(context) {
-        __publicField$q(this, "context");
-        __publicField$q(this, "isEditing", false);
-        __publicField$q(this, "currentDrawing", null);
-        __publicField$q(this, "editingPointIndex", null);
-        __publicField$q(this, "zr");
+        __publicField$s(this, "context");
+        __publicField$s(this, "isEditing", false);
+        __publicField$s(this, "currentDrawing", null);
+        __publicField$s(this, "editingPointIndex", null);
+        __publicField$s(this, "zr");
         // Temporary ZRender elements for visual feedback during drag
-        __publicField$q(this, "editGroup", null);
-        __publicField$q(this, "editLines", []);
-        __publicField$q(this, "editPoints", []);
-        __publicField$q(this, "isMovingShape", false);
-        __publicField$q(this, "dragStart", null);
-        __publicField$q(this, "initialPixelPoints", []);
-        __publicField$q(this, "onDrawingMouseDown", (payload) => {
+        __publicField$s(this, "editGroup", null);
+        __publicField$s(this, "editLines", []);
+        __publicField$s(this, "editPoints", []);
+        __publicField$s(this, "isMovingShape", false);
+        __publicField$s(this, "dragStart", null);
+        __publicField$s(this, "initialPixelPoints", []);
+        __publicField$s(this, "onDrawingMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3380,7 +3380,7 @@
           this.zr.on("mouseup", this.onMouseUp);
           window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$q(this, "onPointMouseDown", (payload) => {
+        __publicField$s(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3399,7 +3399,7 @@
           this.zr.on("mouseup", this.onMouseUp);
           window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$q(this, "onMouseMove", (e) => {
+        __publicField$s(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
             return;
           const x = e.offsetX;
@@ -3436,7 +3436,7 @@
             this.editPoints[this.editingPointIndex].setShape({ cx: x, cy: y });
           }
         });
-        __publicField$q(this, "onMouseUp", (e) => {
+        __publicField$s(this, "onMouseUp", (e) => {
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
@@ -3446,7 +3446,7 @@
          * Uses the last known pixel positions to compute the final drop location
          * relative to the chart container.
          */
-        __publicField$q(this, "onWindowMouseUp", (e) => {
+        __publicField$s(this, "onWindowMouseUp", (e) => {
           if (!this.isEditing)
             return;
           const dom = this.zr.dom;
@@ -3581,15 +3581,15 @@
       }
     }
 
-    var __defProp$p = Object.defineProperty;
-    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$p = (obj, key, value) => {
-      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$r = Object.defineProperty;
+    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$r = (obj, key, value) => {
+      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingRendererRegistry {
       constructor() {
-        __publicField$p(this, "renderers", /* @__PURE__ */ new Map());
+        __publicField$r(this, "renderers", /* @__PURE__ */ new Map());
       }
       register(renderer) {
         this.renderers.set(renderer.type, renderer);
@@ -3599,15 +3599,15 @@
       }
     }
 
-    var __defProp$o = Object.defineProperty;
-    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$o = (obj, key, value) => {
-      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$q = Object.defineProperty;
+    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$q = (obj, key, value) => {
+      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class EventBus {
       constructor() {
-        __publicField$o(this, "handlers", /* @__PURE__ */ new Map());
+        __publicField$q(this, "handlers", /* @__PURE__ */ new Map());
       }
       on(event, handler) {
         if (!this.handlers.has(event)) {
@@ -4365,31 +4365,31 @@
       }
     }
 
-    var __defProp$n = Object.defineProperty;
-    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$n = (obj, key, value) => {
-      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$p = Object.defineProperty;
+    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$p = (obj, key, value) => {
+      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class QFChart {
       constructor(container, options = {}) {
-        __publicField$n(this, "chart");
-        __publicField$n(this, "options");
-        __publicField$n(this, "marketData", []);
-        __publicField$n(this, "indicators", /* @__PURE__ */ new Map());
-        __publicField$n(this, "timeToIndex", /* @__PURE__ */ new Map());
-        __publicField$n(this, "pluginManager");
-        __publicField$n(this, "drawingEditor");
-        __publicField$n(this, "events", new EventBus());
-        __publicField$n(this, "isMainCollapsed", false);
-        __publicField$n(this, "maximizedPaneId", null);
-        __publicField$n(this, "countdownInterval", null);
-        __publicField$n(this, "selectedDrawingId", null);
+        __publicField$p(this, "chart");
+        __publicField$p(this, "options");
+        __publicField$p(this, "marketData", []);
+        __publicField$p(this, "indicators", /* @__PURE__ */ new Map());
+        __publicField$p(this, "timeToIndex", /* @__PURE__ */ new Map());
+        __publicField$p(this, "pluginManager");
+        __publicField$p(this, "drawingEditor");
+        __publicField$p(this, "events", new EventBus());
+        __publicField$p(this, "isMainCollapsed", false);
+        __publicField$p(this, "maximizedPaneId", null);
+        __publicField$p(this, "countdownInterval", null);
+        __publicField$p(this, "selectedDrawingId", null);
         // Track selected drawing
         // Drawing System
-        __publicField$n(this, "drawings", []);
-        __publicField$n(this, "drawingRenderers", new DrawingRendererRegistry());
-        __publicField$n(this, "coordinateConversion", {
+        __publicField$p(this, "drawings", []);
+        __publicField$p(this, "drawingRenderers", new DrawingRendererRegistry());
+        __publicField$p(this, "coordinateConversion", {
           pixelToData: (point) => {
             const option = this.chart.getOption();
             if (!option || !option.grid)
@@ -4416,58 +4416,58 @@
           }
         });
         // Default colors and constants
-        __publicField$n(this, "upColor", "#00da3c");
-        __publicField$n(this, "downColor", "#ec0000");
-        __publicField$n(this, "defaultPadding", 0);
-        __publicField$n(this, "padding");
-        __publicField$n(this, "dataIndexOffset", 0);
+        __publicField$p(this, "upColor", "#00da3c");
+        __publicField$p(this, "downColor", "#ec0000");
+        __publicField$p(this, "defaultPadding", 0);
+        __publicField$p(this, "padding");
+        __publicField$p(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
-        __publicField$n(this, "_paddingPoints", 0);
+        __publicField$p(this, "_paddingPoints", 0);
         // Current symmetric padding (empty bars per side)
-        __publicField$n(this, "LAZY_MIN_PADDING", 5);
+        __publicField$p(this, "LAZY_MIN_PADDING", 5);
         // Always have a tiny buffer so edge scroll triggers
-        __publicField$n(this, "LAZY_MAX_PADDING", 500);
+        __publicField$p(this, "LAZY_MAX_PADDING", 500);
         // Hard cap per side
-        __publicField$n(this, "LAZY_CHUNK_SIZE", 50);
+        __publicField$p(this, "LAZY_CHUNK_SIZE", 50);
         // Bars added per expansion
-        __publicField$n(this, "LAZY_EDGE_THRESHOLD", 10);
+        __publicField$p(this, "LAZY_EDGE_THRESHOLD", 10);
         // Bars from edge to trigger
-        __publicField$n(this, "_expandScheduled", false);
+        __publicField$p(this, "_expandScheduled", false);
         // Debounce flag
         // DOM Elements for Layout
-        __publicField$n(this, "rootContainer");
-        __publicField$n(this, "layoutContainer");
-        __publicField$n(this, "toolbarContainer");
+        __publicField$p(this, "rootContainer");
+        __publicField$p(this, "layoutContainer");
+        __publicField$p(this, "toolbarContainer");
         // New Toolbar
-        __publicField$n(this, "leftSidebar");
-        __publicField$n(this, "rightSidebar");
-        __publicField$n(this, "chartContainer");
-        __publicField$n(this, "overlayContainer");
-        __publicField$n(this, "_lastTables", []);
-        __publicField$n(this, "_tableGraphicIds", []);
+        __publicField$p(this, "leftSidebar");
+        __publicField$p(this, "rightSidebar");
+        __publicField$p(this, "chartContainer");
+        __publicField$p(this, "overlayContainer");
+        __publicField$p(this, "_lastTables", []);
+        __publicField$p(this, "_tableGraphicIds", []);
         // Track canvas table graphic IDs for cleanup
-        __publicField$n(this, "_baseGraphics", []);
+        __publicField$p(this, "_baseGraphics", []);
         // Non-table graphic elements (title, watermark, pane labels)
-        __publicField$n(this, "_labelTooltipEl", null);
+        __publicField$p(this, "_labelTooltipEl", null);
         // Floating tooltip for label.set_tooltip()
         // Pane drag-resize state
-        __publicField$n(this, "_lastLayout", null);
-        __publicField$n(this, "_mainHeightOverride", null);
-        __publicField$n(this, "_paneDragState", null);
-        __publicField$n(this, "_paneResizeRafId", null);
-        __publicField$n(this, "onKeyDown", (e) => {
+        __publicField$p(this, "_lastLayout", null);
+        __publicField$p(this, "_mainHeightOverride", null);
+        __publicField$p(this, "_paneDragState", null);
+        __publicField$p(this, "_paneResizeRafId", null);
+        __publicField$p(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
             this.selectedDrawingId = null;
             this.render();
           }
         });
-        __publicField$n(this, "onFullscreenChange", () => {
+        __publicField$p(this, "onFullscreenChange", () => {
           this.render();
         });
         // --- Interaction Locking ---
-        __publicField$n(this, "isLocked", false);
-        __publicField$n(this, "lockedState", null);
+        __publicField$p(this, "isLocked", false);
+        __publicField$p(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
           title: void 0,
@@ -5699,19 +5699,19 @@ ${timeString}`;
       }
     }
 
-    var __defProp$m = Object.defineProperty;
-    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$m = (obj, key, value) => {
-      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$o = Object.defineProperty;
+    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$o = (obj, key, value) => {
+      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class AbstractPlugin {
       constructor(config) {
-        __publicField$m(this, "id");
-        __publicField$m(this, "name");
-        __publicField$m(this, "icon");
-        __publicField$m(this, "context");
-        __publicField$m(this, "eventListeners", []);
+        __publicField$o(this, "id");
+        __publicField$o(this, "name");
+        __publicField$o(this, "icon");
+        __publicField$o(this, "context");
+        __publicField$o(this, "eventListeners", []);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -5793,10 +5793,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$l = Object.defineProperty;
-    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$l = (obj, key, value) => {
-      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$n = Object.defineProperty;
+    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$n = (obj, key, value) => {
+      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class MeasureTool extends AbstractPlugin {
@@ -5806,31 +5806,31 @@ ${timeString}`;
           name: options?.name || "Measure",
           icon: options?.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></svg>`
         });
-        __publicField$l(this, "zr");
-        __publicField$l(this, "state", "idle");
-        __publicField$l(this, "startPoint", null);
-        __publicField$l(this, "endPoint", null);
+        __publicField$n(this, "zr");
+        __publicField$n(this, "state", "idle");
+        __publicField$n(this, "startPoint", null);
+        __publicField$n(this, "endPoint", null);
         // ZRender Elements
-        __publicField$l(this, "group", null);
-        __publicField$l(this, "rect", null);
-        __publicField$l(this, "labelRect", null);
-        __publicField$l(this, "labelText", null);
-        __publicField$l(this, "lineV", null);
-        __publicField$l(this, "lineH", null);
-        __publicField$l(this, "arrowStart", null);
-        __publicField$l(this, "arrowEnd", null);
+        __publicField$n(this, "group", null);
+        __publicField$n(this, "rect", null);
+        __publicField$n(this, "labelRect", null);
+        __publicField$n(this, "labelText", null);
+        __publicField$n(this, "lineV", null);
+        __publicField$n(this, "lineH", null);
+        __publicField$n(this, "arrowStart", null);
+        __publicField$n(this, "arrowEnd", null);
         // --- Interaction Handlers ---
-        __publicField$l(this, "onMouseDown", () => {
+        __publicField$n(this, "onMouseDown", () => {
           if (this.state === "finished") {
             this.removeGraphic();
           }
         });
-        __publicField$l(this, "onChartInteraction", () => {
+        __publicField$n(this, "onChartInteraction", () => {
           if (this.group) {
             this.removeGraphic();
           }
         });
-        __publicField$l(this, "onClick", (params) => {
+        __publicField$n(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -5845,8 +5845,8 @@ ${timeString}`;
             this.enableClearListeners();
           }
         });
-        __publicField$l(this, "clearHandlers", {});
-        __publicField$l(this, "onMouseMove", (params) => {
+        __publicField$n(this, "clearHandlers", {});
+        __publicField$n(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6068,15 +6068,15 @@ ${timeString}`;
       }
     }
 
-    var __defProp$k = Object.defineProperty;
-    var __defNormalProp$k = (obj, key, value) => key in obj ? __defProp$k(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$k = (obj, key, value) => {
-      __defNormalProp$k(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$m = Object.defineProperty;
+    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$m = (obj, key, value) => {
+      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineDrawingRenderer {
       constructor() {
-        __publicField$k(this, "type", "line");
+        __publicField$m(this, "type", "line");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6122,10 +6122,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$j = Object.defineProperty;
-    var __defNormalProp$j = (obj, key, value) => key in obj ? __defProp$j(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$j = (obj, key, value) => {
-      __defNormalProp$j(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$l = Object.defineProperty;
+    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$l = (obj, key, value) => {
+      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineTool extends AbstractPlugin {
@@ -6135,17 +6135,17 @@ ${timeString}`;
           name: options?.name || "Trend Line",
           icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2" /></svg>`
         });
-        __publicField$j(this, "zr");
-        __publicField$j(this, "state", "idle");
-        __publicField$j(this, "startPoint", null);
-        __publicField$j(this, "endPoint", null);
+        __publicField$l(this, "zr");
+        __publicField$l(this, "state", "idle");
+        __publicField$l(this, "startPoint", null);
+        __publicField$l(this, "endPoint", null);
         // ZRender Elements
-        __publicField$j(this, "group", null);
-        __publicField$j(this, "line", null);
-        __publicField$j(this, "startCircle", null);
-        __publicField$j(this, "endCircle", null);
+        __publicField$l(this, "group", null);
+        __publicField$l(this, "line", null);
+        __publicField$l(this, "startCircle", null);
+        __publicField$l(this, "endCircle", null);
         // --- Interaction Handlers ---
-        __publicField$j(this, "onClick", (params) => {
+        __publicField$l(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6183,7 +6183,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$j(this, "onMouseMove", (params) => {
+        __publicField$l(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6254,17 +6254,17 @@ ${timeString}`;
       }
     }
 
-    var __defProp$i = Object.defineProperty;
-    var __defNormalProp$i = (obj, key, value) => key in obj ? __defProp$i(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$i = (obj, key, value) => {
-      __defNormalProp$i(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$k = Object.defineProperty;
+    var __defNormalProp$k = (obj, key, value) => key in obj ? __defProp$k(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$k = (obj, key, value) => {
+      __defNormalProp$k(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS$3 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS$3 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$5 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$5 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibonacciDrawingRenderer {
       constructor() {
-        __publicField$i(this, "type", "fibonacci");
+        __publicField$k(this, "type", "fibonacci");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6280,9 +6280,9 @@ ${timeString}`;
         const valDiff = endVal - startVal;
         const backgrounds = [];
         const linesAndText = [];
-        LEVELS$3.forEach((level, index) => {
+        LEVELS$5.forEach((level, index) => {
           const levelY = y2 - diffY * level;
-          const levelColor = COLORS$3[index % COLORS$3.length];
+          const levelColor = COLORS$5[index % COLORS$5.length];
           linesAndText.push({
             type: "line",
             shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
@@ -6301,8 +6301,8 @@ ${timeString}`;
             },
             silent: true
           });
-          if (index < LEVELS$3.length - 1) {
-            const nextLevel = LEVELS$3[index + 1];
+          if (index < LEVELS$5.length - 1) {
+            const nextLevel = LEVELS$5[index + 1];
             const nextY = y2 - diffY * nextLevel;
             const rectH = Math.abs(nextY - levelY);
             const rectY = Math.min(levelY, nextY);
@@ -6312,7 +6312,7 @@ ${timeString}`;
               // Enable dragging by clicking background
               shape: { x: startX, y: rectY, width, height: rectH },
               style: {
-                fill: COLORS$3[(index + 1) % COLORS$3.length],
+                fill: COLORS$5[(index + 1) % COLORS$5.length],
                 opacity: 0.1
               }
             });
@@ -6358,10 +6358,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$h = Object.defineProperty;
-    var __defNormalProp$h = (obj, key, value) => key in obj ? __defProp$h(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$h = (obj, key, value) => {
-      __defNormalProp$h(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$j = Object.defineProperty;
+    var __defNormalProp$j = (obj, key, value) => key in obj ? __defProp$j(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$j = (obj, key, value) => {
+      __defNormalProp$j(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciTool extends AbstractPlugin {
@@ -6371,14 +6371,14 @@ ${timeString}`;
           name: options.name || "Fibonacci Retracement",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Z"/></svg>`
         });
-        __publicField$h(this, "startPoint", null);
-        __publicField$h(this, "endPoint", null);
-        __publicField$h(this, "state", "idle");
+        __publicField$j(this, "startPoint", null);
+        __publicField$j(this, "endPoint", null);
+        __publicField$j(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField$h(this, "graphicGroup", null);
+        __publicField$j(this, "graphicGroup", null);
         // Fib levels config
-        __publicField$h(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField$h(this, "colors", [
+        __publicField$j(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$j(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -6394,7 +6394,7 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField$h(this, "onClick", (params) => {
+        __publicField$j(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6410,7 +6410,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$h(this, "onMouseMove", (params) => {
+        __publicField$j(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
@@ -6533,17 +6533,17 @@ ${timeString}`;
       }
     }
 
-    var __defProp$g = Object.defineProperty;
-    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$g = (obj, key, value) => {
-      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$i = Object.defineProperty;
+    var __defNormalProp$i = (obj, key, value) => key in obj ? __defProp$i(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$i = (obj, key, value) => {
+      __defNormalProp$i(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS$2 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS$2 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$4 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$4 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibonacciChannelDrawingRenderer {
       constructor() {
-        __publicField$g(this, "type", "fibonacci_channel");
+        __publicField$i(this, "type", "fibonacci_channel");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6561,7 +6561,7 @@ ${timeString}`;
         const dist = (wx - x1) * nx + (wy - y1) * ny;
         const children = [];
         const levelCoords = [];
-        LEVELS$2.forEach((level, index) => {
+        LEVELS$4.forEach((level, index) => {
           const ox = nx * dist * level;
           const oy = ny * dist * level;
           const lx1 = x1 + ox;
@@ -6569,8 +6569,8 @@ ${timeString}`;
           const lx2 = x2 + ox;
           const ly2 = y2 + oy;
           levelCoords.push({ lx1, ly1, lx2, ly2 });
-          if (index < LEVELS$2.length - 1) {
-            const nextLevel = LEVELS$2[index + 1];
+          if (index < LEVELS$4.length - 1) {
+            const nextLevel = LEVELS$4[index + 1];
             const nox = nx * dist * nextLevel;
             const noy = ny * dist * nextLevel;
             children.push({
@@ -6586,14 +6586,14 @@ ${timeString}`;
                 ]
               },
               style: {
-                fill: COLORS$2[(index + 1) % COLORS$2.length],
+                fill: COLORS$4[(index + 1) % COLORS$4.length],
                 opacity: 0.1
               }
             });
           }
         });
         levelCoords.forEach((coords, index) => {
-          const levelColor = COLORS$2[index % COLORS$2.length];
+          const levelColor = COLORS$4[index % COLORS$4.length];
           children.push({
             type: "line",
             shape: { x1: coords.lx1, y1: coords.ly1, x2: coords.lx2, y2: coords.ly2 },
@@ -6603,7 +6603,7 @@ ${timeString}`;
           children.push({
             type: "text",
             style: {
-              text: `${LEVELS$2[index]}`,
+              text: `${LEVELS$4[index]}`,
               x: coords.lx2 + 5,
               y: coords.ly2 - 5,
               fill: levelColor,
@@ -6646,10 +6646,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$f = Object.defineProperty;
-    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$f = (obj, key, value) => {
-      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$h = Object.defineProperty;
+    var __defNormalProp$h = (obj, key, value) => key in obj ? __defProp$h(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$h = (obj, key, value) => {
+      __defNormalProp$h(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciChannelTool extends AbstractPlugin {
@@ -6659,15 +6659,15 @@ ${timeString}`;
           name: options.name || "Fibonacci Channel",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-200v-80l80-80H120v-80h160l120-120H120v-80h360l120-120H120v-80h720v80H520l-120 120h440v80H320L200-440h640v80H280l-80 80h640v80H120Z"/></svg>`
         });
-        __publicField$f(this, "startPoint", null);
-        __publicField$f(this, "endPoint", null);
-        __publicField$f(this, "widthPoint", null);
-        __publicField$f(this, "state", "idle");
+        __publicField$h(this, "startPoint", null);
+        __publicField$h(this, "endPoint", null);
+        __publicField$h(this, "widthPoint", null);
+        __publicField$h(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField$f(this, "graphicGroup", null);
+        __publicField$h(this, "graphicGroup", null);
         // Fib levels config
-        __publicField$f(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField$f(this, "colors", [
+        __publicField$h(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$h(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -6683,7 +6683,7 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField$f(this, "onClick", (params) => {
+        __publicField$h(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing-baseline";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6704,7 +6704,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$f(this, "onMouseMove", (params) => {
+        __publicField$h(this, "onMouseMove", (params) => {
           if (this.state === "drawing-baseline") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
@@ -6854,17 +6854,17 @@ ${timeString}`;
       }
     }
 
-    var __defProp$e = Object.defineProperty;
-    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$e = (obj, key, value) => {
-      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$g = Object.defineProperty;
+    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$g = (obj, key, value) => {
+      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS$1 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$3 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$3 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibSpeedResistanceFanDrawingRenderer {
       constructor() {
-        __publicField$e(this, "type", "fib_speed_resistance_fan");
+        __publicField$g(this, "type", "fib_speed_resistance_fan");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6876,7 +6876,7 @@ ${timeString}`;
         const children = [];
         const priceRays = [];
         const timeRays = [];
-        for (const level of LEVELS$1) {
+        for (const level of LEVELS$3) {
           priceRays.push([x1 + dx, y1 + dy * level]);
           timeRays.push([x1 + dx * level, y1 + dy]);
         }
@@ -6892,7 +6892,7 @@ ${timeString}`;
               ]
             },
             style: {
-              fill: COLORS$1[(i + 1) % COLORS$1.length],
+              fill: COLORS$3[(i + 1) % COLORS$3.length],
               opacity: 0.06
             }
           });
@@ -6909,14 +6909,14 @@ ${timeString}`;
               ]
             },
             style: {
-              fill: COLORS$1[(i + 1) % COLORS$1.length],
+              fill: COLORS$3[(i + 1) % COLORS$3.length],
               opacity: 0.06
             }
           });
         }
-        LEVELS$1.forEach((level, index) => {
+        LEVELS$3.forEach((level, index) => {
           const [ex, ey] = priceRays[index];
-          const levelColor = COLORS$1[index % COLORS$1.length];
+          const levelColor = COLORS$3[index % COLORS$3.length];
           children.push({
             type: "line",
             shape: { x1, y1, x2: ex, y2: ey },
@@ -6935,9 +6935,9 @@ ${timeString}`;
             silent: true
           });
         });
-        LEVELS$1.forEach((level, index) => {
+        LEVELS$3.forEach((level, index) => {
           const [ex, ey] = timeRays[index];
-          const levelColor = COLORS$1[index % COLORS$1.length];
+          const levelColor = COLORS$3[index % COLORS$3.length];
           children.push({
             type: "line",
             shape: { x1, y1, x2: ex, y2: ey },
@@ -6995,14 +6995,14 @@ ${timeString}`;
       }
     }
 
-    var __defProp$d = Object.defineProperty;
-    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$d = (obj, key, value) => {
-      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$f = Object.defineProperty;
+    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$f = (obj, key, value) => {
+      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$2 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$2 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibSpeedResistanceFanTool extends AbstractPlugin {
       constructor(options = {}) {
         super({
@@ -7010,12 +7010,12 @@ ${timeString}`;
           name: options.name || "Fib Speed Resistance Fan",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e3e3e3"><path d="M2 21L22 3M2 21l20-6M2 21l20-9M2 21l20-12M2 21l20-15M2 21l6-18M2 21l9-18M2 21l12-18M2 21l15-18" stroke="#e3e3e3" stroke-width="1" fill="none"/></svg>`
         });
-        __publicField$d(this, "startPoint", null);
-        __publicField$d(this, "endPoint", null);
-        __publicField$d(this, "state", "idle");
+        __publicField$f(this, "startPoint", null);
+        __publicField$f(this, "endPoint", null);
+        __publicField$f(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField$d(this, "graphicGroup", null);
-        __publicField$d(this, "onClick", (params) => {
+        __publicField$f(this, "graphicGroup", null);
+        __publicField$f(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -7031,7 +7031,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$d(this, "onMouseMove", (params) => {
+        __publicField$f(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
@@ -7086,8 +7086,8 @@ ${timeString}`;
         const y2 = this.endPoint[1];
         const dx = x2 - x1;
         const dy = y2 - y1;
-        LEVELS.forEach((level, index) => {
-          const color = COLORS[index % COLORS.length];
+        LEVELS$2.forEach((level, index) => {
+          const color = COLORS$2[index % COLORS$2.length];
           this.graphicGroup.add(
             new echarts__namespace.graphic.Line({
               shape: { x1, y1, x2: x1 + dx, y2: y1 + dy * level },
@@ -7103,24 +7103,24 @@ ${timeString}`;
             })
           );
         });
-        for (let i = 0; i < LEVELS.length - 1; i++) {
-          const pr1 = [x1 + dx, y1 + dy * LEVELS[i]];
-          const pr2 = [x1 + dx, y1 + dy * LEVELS[i + 1]];
+        for (let i = 0; i < LEVELS$2.length - 1; i++) {
+          const pr1 = [x1 + dx, y1 + dy * LEVELS$2[i]];
+          const pr2 = [x1 + dx, y1 + dy * LEVELS$2[i + 1]];
           this.graphicGroup.add(
             new echarts__namespace.graphic.Polygon({
               shape: { points: [[x1, y1], pr1, pr2] },
-              style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+              style: { fill: COLORS$2[(i + 1) % COLORS$2.length], opacity: 0.06 },
               silent: true
             })
           );
         }
-        for (let i = 0; i < LEVELS.length - 1; i++) {
-          const tr1 = [x1 + dx * LEVELS[i], y1 + dy];
-          const tr2 = [x1 + dx * LEVELS[i + 1], y1 + dy];
+        for (let i = 0; i < LEVELS$2.length - 1; i++) {
+          const tr1 = [x1 + dx * LEVELS$2[i], y1 + dy];
+          const tr2 = [x1 + dx * LEVELS$2[i + 1], y1 + dy];
           this.graphicGroup.add(
             new echarts__namespace.graphic.Polygon({
               shape: { points: [[x1, y1], tr1, tr2] },
-              style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+              style: { fill: COLORS$2[(i + 1) % COLORS$2.length], opacity: 0.06 },
               silent: true
             })
           );
@@ -7168,6 +7168,307 @@ ${timeString}`;
               color: "#3b82f6",
               lineWidth: 1
             }
+          });
+        }
+      }
+    }
+
+    var __defProp$e = Object.defineProperty;
+    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$e = (obj, key, value) => {
+      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.272, 1.618, 2, 2.618];
+    const COLORS$1 = [
+      "#787b86",
+      "#f44336",
+      "#ff9800",
+      "#4caf50",
+      "#2196f3",
+      "#00bcd4",
+      "#787b86",
+      "#e91e63",
+      "#9c27b0",
+      "#673ab7",
+      "#3f51b5"
+    ];
+    class FibTrendExtensionDrawingRenderer {
+      constructor() {
+        __publicField$e(this, "type", "fib_trend_extension");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, api } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 3)
+          return;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const [x3, y3] = pixelPoints[2];
+        const pts = drawing.points;
+        const trendMove = pts[1].value - pts[0].value;
+        const minX = Math.min(x1, x2, x3);
+        const maxX = Math.max(x1, x2, x3);
+        const extraWidth = (maxX - minX) * 0.5;
+        const lineLeft = minX;
+        const lineRight = maxX + extraWidth;
+        const children = [];
+        const levelData = [];
+        for (let i = 0; i < LEVELS$1.length; i++) {
+          const level = LEVELS$1[i];
+          const price = pts[2].value + trendMove * level;
+          api.coord([
+            pts[2].timeIndex + ctx.drawing.points[2].timeIndex - pts[2].timeIndex,
+            price
+          ]);
+          const py = y3 + (y2 - y1) * level;
+          levelData.push({ level, y: py, price, color: COLORS$1[i % COLORS$1.length] });
+        }
+        for (let i = 0; i < levelData.length - 1; i++) {
+          const curr = levelData[i];
+          const next = levelData[i + 1];
+          const rectY = Math.min(curr.y, next.y);
+          const rectH = Math.abs(next.y - curr.y);
+          children.push({
+            type: "rect",
+            name: "line",
+            shape: { x: lineLeft, y: rectY, width: lineRight - lineLeft, height: rectH },
+            style: { fill: next.color, opacity: 0.06 }
+          });
+        }
+        for (const ld of levelData) {
+          children.push({
+            type: "line",
+            shape: { x1: lineLeft, y1: ld.y, x2: lineRight, y2: ld.y },
+            style: { stroke: ld.color, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${ld.level} (${ld.price.toFixed(2)})`,
+              x: lineRight + 4,
+              y: ld.y - 6,
+              fill: ld.color,
+              fontSize: 9
+            },
+            silent: true
+          });
+        }
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#2196f3", lineWidth: 1.5, lineDash: [5, 4] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1: x2, y1: y2, x2: x3, y2: y3 },
+          style: { stroke: "#ff9800", lineWidth: 1.5, lineDash: [5, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-2",
+          shape: { cx: x3, cy: y3, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        const labels = ["1", "2", "3"];
+        const points = [pixelPoints[0], pixelPoints[1], pixelPoints[2]];
+        for (let i = 0; i < 3; i++) {
+          const [px, py] = points[i];
+          const isHigh = (i === 0 || py <= points[i - 1][1]) && (i === 2 || py <= points[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: labels[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$d = Object.defineProperty;
+    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$d = (obj, key, value) => {
+      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.272, 1.618, 2, 2.618];
+    const COLORS = [
+      "#787b86",
+      "#f44336",
+      "#ff9800",
+      "#4caf50",
+      "#2196f3",
+      "#00bcd4",
+      "#787b86",
+      "#e91e63",
+      "#9c27b0",
+      "#673ab7",
+      "#3f51b5"
+    ];
+    class FibTrendExtensionTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fib-trend-extension-tool",
+          name: options.name || "Fib Trend Extension",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Z"/></svg>`
+        });
+        __publicField$d(this, "points", []);
+        __publicField$d(this, "state", "idle");
+        __publicField$d(this, "graphicGroup", null);
+        __publicField$d(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing-trend";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing-trend") {
+            this.state = "drawing-retracement";
+            this.points[1] = pt;
+            this.points.push([...pt]);
+            this.updateGraphic();
+          } else if (this.state === "drawing-retracement") {
+            this.state = "finished";
+            this.points[2] = pt;
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$d(this, "onMouseMove", (params) => {
+          if (this.state === "drawing-trend") {
+            this.points[1] = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          } else if (this.state === "drawing-retracement") {
+            this.points[2] = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibTrendExtensionDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const [x1, y1] = this.points[0];
+        const [x2, y2] = this.points[1];
+        this.graphicGroup.add(new echarts__namespace.graphic.Line({
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#2196f3", lineWidth: 1.5, lineDash: [5, 4] },
+          silent: true
+        }));
+        if (this.points.length >= 3) {
+          const [x3, y3] = this.points[2];
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({
+            shape: { x1: x2, y1: y2, x2: x3, y2: y3 },
+            style: { stroke: "#ff9800", lineWidth: 1.5, lineDash: [5, 4] },
+            silent: true
+          }));
+          const trendPixelDy = y2 - y1;
+          const minX = Math.min(x1, x2, x3);
+          const maxX = Math.max(x1, x2, x3);
+          const extraWidth = (maxX - minX) * 0.5;
+          const lineLeft = minX;
+          const lineRight = maxX + extraWidth;
+          for (let i = 0; i < LEVELS.length; i++) {
+            const level = LEVELS[i];
+            const ly = y3 + trendPixelDy * level;
+            const lColor = COLORS[i % COLORS.length];
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({
+              shape: { x1: lineLeft, y1: ly, x2: lineRight, y2: ly },
+              style: { stroke: lColor, lineWidth: 1 },
+              silent: true
+            }));
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({
+              style: { text: `${level}`, x: lineRight + 4, y: ly - 6, fill: lColor, fontSize: 9 },
+              silent: true
+            }));
+            if (i < LEVELS.length - 1) {
+              const nextLy = y3 + trendPixelDy * LEVELS[i + 1];
+              const rectY = Math.min(ly, nextLy);
+              const rectH = Math.abs(nextLy - ly);
+              this.graphicGroup.add(new echarts__namespace.graphic.Rect({
+                shape: { x: lineLeft, y: rectY, width: lineRight - lineLeft, height: rectH },
+                style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+                silent: true
+              }));
+            }
+          }
+        }
+        for (const pt of this.points) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({
+            shape: { cx: pt[0], cy: pt[1], r: 4 },
+            style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 },
+            z: 101,
+            silent: true
+          }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map(
+          (pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] })
+        );
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `fib-ext-${Date.now()}`,
+            type: "fib_trend_extension",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: { color: "#3b82f6", lineWidth: 1 }
           });
         }
       }
@@ -8714,6 +9015,8 @@ ${timeString}`;
     exports.DrawingRendererRegistry = DrawingRendererRegistry;
     exports.FibSpeedResistanceFanDrawingRenderer = FibSpeedResistanceFanDrawingRenderer;
     exports.FibSpeedResistanceFanTool = FibSpeedResistanceFanTool;
+    exports.FibTrendExtensionDrawingRenderer = FibTrendExtensionDrawingRenderer;
+    exports.FibTrendExtensionTool = FibTrendExtensionTool;
     exports.FibonacciChannelDrawingRenderer = FibonacciChannelDrawingRenderer;
     exports.FibonacciChannelTool = FibonacciChannelTool;
     exports.FibonacciDrawingRenderer = FibonacciDrawingRenderer;

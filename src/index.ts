@@ -5,6 +5,7 @@ export * from "./plugins/LineTool";
 export * from "./plugins/FibonacciTool";
 export * from "./plugins/FibonacciChannelTool";
 export * from "./plugins/FibSpeedResistanceFanTool";
+export * from "./plugins/FibTrendExtensionTool";
 export * from "./plugins/XABCDPatternTool";
 export * from "./plugins/ABCDPatternTool";
 export * from "./plugins/CypherPatternTool";
