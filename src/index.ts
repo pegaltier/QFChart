@@ -3,4 +3,7 @@ export * from "./QFChart";
 export * from "./plugins/MeasureTool";
 export * from "./plugins/LineTool";
 export * from "./plugins/FibonacciTool";
+export * from "./plugins/FibonacciChannelTool";
+export * from "./plugins/ToolGroup";
 export * from "./components/AbstractPlugin";
+export * from "./components/DrawingRendererRegistry";

@@ -39,21 +39,21 @@
 
     var echarts__namespace = /*#__PURE__*/_interopNamespaceDefault(echarts);
 
-    var __defProp$a = Object.defineProperty;
-    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$a = (obj, key, value) => {
-      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$g = Object.defineProperty;
+    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$g = (obj, key, value) => {
+      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class Indicator {
       constructor(id, plots, paneIndex, options = {}) {
-        __publicField$a(this, "id");
-        __publicField$a(this, "plots");
-        __publicField$a(this, "paneIndex");
-        __publicField$a(this, "height");
-        __publicField$a(this, "collapsed");
-        __publicField$a(this, "titleColor");
-        __publicField$a(this, "controls");
+        __publicField$g(this, "id");
+        __publicField$g(this, "plots");
+        __publicField$g(this, "paneIndex");
+        __publicField$g(this, "height");
+        __publicField$g(this, "collapsed");
+        __publicField$g(this, "titleColor");
+        __publicField$g(this, "controls");
         this.id = id;
         this.plots = plots;
         this.paneIndex = paneIndex;
@@ -2513,10 +2513,10 @@
       }
     }
 
-    var __defProp$9 = Object.defineProperty;
-    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$9 = (obj, key, value) => {
-      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$f = Object.defineProperty;
+    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$f = (obj, key, value) => {
+      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesRendererFactory = class _SeriesRendererFactory {
@@ -2527,7 +2527,7 @@
         return this.renderers.get(style) || this.renderers.get("line");
       }
     };
-    __publicField$9(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
+    __publicField$f(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
     _SeriesRendererFactory.register("line", new LineRenderer());
     _SeriesRendererFactory.register("step", new StepRenderer());
     _SeriesRendererFactory.register("histogram", new HistogramRenderer());
@@ -2547,10 +2547,10 @@
     _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
-    var __defProp$8 = Object.defineProperty;
-    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$8 = (obj, key, value) => {
-      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$e = Object.defineProperty;
+    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$e = (obj, key, value) => {
+      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesBuilder = class _SeriesBuilder {
@@ -2829,7 +2829,7 @@
         return { series, barColors };
       }
     };
-    __publicField$8(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
+    __publicField$e(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
@@ -3143,20 +3143,20 @@
       }
     }
 
-    var __defProp$7 = Object.defineProperty;
-    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$7 = (obj, key, value) => {
-      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$d = Object.defineProperty;
+    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$d = (obj, key, value) => {
+      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class PluginManager {
       constructor(context, toolbarContainer) {
-        __publicField$7(this, "plugins", /* @__PURE__ */ new Map());
-        __publicField$7(this, "activePluginId", null);
-        __publicField$7(this, "context");
-        __publicField$7(this, "toolbarContainer");
-        __publicField$7(this, "tooltipElement", null);
-        __publicField$7(this, "hideTimeout", null);
+        __publicField$d(this, "plugins", /* @__PURE__ */ new Map());
+        __publicField$d(this, "activePluginId", null);
+        __publicField$d(this, "context");
+        __publicField$d(this, "toolbarContainer");
+        __publicField$d(this, "tooltipElement", null);
+        __publicField$d(this, "hideTimeout", null);
         this.context = context;
         this.toolbarContainer = toolbarContainer;
         this.createTooltip();
@@ -3340,28 +3340,27 @@
       }
     }
 
-    var __defProp$6 = Object.defineProperty;
-    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$6 = (obj, key, value) => {
-      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$c = Object.defineProperty;
+    var __defNormalProp$c = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$c = (obj, key, value) => {
+      __defNormalProp$c(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingEditor {
       constructor(context) {
-        __publicField$6(this, "context");
-        __publicField$6(this, "isEditing", false);
-        __publicField$6(this, "currentDrawing", null);
-        __publicField$6(this, "editingPointIndex", null);
-        __publicField$6(this, "zr");
+        __publicField$c(this, "context");
+        __publicField$c(this, "isEditing", false);
+        __publicField$c(this, "currentDrawing", null);
+        __publicField$c(this, "editingPointIndex", null);
+        __publicField$c(this, "zr");
         // Temporary ZRender elements for visual feedback during drag
-        __publicField$6(this, "editGroup", null);
-        __publicField$6(this, "editLine", null);
-        __publicField$6(this, "editStartPoint", null);
-        __publicField$6(this, "editEndPoint", null);
-        __publicField$6(this, "isMovingShape", false);
-        __publicField$6(this, "dragStart", null);
-        __publicField$6(this, "initialPixelPoints", []);
-        __publicField$6(this, "onDrawingMouseDown", (payload) => {
+        __publicField$c(this, "editGroup", null);
+        __publicField$c(this, "editLines", []);
+        __publicField$c(this, "editPoints", []);
+        __publicField$c(this, "isMovingShape", false);
+        __publicField$c(this, "dragStart", null);
+        __publicField$c(this, "initialPixelPoints", []);
+        __publicField$c(this, "onDrawingMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3380,7 +3379,7 @@
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
         });
-        __publicField$6(this, "onPointMouseDown", (payload) => {
+        __publicField$c(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3389,12 +3388,16 @@
           this.isEditing = true;
           this.currentDrawing = JSON.parse(JSON.stringify(drawing));
           this.editingPointIndex = payload.pointIndex;
+          this.initialPixelPoints = drawing.points.map((p) => {
+            const pixel = this.context.coordinateConversion.dataToPixel(p);
+            return pixel ? { x: pixel.x, y: pixel.y } : { x: 0, y: 0 };
+          });
           this.context.lockChart();
           this.createEditGraphic();
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
         });
-        __publicField$6(this, "onMouseMove", (e) => {
+        __publicField$c(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
             return;
           const x = e.offsetX;
@@ -3402,33 +3405,36 @@
           if (this.isMovingShape && this.dragStart) {
             const dx = x - this.dragStart.x;
             const dy = y - this.dragStart.y;
-            const newP1 = {
-              x: this.initialPixelPoints[0].x + dx,
-              y: this.initialPixelPoints[0].y + dy
-            };
-            const newP2 = {
-              x: this.initialPixelPoints[1].x + dx,
-              y: this.initialPixelPoints[1].y + dy
-            };
-            this.editLine.setShape({
-              x1: newP1.x,
-              y1: newP1.y,
-              x2: newP2.x,
-              y2: newP2.y
-            });
-            this.editStartPoint.setShape({ cx: newP1.x, cy: newP1.y });
-            this.editEndPoint.setShape({ cx: newP2.x, cy: newP2.y });
-          } else if (this.editingPointIndex !== null) {
-            if (this.editingPointIndex === 0) {
-              this.editLine.setShape({ x1: x, y1: y });
-              this.editStartPoint.setShape({ cx: x, cy: y });
-            } else {
-              this.editLine.setShape({ x2: x, y2: y });
-              this.editEndPoint.setShape({ cx: x, cy: y });
+            const newPts = this.initialPixelPoints.map((p) => ({
+              x: p.x + dx,
+              y: p.y + dy
+            }));
+            for (let i = 0; i < this.editLines.length; i++) {
+              this.editLines[i].setShape({
+                x1: newPts[i].x,
+                y1: newPts[i].y,
+                x2: newPts[i + 1].x,
+                y2: newPts[i + 1].y
+              });
             }
+            for (let i = 0; i < this.editPoints.length; i++) {
+              this.editPoints[i].setShape({ cx: newPts[i].x, cy: newPts[i].y });
+            }
+          } else if (this.editingPointIndex !== null) {
+            const newPts = this.initialPixelPoints.map((p) => ({ x: p.x, y: p.y }));
+            newPts[this.editingPointIndex] = { x, y };
+            for (let i = 0; i < this.editLines.length; i++) {
+              this.editLines[i].setShape({
+                x1: newPts[i].x,
+                y1: newPts[i].y,
+                x2: newPts[i + 1].x,
+                y2: newPts[i + 1].y
+              });
+            }
+            this.editPoints[this.editingPointIndex].setShape({ cx: x, cy: y });
           }
         });
-        __publicField$6(this, "onMouseUp", (e) => {
+        __publicField$c(this, "onMouseUp", (e) => {
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
@@ -3445,66 +3451,61 @@
         if (!this.currentDrawing)
           return;
         this.editGroup = new echarts__namespace.graphic.Group();
-        const p1Data = this.currentDrawing.points[0];
-        const p2Data = this.currentDrawing.points[1];
-        const p1 = this.context.coordinateConversion.dataToPixel(p1Data);
-        const p2 = this.context.coordinateConversion.dataToPixel(p2Data);
-        if (!p1 || !p2)
+        this.editLines = [];
+        this.editPoints = [];
+        const pixelPts = this.currentDrawing.points.map((p) => {
+          const px = this.context.coordinateConversion.dataToPixel(p);
+          return px ? { x: px.x, y: px.y } : null;
+        });
+        if (pixelPts.some((p) => !p))
           return;
-        this.editLine = new echarts__namespace.graphic.Line({
-          shape: { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y },
-          style: {
-            stroke: this.currentDrawing.style?.color || "#3b82f6",
-            lineWidth: this.currentDrawing.style?.lineWidth || 2,
-            lineDash: [4, 4]
-            // Dashed to indicate editing
-          },
-          silent: true
-          // Events pass through to handlers
-        });
-        this.editStartPoint = new echarts__namespace.graphic.Circle({
-          shape: { cx: p1.x, cy: p1.y, r: 5 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
-          z: 1e3
-        });
-        this.editEndPoint = new echarts__namespace.graphic.Circle({
-          shape: { cx: p2.x, cy: p2.y, r: 5 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
-          z: 1e3
-        });
-        this.editGroup.add(this.editLine);
-        this.editGroup.add(this.editStartPoint);
-        this.editGroup.add(this.editEndPoint);
+        const pts = pixelPts;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const line = new echarts__namespace.graphic.Line({
+            shape: { x1: pts[i].x, y1: pts[i].y, x2: pts[i + 1].x, y2: pts[i + 1].y },
+            style: {
+              stroke: this.currentDrawing.style?.color || "#3b82f6",
+              lineWidth: this.currentDrawing.style?.lineWidth || 2,
+              lineDash: [4, 4]
+            },
+            silent: true
+          });
+          this.editLines.push(line);
+          this.editGroup.add(line);
+        }
+        for (let i = 0; i < pts.length; i++) {
+          const circle = new echarts__namespace.graphic.Circle({
+            shape: { cx: pts[i].x, cy: pts[i].y, r: 5 },
+            style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
+            z: 1e3
+          });
+          this.editPoints.push(circle);
+          this.editGroup.add(circle);
+        }
         this.zr.add(this.editGroup);
       }
-      finishEditing(finalX, finishY) {
+      finishEditing(finalX, finalY) {
         if (!this.currentDrawing)
           return;
         if (this.isMovingShape && this.dragStart) {
           const dx = finalX - this.dragStart.x;
-          const dy = finishY - this.dragStart.y;
-          const newPoints = this.initialPixelPoints.map((p, i) => {
-            const newX = p.x + dx;
-            const newY = p.y + dy;
-            return this.context.coordinateConversion.pixelToData({
-              x: newX,
-              y: newY
-            });
-          });
+          const dy = finalY - this.dragStart.y;
+          const newPoints = this.initialPixelPoints.map(
+            (p) => this.context.coordinateConversion.pixelToData({ x: p.x + dx, y: p.y + dy })
+          );
           if (newPoints.every((p) => p !== null)) {
-            if (newPoints[0] && newPoints[1]) {
-              this.currentDrawing.points[0] = newPoints[0];
-              this.currentDrawing.points[1] = newPoints[1];
-              if (newPoints[0].paneIndex !== void 0) {
-                this.currentDrawing.paneIndex = newPoints[0].paneIndex;
-              }
-              this.context.updateDrawing(this.currentDrawing);
+            for (let i = 0; i < newPoints.length; i++) {
+              this.currentDrawing.points[i] = newPoints[i];
             }
+            if (newPoints[0]?.paneIndex !== void 0) {
+              this.currentDrawing.paneIndex = newPoints[0].paneIndex;
+            }
+            this.context.updateDrawing(this.currentDrawing);
           }
         } else if (this.editingPointIndex !== null) {
           const newData = this.context.coordinateConversion.pixelToData({
             x: finalX,
-            y: finishY
+            y: finalY
           });
           if (newData) {
             this.currentDrawing.points[this.editingPointIndex] = newData;
@@ -3520,6 +3521,8 @@
         this.initialPixelPoints = [];
         this.currentDrawing = null;
         this.editingPointIndex = null;
+        this.editLines = [];
+        this.editPoints = [];
         if (this.editGroup) {
           this.zr.remove(this.editGroup);
           this.editGroup = null;
@@ -3530,15 +3533,33 @@
       }
     }
 
-    var __defProp$5 = Object.defineProperty;
-    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$5 = (obj, key, value) => {
-      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$b = Object.defineProperty;
+    var __defNormalProp$b = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$b = (obj, key, value) => {
+      __defNormalProp$b(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class DrawingRendererRegistry {
+      constructor() {
+        __publicField$b(this, "renderers", /* @__PURE__ */ new Map());
+      }
+      register(renderer) {
+        this.renderers.set(renderer.type, renderer);
+      }
+      get(type) {
+        return this.renderers.get(type);
+      }
+    }
+
+    var __defProp$a = Object.defineProperty;
+    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$a = (obj, key, value) => {
+      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class EventBus {
       constructor() {
-        __publicField$5(this, "handlers", /* @__PURE__ */ new Map());
+        __publicField$a(this, "handlers", /* @__PURE__ */ new Map());
       }
       on(event, handler) {
         if (!this.handlers.has(event)) {
@@ -4296,30 +4317,31 @@
       }
     }
 
-    var __defProp$4 = Object.defineProperty;
-    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$4 = (obj, key, value) => {
-      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$9 = Object.defineProperty;
+    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$9 = (obj, key, value) => {
+      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class QFChart {
       constructor(container, options = {}) {
-        __publicField$4(this, "chart");
-        __publicField$4(this, "options");
-        __publicField$4(this, "marketData", []);
-        __publicField$4(this, "indicators", /* @__PURE__ */ new Map());
-        __publicField$4(this, "timeToIndex", /* @__PURE__ */ new Map());
-        __publicField$4(this, "pluginManager");
-        __publicField$4(this, "drawingEditor");
-        __publicField$4(this, "events", new EventBus());
-        __publicField$4(this, "isMainCollapsed", false);
-        __publicField$4(this, "maximizedPaneId", null);
-        __publicField$4(this, "countdownInterval", null);
-        __publicField$4(this, "selectedDrawingId", null);
+        __publicField$9(this, "chart");
+        __publicField$9(this, "options");
+        __publicField$9(this, "marketData", []);
+        __publicField$9(this, "indicators", /* @__PURE__ */ new Map());
+        __publicField$9(this, "timeToIndex", /* @__PURE__ */ new Map());
+        __publicField$9(this, "pluginManager");
+        __publicField$9(this, "drawingEditor");
+        __publicField$9(this, "events", new EventBus());
+        __publicField$9(this, "isMainCollapsed", false);
+        __publicField$9(this, "maximizedPaneId", null);
+        __publicField$9(this, "countdownInterval", null);
+        __publicField$9(this, "selectedDrawingId", null);
         // Track selected drawing
         // Drawing System
-        __publicField$4(this, "drawings", []);
-        __publicField$4(this, "coordinateConversion", {
+        __publicField$9(this, "drawings", []);
+        __publicField$9(this, "drawingRenderers", new DrawingRendererRegistry());
+        __publicField$9(this, "coordinateConversion", {
           pixelToData: (point) => {
             const option = this.chart.getOption();
             if (!option || !option.grid)
@@ -4346,58 +4368,58 @@
           }
         });
         // Default colors and constants
-        __publicField$4(this, "upColor", "#00da3c");
-        __publicField$4(this, "downColor", "#ec0000");
-        __publicField$4(this, "defaultPadding", 0);
-        __publicField$4(this, "padding");
-        __publicField$4(this, "dataIndexOffset", 0);
+        __publicField$9(this, "upColor", "#00da3c");
+        __publicField$9(this, "downColor", "#ec0000");
+        __publicField$9(this, "defaultPadding", 0);
+        __publicField$9(this, "padding");
+        __publicField$9(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
-        __publicField$4(this, "_paddingPoints", 0);
+        __publicField$9(this, "_paddingPoints", 0);
         // Current symmetric padding (empty bars per side)
-        __publicField$4(this, "LAZY_MIN_PADDING", 5);
+        __publicField$9(this, "LAZY_MIN_PADDING", 5);
         // Always have a tiny buffer so edge scroll triggers
-        __publicField$4(this, "LAZY_MAX_PADDING", 500);
+        __publicField$9(this, "LAZY_MAX_PADDING", 500);
         // Hard cap per side
-        __publicField$4(this, "LAZY_CHUNK_SIZE", 50);
+        __publicField$9(this, "LAZY_CHUNK_SIZE", 50);
         // Bars added per expansion
-        __publicField$4(this, "LAZY_EDGE_THRESHOLD", 10);
+        __publicField$9(this, "LAZY_EDGE_THRESHOLD", 10);
         // Bars from edge to trigger
-        __publicField$4(this, "_expandScheduled", false);
+        __publicField$9(this, "_expandScheduled", false);
         // Debounce flag
         // DOM Elements for Layout
-        __publicField$4(this, "rootContainer");
-        __publicField$4(this, "layoutContainer");
-        __publicField$4(this, "toolbarContainer");
+        __publicField$9(this, "rootContainer");
+        __publicField$9(this, "layoutContainer");
+        __publicField$9(this, "toolbarContainer");
         // New Toolbar
-        __publicField$4(this, "leftSidebar");
-        __publicField$4(this, "rightSidebar");
-        __publicField$4(this, "chartContainer");
-        __publicField$4(this, "overlayContainer");
-        __publicField$4(this, "_lastTables", []);
-        __publicField$4(this, "_tableGraphicIds", []);
+        __publicField$9(this, "leftSidebar");
+        __publicField$9(this, "rightSidebar");
+        __publicField$9(this, "chartContainer");
+        __publicField$9(this, "overlayContainer");
+        __publicField$9(this, "_lastTables", []);
+        __publicField$9(this, "_tableGraphicIds", []);
         // Track canvas table graphic IDs for cleanup
-        __publicField$4(this, "_baseGraphics", []);
+        __publicField$9(this, "_baseGraphics", []);
         // Non-table graphic elements (title, watermark, pane labels)
-        __publicField$4(this, "_labelTooltipEl", null);
+        __publicField$9(this, "_labelTooltipEl", null);
         // Floating tooltip for label.set_tooltip()
         // Pane drag-resize state
-        __publicField$4(this, "_lastLayout", null);
-        __publicField$4(this, "_mainHeightOverride", null);
-        __publicField$4(this, "_paneDragState", null);
-        __publicField$4(this, "_paneResizeRafId", null);
-        __publicField$4(this, "onKeyDown", (e) => {
+        __publicField$9(this, "_lastLayout", null);
+        __publicField$9(this, "_mainHeightOverride", null);
+        __publicField$9(this, "_paneDragState", null);
+        __publicField$9(this, "_paneResizeRafId", null);
+        __publicField$9(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
             this.selectedDrawingId = null;
             this.render();
           }
         });
-        __publicField$4(this, "onFullscreenChange", () => {
+        __publicField$9(this, "onFullscreenChange", () => {
           this.render();
         });
         // --- Interaction Locking ---
-        __publicField$4(this, "isLocked", false);
-        __publicField$4(this, "lockedState", null);
+        __publicField$9(this, "isLocked", false);
+        __publicField$9(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
           title: void 0,
@@ -4672,8 +4694,8 @@
               type: info.drawing.type
             });
             this.chart.getZr().setCursorStyle("move");
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:hover", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -4702,8 +4724,8 @@
           }, 50);
           if (info.targetName === "line") {
             this.events.emit("drawing:mouseout", { id: info.drawing.id });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:mouseout", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -4724,8 +4746,8 @@
               x,
               y
             });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:mousedown", {
               id: info.drawing.id,
               pointIndex: pointIdx,
@@ -4745,8 +4767,8 @@
           }
           if (info.targetName === "line") {
             this.events.emit("drawing:click", { id: info.drawing.id });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:click", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -4806,6 +4828,9 @@
       }
       registerPlugin(plugin) {
         this.pluginManager.register(plugin);
+      }
+      registerDrawingRenderer(renderer) {
+        this.drawingRenderers.register(renderer);
       }
       // --- Drawing System ---
       addDrawing(drawing) {
@@ -5501,240 +5526,33 @@ ${timeString}`;
               const drawing = drawings[params.dataIndex];
               if (!drawing)
                 return;
-              const start = drawing.points[0];
-              const end = drawing.points[1];
-              if (!start || !end)
+              const renderer = this.drawingRenderers.get(drawing.type);
+              if (!renderer)
                 return;
               const drawingOffset = this.dataIndexOffset;
-              const p1 = api.coord([start.timeIndex + drawingOffset, start.value]);
-              const p2 = api.coord([end.timeIndex + drawingOffset, end.value]);
-              const isSelected = drawing.id === this.selectedDrawingId;
-              if (drawing.type === "line") {
-                return {
-                  type: "group",
-                  children: [
-                    {
-                      type: "line",
-                      name: "line",
-                      shape: {
-                        x1: p1[0],
-                        y1: p1[1],
-                        x2: p2[0],
-                        y2: p2[1]
-                      },
-                      style: {
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: drawing.style?.lineWidth || 2
-                      }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-start",
-                      shape: { cx: p1[0], cy: p1[1], r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                        // Show if selected
-                      }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-end",
-                      shape: { cx: p2[0], cy: p2[1], r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                        // Show if selected
-                      }
-                    }
-                  ]
-                };
-              } else if (drawing.type === "fibonacci") {
-                const x1 = p1[0];
-                const y1 = p1[1];
-                const x2 = p2[0];
-                const y2 = p2[1];
-                const startX = Math.min(x1, x2);
-                const endX = Math.max(x1, x2);
-                const width = endX - startX;
-                const diffY = y2 - y1;
-                const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-                const colors = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
-                const children = [];
-                children.push({
-                  type: "line",
-                  name: "line",
-                  // Use 'line' name to enable dragging logic in DrawingEditor
-                  shape: { x1, y1, x2, y2 },
-                  style: {
-                    stroke: "#999",
-                    lineWidth: 1,
-                    lineDash: [4, 4]
-                  }
-                });
-                children.push({
-                  type: "circle",
-                  name: "point-start",
-                  shape: { cx: x1, cy: y1, r: 4 },
-                  style: {
-                    fill: "#fff",
-                    stroke: drawing.style?.color || "#3b82f6",
-                    lineWidth: 1,
-                    opacity: isSelected ? 1 : 0
-                  },
-                  z: 100
-                  // Ensure on top
-                });
-                children.push({
-                  type: "circle",
-                  name: "point-end",
-                  shape: { cx: x2, cy: y2, r: 4 },
-                  style: {
-                    fill: "#fff",
-                    stroke: drawing.style?.color || "#3b82f6",
-                    lineWidth: 1,
-                    opacity: isSelected ? 1 : 0
-                  },
-                  z: 100
-                });
-                levels.forEach((level, index) => {
-                  const levelY = y2 - diffY * level;
-                  const color = colors[index % colors.length];
-                  children.push({
-                    type: "line",
-                    name: "fib-line",
-                    // distinct name, maybe we don't want to drag by clicking these lines? or yes? 'line' triggers drag. 'fib-line' won't unless we update logic.
-                    // The user asked for "fib levels between start and end".
-                    shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                    style: { stroke: color, lineWidth: 1 },
-                    silent: true
-                    // Make internal lines silent so clicks pass to background/diagonal?
-                  });
-                  const startVal = drawing.points[0].value;
-                  const endVal = drawing.points[1].value;
-                  const valDiff = endVal - startVal;
-                  const price = endVal - valDiff * level;
-                  children.push({
-                    type: "text",
-                    style: {
-                      text: `${level} (${price.toFixed(2)})`,
-                      x: startX + 5,
-                      y: levelY - 10,
-                      fill: color,
-                      fontSize: 10
-                    },
-                    silent: true
-                  });
-                  if (index < levels.length - 1) {
-                    const nextLevel = levels[index + 1];
-                    const nextY = y2 - diffY * nextLevel;
-                    const rectH = Math.abs(nextY - levelY);
-                    const rectY = Math.min(levelY, nextY);
-                    children.push({
-                      type: "rect",
-                      shape: { x: startX, y: rectY, width, height: rectH },
-                      style: {
-                        fill: colors[(index + 1) % colors.length],
-                        opacity: 0.1
-                      },
-                      silent: true
-                      // Let clicks pass through?
-                    });
-                  }
-                });
-                const backgrounds = [];
-                const linesAndText = [];
-                levels.forEach((level, index) => {
-                  const levelY = y2 - diffY * level;
-                  const color = colors[index % colors.length];
-                  linesAndText.push({
-                    type: "line",
-                    shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                    style: { stroke: color, lineWidth: 1 },
-                    silent: true
-                  });
-                  const startVal = drawing.points[0].value;
-                  const endVal = drawing.points[1].value;
-                  const valDiff = endVal - startVal;
-                  const price = endVal - valDiff * level;
-                  linesAndText.push({
-                    type: "text",
-                    style: {
-                      text: `${level} (${price.toFixed(2)})`,
-                      x: startX + 5,
-                      y: levelY - 10,
-                      fill: color,
-                      fontSize: 10
-                    },
-                    silent: true
-                  });
-                  if (index < levels.length - 1) {
-                    const nextLevel = levels[index + 1];
-                    const nextY = y2 - diffY * nextLevel;
-                    const rectH = Math.abs(nextY - levelY);
-                    const rectY = Math.min(levelY, nextY);
-                    backgrounds.push({
-                      type: "rect",
-                      name: "line",
-                      // Enable dragging by clicking background!
-                      shape: { x: startX, y: rectY, width, height: rectH },
-                      style: {
-                        fill: colors[(index + 1) % colors.length],
-                        opacity: 0.1
-                      }
-                    });
-                  }
-                });
-                return {
-                  type: "group",
-                  children: [
-                    ...backgrounds,
-                    ...linesAndText,
-                    {
-                      type: "line",
-                      name: "line",
-                      shape: { x1, y1, x2, y2 },
-                      style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-start",
-                      shape: { cx: x1, cy: y1, r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                      },
-                      z: 100
-                    },
-                    {
-                      type: "circle",
-                      name: "point-end",
-                      shape: { cx: x2, cy: y2, r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                      },
-                      z: 100
-                    }
-                  ]
-                };
-              }
+              const pixelPoints = drawing.points.map(
+                (p) => api.coord([p.timeIndex + drawingOffset, p.value])
+              );
+              return renderer.render({
+                drawing,
+                pixelPoints,
+                isSelected: drawing.id === this.selectedDrawingId,
+                api
+              });
             },
-            data: drawings.map((d) => [
-              d.points[0].timeIndex + this.dataIndexOffset,
-              d.points[0].value,
-              d.points[1].timeIndex + this.dataIndexOffset,
-              d.points[1].value
-            ]),
-            encode: { x: [0, 2], y: [1, 3] },
+            data: drawings.map((d) => {
+              const row = [];
+              d.points.forEach((p) => {
+                row.push(p.timeIndex + this.dataIndexOffset, p.value);
+              });
+              return row;
+            }),
+            encode: (() => {
+              const maxPoints = drawings.reduce((max, d) => Math.max(max, d.points.length), 0);
+              const xDims = Array.from({ length: maxPoints }, (_, i) => i * 2);
+              const yDims = Array.from({ length: maxPoints }, (_, i) => i * 2 + 1);
+              return { x: xDims, y: yDims };
+            })(),
             z: 100,
             silent: false
           });
@@ -5833,19 +5651,19 @@ ${timeString}`;
       }
     }
 
-    var __defProp$3 = Object.defineProperty;
-    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$3 = (obj, key, value) => {
-      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$8 = Object.defineProperty;
+    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$8 = (obj, key, value) => {
+      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class AbstractPlugin {
       constructor(config) {
-        __publicField$3(this, "id");
-        __publicField$3(this, "name");
-        __publicField$3(this, "icon");
-        __publicField$3(this, "context");
-        __publicField$3(this, "eventListeners", []);
+        __publicField$8(this, "id");
+        __publicField$8(this, "name");
+        __publicField$8(this, "icon");
+        __publicField$8(this, "context");
+        __publicField$8(this, "eventListeners", []);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -5927,51 +5745,44 @@ ${timeString}`;
       }
     }
 
-    var __defProp$2 = Object.defineProperty;
-    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$2 = (obj, key, value) => {
-      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$7 = Object.defineProperty;
+    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$7 = (obj, key, value) => {
+      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class MeasureTool extends AbstractPlugin {
-      // End Arrow
-      constructor(options) {
+      constructor(options = {}) {
         super({
           id: "measure",
           name: options?.name || "Measure",
           icon: options?.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></svg>`
         });
-        __publicField$2(this, "zr");
-        __publicField$2(this, "state", "idle");
-        __publicField$2(this, "startPoint", null);
-        __publicField$2(this, "endPoint", null);
+        __publicField$7(this, "zr");
+        __publicField$7(this, "state", "idle");
+        __publicField$7(this, "startPoint", null);
+        __publicField$7(this, "endPoint", null);
         // ZRender Elements
-        __publicField$2(this, "group", null);
-        __publicField$2(this, "rect", null);
-        // Measurement Box
-        __publicField$2(this, "labelRect", null);
-        // Label Background
-        __publicField$2(this, "labelText", null);
-        // Label Text
-        __publicField$2(this, "lineV", null);
-        // Vertical Arrow Line
-        __publicField$2(this, "lineH", null);
-        // Horizontal Arrow Line
-        __publicField$2(this, "arrowStart", null);
-        // Start Arrow
-        __publicField$2(this, "arrowEnd", null);
+        __publicField$7(this, "group", null);
+        __publicField$7(this, "rect", null);
+        __publicField$7(this, "labelRect", null);
+        __publicField$7(this, "labelText", null);
+        __publicField$7(this, "lineV", null);
+        __publicField$7(this, "lineH", null);
+        __publicField$7(this, "arrowStart", null);
+        __publicField$7(this, "arrowEnd", null);
         // --- Interaction Handlers ---
-        __publicField$2(this, "onMouseDown", () => {
+        __publicField$7(this, "onMouseDown", () => {
           if (this.state === "finished") {
             this.removeGraphic();
           }
         });
-        __publicField$2(this, "onChartInteraction", () => {
+        __publicField$7(this, "onChartInteraction", () => {
           if (this.group) {
             this.removeGraphic();
           }
         });
-        __publicField$2(this, "onClick", (params) => {
+        __publicField$7(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -5986,8 +5797,8 @@ ${timeString}`;
             this.enableClearListeners();
           }
         });
-        __publicField$2(this, "clearHandlers", {});
-        __publicField$2(this, "onMouseMove", (params) => {
+        __publicField$7(this, "clearHandlers", {});
+        __publicField$7(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6177,7 +5988,7 @@ ${timeString}`;
           });
           this.arrowEnd.setStyle({ fill: strokeColor });
         }
-        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars, ${(bars * 0).toFixed(0)}d`].join("\n");
+        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars`].join("\n");
         const labelW = 140;
         const labelH = 40;
         const rectBottomY = Math.max(y1, y2);
@@ -6209,34 +6020,84 @@ ${timeString}`;
       }
     }
 
-    var __defProp$1 = Object.defineProperty;
-    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$1 = (obj, key, value) => {
-      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$6 = Object.defineProperty;
+    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$6 = (obj, key, value) => {
+      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class LineDrawingRenderer {
+      constructor() {
+        __publicField$6(this, "type", "line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2, y2 },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 2
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              }
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$5 = Object.defineProperty;
+    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$5 = (obj, key, value) => {
+      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineTool extends AbstractPlugin {
-      constructor(options) {
+      constructor(options = {}) {
         super({
           id: "trend-line",
           name: options?.name || "Trend Line",
           icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2" /></svg>`
         });
-        __publicField$1(this, "zr");
-        __publicField$1(this, "state", "idle");
-        __publicField$1(this, "startPoint", null);
-        __publicField$1(this, "endPoint", null);
+        __publicField$5(this, "zr");
+        __publicField$5(this, "state", "idle");
+        __publicField$5(this, "startPoint", null);
+        __publicField$5(this, "endPoint", null);
         // ZRender Elements
-        __publicField$1(this, "group", null);
-        __publicField$1(this, "line", null);
-        __publicField$1(this, "startCircle", null);
-        __publicField$1(this, "endCircle", null);
+        __publicField$5(this, "group", null);
+        __publicField$5(this, "line", null);
+        __publicField$5(this, "startCircle", null);
+        __publicField$5(this, "endCircle", null);
         // --- Interaction Handlers ---
-        __publicField$1(this, "onMouseDown", () => {
-        });
-        __publicField$1(this, "onChartInteraction", () => {
-        });
-        __publicField$1(this, "onClick", (params) => {
+        __publicField$5(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6274,8 +6135,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$1(this, "clearHandlers", {});
-        __publicField$1(this, "onMouseMove", (params) => {
+        __publicField$5(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6284,6 +6144,7 @@ ${timeString}`;
       }
       onInit() {
         this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new LineDrawingRenderer());
       }
       onActivate() {
         this.state = "idle";
@@ -6296,21 +6157,12 @@ ${timeString}`;
         this.chart.getZr().setCursorStyle("default");
         this.zr.off("click", this.onClick);
         this.zr.off("mousemove", this.onMouseMove);
-        this.disableClearListeners();
         if (this.state === "drawing") {
           this.removeGraphic();
         }
       }
       onDestroy() {
         this.removeGraphic();
-      }
-      saveDataCoordinates() {
-      }
-      updateGraphicFromData() {
-      }
-      enableClearListeners() {
-      }
-      disableClearListeners() {
       }
       // --- Graphics ---
       initGraphic() {
@@ -6341,7 +6193,6 @@ ${timeString}`;
         if (this.group) {
           this.zr.remove(this.group);
           this.group = null;
-          this.disableClearListeners();
         }
       }
       updateGraphic() {
@@ -6355,10 +6206,114 @@ ${timeString}`;
       }
     }
 
-    var __defProp = Object.defineProperty;
-    var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField = (obj, key, value) => {
-      __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$4 = Object.defineProperty;
+    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$4 = (obj, key, value) => {
+      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$1 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibonacciDrawingRenderer {
+      constructor() {
+        __publicField$4(this, "type", "fibonacci");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        const startX = Math.min(x1, x2);
+        const endX = Math.max(x1, x2);
+        const width = endX - startX;
+        const diffY = y2 - y1;
+        const startVal = drawing.points[0].value;
+        const endVal = drawing.points[1].value;
+        const valDiff = endVal - startVal;
+        const backgrounds = [];
+        const linesAndText = [];
+        LEVELS$1.forEach((level, index) => {
+          const levelY = y2 - diffY * level;
+          const levelColor = COLORS$1[index % COLORS$1.length];
+          linesAndText.push({
+            type: "line",
+            shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          const price = endVal - valDiff * level;
+          linesAndText.push({
+            type: "text",
+            style: {
+              text: `${level} (${price.toFixed(2)})`,
+              x: startX + 5,
+              y: levelY - 10,
+              fill: levelColor,
+              fontSize: 10
+            },
+            silent: true
+          });
+          if (index < LEVELS$1.length - 1) {
+            const nextLevel = LEVELS$1[index + 1];
+            const nextY = y2 - diffY * nextLevel;
+            const rectH = Math.abs(nextY - levelY);
+            const rectY = Math.min(levelY, nextY);
+            backgrounds.push({
+              type: "rect",
+              name: "line",
+              // Enable dragging by clicking background
+              shape: { x: startX, y: rectY, width, height: rectH },
+              style: {
+                fill: COLORS$1[(index + 1) % COLORS$1.length],
+                opacity: 0.1
+              }
+            });
+          }
+        });
+        return {
+          type: "group",
+          children: [
+            ...backgrounds,
+            ...linesAndText,
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              },
+              z: 100
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              },
+              z: 100
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$3 = Object.defineProperty;
+    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$3 = (obj, key, value) => {
+      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciTool extends AbstractPlugin {
@@ -6368,14 +6323,14 @@ ${timeString}`;
           name: options.name || "Fibonacci Retracement",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Z"/></svg>`
         });
-        __publicField(this, "startPoint", null);
-        __publicField(this, "endPoint", null);
-        __publicField(this, "state", "idle");
+        __publicField$3(this, "startPoint", null);
+        __publicField$3(this, "endPoint", null);
+        __publicField$3(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField(this, "graphicGroup", null);
+        __publicField$3(this, "graphicGroup", null);
         // Fib levels config
-        __publicField(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField(this, "colors", [
+        __publicField$3(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$3(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -6391,7 +6346,7 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField(this, "onClick", (params) => {
+        __publicField$3(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6407,12 +6362,15 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField(this, "onMouseMove", (params) => {
+        __publicField$3(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
           }
         });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibonacciDrawingRenderer());
       }
       onActivate() {
         this.state = "idle";
@@ -6492,7 +6450,6 @@ ${timeString}`;
               shape: { x: startX, y: rectY, width, height: rectH },
               style: {
                 fill: this.colors[(index + 1) % this.colors.length],
-                // Use next level's color
                 opacity: 0.1
               },
               silent: true
@@ -6521,7 +6478,6 @@ ${timeString}`;
             paneIndex,
             style: {
               color: "#3b82f6",
-              // Default color, though individual lines use specific colors
               lineWidth: 1
             }
           });
@@ -6529,11 +6485,515 @@ ${timeString}`;
       }
     }
 
+    var __defProp$2 = Object.defineProperty;
+    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$2 = (obj, key, value) => {
+      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibonacciChannelDrawingRenderer {
+      constructor() {
+        __publicField$2(this, "type", "fibonacci_channel");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const [wx, wy] = pixelPoints[2];
+        const color = drawing.style?.color || "#3b82f6";
+        const bdx = x2 - x1;
+        const bdy = y2 - y1;
+        const blen = Math.sqrt(bdx * bdx + bdy * bdy);
+        if (blen === 0)
+          return;
+        const nx = -bdy / blen;
+        const ny = bdx / blen;
+        const dist = (wx - x1) * nx + (wy - y1) * ny;
+        const children = [];
+        const levelCoords = [];
+        LEVELS.forEach((level, index) => {
+          const ox = nx * dist * level;
+          const oy = ny * dist * level;
+          const lx1 = x1 + ox;
+          const ly1 = y1 + oy;
+          const lx2 = x2 + ox;
+          const ly2 = y2 + oy;
+          levelCoords.push({ lx1, ly1, lx2, ly2 });
+          if (index < LEVELS.length - 1) {
+            const nextLevel = LEVELS[index + 1];
+            const nox = nx * dist * nextLevel;
+            const noy = ny * dist * nextLevel;
+            children.push({
+              type: "polygon",
+              name: "line",
+              // Enable dragging by clicking background
+              shape: {
+                points: [
+                  [lx1, ly1],
+                  [lx2, ly2],
+                  [x2 + nox, y2 + noy],
+                  [x1 + nox, y1 + noy]
+                ]
+              },
+              style: {
+                fill: COLORS[(index + 1) % COLORS.length],
+                opacity: 0.1
+              }
+            });
+          }
+        });
+        levelCoords.forEach((coords, index) => {
+          const levelColor = COLORS[index % COLORS.length];
+          children.push({
+            type: "line",
+            shape: { x1: coords.lx1, y1: coords.ly1, x2: coords.lx2, y2: coords.ly2 },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${LEVELS[index]}`,
+              x: coords.lx2 + 5,
+              y: coords.ly2 - 5,
+              fill: levelColor,
+              fontSize: 10
+            },
+            silent: true
+          });
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-2",
+          shape: { cx: wx, cy: wy, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$1 = Object.defineProperty;
+    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$1 = (obj, key, value) => {
+      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class FibonacciChannelTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fibonacci-channel-tool",
+          name: options.name || "Fibonacci Channel",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-200v-80l80-80H120v-80h160l120-120H120v-80h360l120-120H120v-80h720v80H520l-120 120h440v80H320L200-440h640v80H280l-80 80h640v80H120Z"/></svg>`
+        });
+        __publicField$1(this, "startPoint", null);
+        __publicField$1(this, "endPoint", null);
+        __publicField$1(this, "widthPoint", null);
+        __publicField$1(this, "state", "idle");
+        // Temporary ZRender elements
+        __publicField$1(this, "graphicGroup", null);
+        // Fib levels config
+        __publicField$1(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$1(this, "colors", [
+          "#787b86",
+          // 0
+          "#f44336",
+          // 0.236
+          "#ff9800",
+          // 0.382
+          "#4caf50",
+          // 0.5
+          "#2196f3",
+          // 0.618
+          "#00bcd4",
+          // 0.786
+          "#787b86"
+          // 1
+        ]);
+        __publicField$1(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing-baseline";
+            this.startPoint = [params.offsetX, params.offsetY];
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing-baseline") {
+            this.state = "drawing-width";
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.widthPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          } else if (this.state === "drawing-width") {
+            this.state = "finished";
+            this.widthPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$1(this, "onMouseMove", (params) => {
+          if (this.state === "drawing-baseline") {
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          } else if (this.state === "drawing-width") {
+            this.widthPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibonacciChannelDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.widthPoint = null;
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.widthPoint = null;
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup || !this.startPoint || !this.endPoint)
+          return;
+        this.graphicGroup.removeAll();
+        const x1 = this.startPoint[0];
+        const y1 = this.startPoint[1];
+        const x2 = this.endPoint[0];
+        const y2 = this.endPoint[1];
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#787b86", lineWidth: 2 },
+            silent: true
+          })
+        );
+        if (this.widthPoint && this.state !== "drawing-baseline") {
+          const wp = this.widthPoint;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len === 0)
+            return;
+          const nx = -dy / len;
+          const ny = dx / len;
+          const dist = (wp[0] - x1) * nx + (wp[1] - y1) * ny;
+          this.levels.forEach((level, index) => {
+            const offsetX = nx * dist * level;
+            const offsetY = ny * dist * level;
+            const lx1 = x1 + offsetX;
+            const ly1 = y1 + offsetY;
+            const lx2 = x2 + offsetX;
+            const ly2 = y2 + offsetY;
+            const color = this.colors[index % this.colors.length];
+            this.graphicGroup.add(
+              new echarts__namespace.graphic.Line({
+                shape: { x1: lx1, y1: ly1, x2: lx2, y2: ly2 },
+                style: { stroke: color, lineWidth: 1 },
+                silent: true
+              })
+            );
+            if (index < this.levels.length - 1) {
+              const nextLevel = this.levels[index + 1];
+              const nOffsetX = nx * dist * nextLevel;
+              const nOffsetY = ny * dist * nextLevel;
+              const nx1 = x1 + nOffsetX;
+              const ny1 = y1 + nOffsetY;
+              const nx2 = x2 + nOffsetX;
+              const ny2 = y2 + nOffsetY;
+              this.graphicGroup.add(
+                new echarts__namespace.graphic.Polygon({
+                  shape: {
+                    points: [
+                      [lx1, ly1],
+                      [lx2, ly2],
+                      [nx2, ny2],
+                      [nx1, ny1]
+                    ]
+                  },
+                  style: {
+                    fill: this.colors[(index + 1) % this.colors.length],
+                    opacity: 0.1
+                  },
+                  silent: true
+                })
+              );
+            }
+          });
+        }
+      }
+      saveDrawing() {
+        if (!this.startPoint || !this.endPoint || !this.widthPoint)
+          return;
+        const start = this.context.coordinateConversion.pixelToData({
+          x: this.startPoint[0],
+          y: this.startPoint[1]
+        });
+        const end = this.context.coordinateConversion.pixelToData({
+          x: this.endPoint[0],
+          y: this.endPoint[1]
+        });
+        const width = this.context.coordinateConversion.pixelToData({
+          x: this.widthPoint[0],
+          y: this.widthPoint[1]
+        });
+        if (start && end && width) {
+          const paneIndex = start.paneIndex || 0;
+          this.context.addDrawing({
+            id: `fib-channel-${Date.now()}`,
+            type: "fibonacci_channel",
+            points: [start, end, width],
+            paneIndex,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 1
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp = Object.defineProperty;
+    var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField = (obj, key, value) => {
+      __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class ToolGroup extends AbstractPlugin {
+      constructor(config) {
+        const arrowSvg = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: -4px; top: 50%; transform: translateY(-50%); opacity: 0.6;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+        let enhancedIcon = "";
+        if (config.icon) {
+          enhancedIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    ${config.icon}
+                </div>
+                ${arrowSvg}
+            </div>`;
+        } else {
+          enhancedIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <span>${config.name.substring(0, 2).toUpperCase()}</span>
+                ${arrowSvg}
+            </div>`;
+        }
+        super({
+          id: config.id || `group-${config.name.toLowerCase().replace(/\s+/g, "-")}`,
+          name: config.name,
+          icon: enhancedIcon
+        });
+        __publicField(this, "plugins", []);
+        __publicField(this, "activeSubPlugin", null);
+        __publicField(this, "menuElement", null);
+        __publicField(this, "buttonElement", null);
+        __publicField(this, "originalIcon", "");
+        __publicField(this, "arrowSvg", "");
+        __publicField(this, "handleOutsideClick", (e) => {
+          if (this.menuElement && !this.menuElement.contains(e.target)) {
+            this.hideMenu();
+            if (!this.activeSubPlugin) {
+              this.buttonElement?.click();
+            }
+          }
+        });
+        this.originalIcon = enhancedIcon;
+        this.arrowSvg = arrowSvg;
+      }
+      add(plugin) {
+        this.plugins.push(plugin);
+      }
+      onInit() {
+        this.plugins.forEach((p) => p.init(this.context));
+      }
+      onActivate() {
+        this.showMenu();
+      }
+      onDeactivate() {
+        this.hideMenu();
+        if (this.activeSubPlugin) {
+          this.activeSubPlugin.deactivate?.();
+          this.activeSubPlugin = null;
+        }
+        if (this.buttonElement) {
+          this.buttonElement.innerHTML = this.originalIcon;
+        }
+      }
+      onDestroy() {
+        this.hideMenu();
+        this.plugins.forEach((p) => p.destroy?.());
+      }
+      showMenu() {
+        this.buttonElement = document.getElementById(`qfchart-plugin-btn-${this.id}`);
+        if (!this.buttonElement)
+          return;
+        if (this.menuElement) {
+          this.hideMenu();
+        }
+        this.menuElement = document.createElement("div");
+        Object.assign(this.menuElement.style, {
+          position: "fixed",
+          backgroundColor: "#1e293b",
+          border: "1px solid #334155",
+          borderRadius: "6px",
+          padding: "4px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2px",
+          zIndex: "10000",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+          minWidth: "150px"
+        });
+        this.plugins.forEach((plugin) => {
+          const item = document.createElement("div");
+          Object.assign(item.style, {
+            display: "flex",
+            alignItems: "center",
+            padding: "8px 12px",
+            cursor: "pointer",
+            color: "#cbd5e1",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontFamily: this.context.getOptions().fontFamily || "sans-serif",
+            transition: "background-color 0.2s"
+          });
+          item.addEventListener("mouseenter", () => {
+            item.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.backgroundColor = "transparent";
+          });
+          if (plugin.icon) {
+            const iconContainer = document.createElement("div");
+            iconContainer.innerHTML = plugin.icon;
+            Object.assign(iconContainer.style, {
+              width: "20px",
+              height: "20px",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            });
+            const svg = iconContainer.querySelector("svg");
+            if (svg) {
+              svg.style.width = "100%";
+              svg.style.height = "100%";
+            }
+            item.appendChild(iconContainer);
+          }
+          const nameSpan = document.createElement("span");
+          nameSpan.textContent = plugin.name || plugin.id;
+          item.appendChild(nameSpan);
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.activateSubPlugin(plugin);
+          });
+          this.menuElement.appendChild(item);
+        });
+        document.body.appendChild(this.menuElement);
+        const rect = this.buttonElement.getBoundingClientRect();
+        this.menuElement.style.top = `${rect.top}px`;
+        this.menuElement.style.left = `${rect.right + 5}px`;
+        setTimeout(() => {
+          document.addEventListener("click", this.handleOutsideClick);
+        }, 0);
+      }
+      hideMenu() {
+        if (this.menuElement && this.menuElement.parentNode) {
+          this.menuElement.parentNode.removeChild(this.menuElement);
+        }
+        this.menuElement = null;
+        document.removeEventListener("click", this.handleOutsideClick);
+      }
+      activateSubPlugin(plugin) {
+        this.hideMenu();
+        if (this.activeSubPlugin) {
+          this.activeSubPlugin.deactivate?.();
+        }
+        this.activeSubPlugin = plugin;
+        this.activeSubPlugin.activate?.();
+        if (this.buttonElement) {
+          let subIcon = "";
+          if (plugin.icon) {
+            subIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        ${plugin.icon}
+                    </div>
+                    ${this.arrowSvg}
+                </div>`;
+          } else {
+            subIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <span>${(plugin.name || plugin.id).substring(0, 2).toUpperCase()}</span>
+                    ${this.arrowSvg}
+                </div>`;
+          }
+          this.buttonElement.innerHTML = subIcon;
+        }
+      }
+    }
+
     exports.AbstractPlugin = AbstractPlugin;
+    exports.DrawingRendererRegistry = DrawingRendererRegistry;
+    exports.FibonacciChannelDrawingRenderer = FibonacciChannelDrawingRenderer;
+    exports.FibonacciChannelTool = FibonacciChannelTool;
+    exports.FibonacciDrawingRenderer = FibonacciDrawingRenderer;
     exports.FibonacciTool = FibonacciTool;
+    exports.LineDrawingRenderer = LineDrawingRenderer;
     exports.LineTool = LineTool;
     exports.MeasureTool = MeasureTool;
     exports.QFChart = QFChart;
+    exports.ToolGroup = ToolGroup;
 
 }));
 //# sourceMappingURL=qfchart.dev.browser.js.map

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -279,6 +279,20 @@ chart.registerPlugin(new QFChart.FibonacciTool());
                 // Register Fibonacci Tool Plugin
                 const fibTool = new QFChart.FibonacciTool();
                 chart.registerPlugin(fibTool);
+
+                // 1. Create the ToolGroup with a name and an SVG icon
+                const fibGroup = new QFChart.ToolGroup({
+                    name: 'Fibonacci Tools',
+                    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`, // Replace with your actual icon
+                });
+                // 2. Create your individual tools
+                const fibTool2 = new QFChart.FibonacciTool();
+                const fibChannelTool = new QFChart.FibonacciChannelTool();
+                // 3. Add tools to the group
+                fibGroup.add(fibTool2);
+                fibGroup.add(fibChannelTool);
+                // 4. Register the group as a single plugin on the chart
+                chart.registerPlugin(fibGroup);
 
                 // Logging Event Listeners for Drawing Tools
                 chart.events.on('drawing:hover', (payload) => console.log('Event: drawing:hover', payload));
