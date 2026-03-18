@@ -155,16 +155,36 @@ Registers a plugin instance with the chart.
 
 -   **plugin**: An object implementing the `Plugin` interface (or extending `AbstractPlugin`).
 
+#### `registerDrawingRenderer(renderer: DrawingRenderer)`
+
+Registers a custom drawing renderer for a new drawing type. This is typically called by plugins in their `onInit()` method.
+
+-   **renderer**: An object implementing the `DrawingRenderer` interface.
+
+```typescript
+interface DrawingRenderer {
+    type: string;
+    render(ctx: DrawingRenderContext): any;
+}
+
+interface DrawingRenderContext {
+    drawing: DrawingElement;
+    pixelPoints: [number, number][];
+    isSelected: boolean;
+    api: any;
+}
+```
+
 #### `addDrawing(drawing: DrawingElement)`
 
-Adds a persistent drawing (like a line or shape) to the chart. These drawings move and zoom naturally with the chart.
+Adds a persistent drawing to the chart. These drawings move and zoom naturally with the chart.
 
 -   **drawing**: Object defining the drawing type and coordinates.
     ```typescript
     interface DrawingElement {
         id: string;
-        type: 'line' | 'fibonacci';
-        points: DataCoordinate[]; // [{ timeIndex, value }, ...]
+        type: string;  // e.g., 'line', 'fibonacci', 'xabcd_pattern', or any custom type
+        points: DataCoordinate[]; // Variable length: 2 for lines, 3 for channels, 5+ for patterns
         paneIndex?: number;
         style?: { color?: string; lineWidth?: number };
     }
@@ -173,6 +193,18 @@ Adds a persistent drawing (like a line or shape) to the chart. These drawings mo
 #### `removeDrawing(id: string)`
 
 Removes a drawing by its ID.
+
+#### `getDrawing(id: string): DrawingElement | undefined`
+
+Returns a drawing by its ID, or `undefined` if not found.
+
+#### `updateDrawing(drawing: DrawingElement)`
+
+Updates an existing drawing (e.g., after dragging). The drawing is matched by `id`.
+
+#### `snapToCandle(point: { x, y }): { x, y }`
+
+Returns pixel coordinates snapped to the nearest candle's closest OHLC value. Used internally by `AbstractPlugin.getPoint()` when Ctrl/Cmd is held.
 
 #### `resize()`
 

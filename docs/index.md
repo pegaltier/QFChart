@@ -17,7 +17,7 @@ permalink: /
 -   **Overlay Indicators**: Add indicators directly on top of the main chart (e.g., SMA, Bollinger Bands).
 -   **Flexible Layouts**: Configurable sidebars for data display (Left/Right/Floating) to avoid obstructing the chart.
 -   **Dynamic Resizing**: Automatically handles window resizing and layout adjustments.
--   **Plugin System**: Extensible architecture for adding interactive tools (e.g., Measure Tool, Line Drawing, Fibonacci Retracements).
+-   **Plugin System**: Extensible architecture for adding interactive tools — drawing tools, Fibonacci analysis, chart patterns (XABCD, Head & Shoulders, etc.), with snap-to-candle support (Ctrl/Cmd).
 -   **TypeScript Support**: Written in TypeScript with full type definitions.
 
 ## QFChart in Action
