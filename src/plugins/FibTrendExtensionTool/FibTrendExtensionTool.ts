@@ -53,7 +53,7 @@ export class FibTrendExtensionTool extends AbstractPlugin {
     }
 
     private onClick = (params: any) => {
-        const pt = [params.offsetX, params.offsetY];
+        const pt = this.getPoint(params);
 
         if (this.state === 'idle') {
             this.state = 'drawing-trend';
@@ -77,10 +77,10 @@ export class FibTrendExtensionTool extends AbstractPlugin {
 
     private onMouseMove = (params: any) => {
         if (this.state === 'drawing-trend') {
-            this.points[1] = [params.offsetX, params.offsetY];
+            this.points[1] = this.getPoint(params);
             this.updateGraphic();
         } else if (this.state === 'drawing-retracement') {
-            this.points[2] = [params.offsetX, params.offsetY];
+            this.points[2] = this.getPoint(params);
             this.updateGraphic();
         }
     };

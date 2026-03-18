@@ -72,18 +72,18 @@ export class FibonacciChannelTool extends AbstractPlugin {
   private onClick = (params: any) => {
     if (this.state === "idle") {
       this.state = "drawing-baseline";
-      this.startPoint = [params.offsetX, params.offsetY];
-      this.endPoint = [params.offsetX, params.offsetY];
+      this.startPoint = this.getPoint(params);
+      this.endPoint = this.getPoint(params);
       this.initGraphic();
       this.updateGraphic();
     } else if (this.state === "drawing-baseline") {
       this.state = "drawing-width";
-      this.endPoint = [params.offsetX, params.offsetY];
-      this.widthPoint = [params.offsetX, params.offsetY];
+      this.endPoint = this.getPoint(params);
+      this.widthPoint = this.getPoint(params);
       this.updateGraphic();
     } else if (this.state === "drawing-width") {
       this.state = "finished";
-      this.widthPoint = [params.offsetX, params.offsetY];
+      this.widthPoint = this.getPoint(params);
       this.updateGraphic();
       this.saveDrawing();
 
@@ -94,10 +94,10 @@ export class FibonacciChannelTool extends AbstractPlugin {
 
   private onMouseMove = (params: any) => {
     if (this.state === "drawing-baseline") {
-      this.endPoint = [params.offsetX, params.offsetY];
+      this.endPoint = this.getPoint(params);
       this.updateGraphic();
     } else if (this.state === "drawing-width") {
-      this.widthPoint = [params.offsetX, params.offsetY];
+      this.widthPoint = this.getPoint(params);
       this.updateGraphic();
     }
   };

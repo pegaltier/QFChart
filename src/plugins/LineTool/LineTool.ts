@@ -61,13 +61,13 @@ export class LineTool extends AbstractPlugin {
     private onClick = (params: any) => {
         if (this.state === 'idle') {
             this.state = 'drawing';
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
         } else if (this.state === 'drawing') {
             this.state = 'finished';
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
 
             // Convert to native chart drawing
@@ -105,7 +105,7 @@ export class LineTool extends AbstractPlugin {
 
     private onMouseMove = (params: any) => {
         if (this.state !== 'drawing') return;
-        this.endPoint = [params.offsetX, params.offsetY];
+        this.endPoint = this.getPoint(params);
         this.updateGraphic();
     };
 

@@ -35,7 +35,7 @@ export class TrianglePatternTool extends AbstractPlugin {
     }
 
     private onClick = (params: any) => {
-        const pt = [params.offsetX, params.offsetY];
+        const pt = this.getPoint(params);
         if (this.state === 'idle') {
             this.state = 'drawing'; this.points = [pt, [...pt]]; this.initGraphic(); this.updateGraphic();
         } else if (this.state === 'drawing') {
@@ -48,7 +48,7 @@ export class TrianglePatternTool extends AbstractPlugin {
 
     private onMouseMove = (params: any) => {
         if (this.state !== 'drawing' || this.points.length < 2) return;
-        this.points[this.points.length - 1] = [params.offsetX, params.offsetY]; this.updateGraphic();
+        this.points[this.points.length - 1] = this.getPoint(params); this.updateGraphic();
     };
 
     private initGraphic() { this.graphicGroup = new echarts.graphic.Group(); this.context.getChart().getZr().add(this.graphicGroup); }

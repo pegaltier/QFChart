@@ -180,6 +180,9 @@ export interface ChartContext {
 
     // Drawing Renderer Registration
     registerDrawingRenderer(renderer: DrawingRenderer): void;
+
+    // Snap to nearest candle OHLC value
+    snapToCandle(point: Coordinate): Coordinate;
 }
 
 export type DrawingType = string;

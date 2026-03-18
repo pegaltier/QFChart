@@ -4880,6 +4880,51 @@
       registerDrawingRenderer(renderer) {
         this.drawingRenderers.register(renderer);
       }
+      snapToCandle(point) {
+        const dataCoord = this.coordinateConversion.pixelToData(point);
+        if (!dataCoord)
+          return point;
+        const paneIndex = dataCoord.paneIndex || 0;
+        if (paneIndex !== 0)
+          return point;
+        const realIndex = Math.round(dataCoord.timeIndex);
+        if (realIndex < 0 || realIndex >= this.marketData.length)
+          return point;
+        const candle = this.marketData[realIndex];
+        if (!candle)
+          return point;
+        const snappedX = this.chart.convertToPixel(
+          { gridIndex: paneIndex },
+          [realIndex + this.dataIndexOffset, candle.close]
+        );
+        if (!snappedX)
+          return point;
+        const snapPxX = snappedX[0];
+        const ohlc = [candle.open, candle.high, candle.low, candle.close];
+        let bestValue = ohlc[0];
+        let bestDist = Infinity;
+        for (const val of ohlc) {
+          const px = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, val]
+          );
+          if (px) {
+            const dist = Math.abs(px[1] - point.y);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestValue = val;
+            }
+          }
+        }
+        const snappedY = this.chart.convertToPixel(
+          { gridIndex: paneIndex },
+          [realIndex + this.dataIndexOffset, bestValue]
+        );
+        return {
+          x: snapPxX,
+          y: snappedY ? snappedY[1] : point.y
+        };
+      }
       // --- Drawing System ---
       addDrawing(drawing) {
         this.drawings.push(drawing);
@@ -5712,6 +5757,14 @@ ${timeString}`;
         __publicField$o(this, "icon");
         __publicField$o(this, "context");
         __publicField$o(this, "eventListeners", []);
+        // Snap indicator
+        __publicField$o(this, "_snapIndicator", null);
+        __publicField$o(this, "_snapMoveHandler", null);
+        __publicField$o(this, "_snapKeyDownHandler", null);
+        __publicField$o(this, "_snapKeyUpHandler", null);
+        __publicField$o(this, "_snapBlurHandler", null);
+        __publicField$o(this, "_snapActive", false);
+        __publicField$o(this, "_lastMouseEvent", null);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -5728,6 +5781,7 @@ ${timeString}`;
       }
       activate() {
         this.onActivate();
+        this._bindSnapIndicator();
         this.context.events.emit("plugin:activated", this.id);
       }
       /**
@@ -5736,6 +5790,7 @@ ${timeString}`;
       onActivate() {
       }
       deactivate() {
+        this._unbindSnapIndicator();
         this.onDeactivate();
         this.context.events.emit("plugin:deactivated", this.id);
       }
@@ -5745,6 +5800,7 @@ ${timeString}`;
       onDeactivate() {
       }
       destroy() {
+        this._unbindSnapIndicator();
         this.removeAllListeners();
         this.onDestroy();
       }
@@ -5791,6 +5847,110 @@ ${timeString}`;
       get marketData() {
         return this.context.getMarketData();
       }
+      /**
+       * Get the event point coordinates, snapping to nearest candle OHLC if Ctrl is held.
+       * Use this instead of [params.offsetX, params.offsetY] in click/mousemove handlers.
+       */
+      getPoint(params) {
+        const x = params.offsetX;
+        const y = params.offsetY;
+        const event = params.event;
+        const ctrlKey = event?.ctrlKey || event?.metaKey;
+        if (ctrlKey) {
+          const snapped = this.context.snapToCandle({ x, y });
+          return [snapped.x, snapped.y];
+        }
+        return [x, y];
+      }
+      // --- Snap Indicator (internal) ---
+      _bindSnapIndicator() {
+        const zr = this.context.getChart().getZr();
+        this._snapMoveHandler = (e) => {
+          this._lastMouseEvent = e;
+          const ctrlKey = e.event?.ctrlKey || e.event?.metaKey;
+          if (ctrlKey) {
+            this._showSnapAt(e.offsetX, e.offsetY);
+          } else {
+            this._hideSnap();
+          }
+        };
+        this._snapKeyDownHandler = (e) => {
+          if ((e.key === "Control" || e.key === "Meta") && this._lastMouseEvent) {
+            this._showSnapAt(this._lastMouseEvent.offsetX, this._lastMouseEvent.offsetY);
+          }
+        };
+        this._snapKeyUpHandler = (e) => {
+          if (e.key === "Control" || e.key === "Meta") {
+            this._hideSnap();
+          }
+        };
+        this._snapBlurHandler = () => {
+          this._hideSnap();
+        };
+        zr.on("mousemove", this._snapMoveHandler);
+        window.addEventListener("keydown", this._snapKeyDownHandler);
+        window.addEventListener("keyup", this._snapKeyUpHandler);
+        window.addEventListener("blur", this._snapBlurHandler);
+      }
+      _unbindSnapIndicator() {
+        if (this._snapMoveHandler) {
+          try {
+            this.context.getChart().getZr().off("mousemove", this._snapMoveHandler);
+          } catch {
+          }
+          this._snapMoveHandler = null;
+        }
+        if (this._snapKeyDownHandler) {
+          window.removeEventListener("keydown", this._snapKeyDownHandler);
+          this._snapKeyDownHandler = null;
+        }
+        if (this._snapKeyUpHandler) {
+          window.removeEventListener("keyup", this._snapKeyUpHandler);
+          this._snapKeyUpHandler = null;
+        }
+        if (this._snapBlurHandler) {
+          window.removeEventListener("blur", this._snapBlurHandler);
+          this._snapBlurHandler = null;
+        }
+        this._removeSnapGraphic();
+        this._lastMouseEvent = null;
+      }
+      _removeSnapGraphic() {
+        if (this._snapIndicator) {
+          try {
+            this.context.getChart().getZr().remove(this._snapIndicator);
+          } catch {
+          }
+          this._snapIndicator = null;
+          this._snapActive = false;
+        }
+      }
+      _showSnapAt(x, y) {
+        const snapped = this.context.snapToCandle({ x, y });
+        const zr = this.context.getChart().getZr();
+        if (!this._snapIndicator) {
+          this._snapIndicator = new echarts__namespace.graphic.Circle({
+            shape: { cx: 0, cy: 0, r: 5 },
+            style: {
+              fill: "rgba(59, 130, 246, 0.3)",
+              stroke: "#3b82f6",
+              lineWidth: 1.5
+            },
+            z: 9999,
+            silent: true
+          });
+          zr.add(this._snapIndicator);
+        }
+        this._snapIndicator.setShape({ cx: snapped.x, cy: snapped.y });
+        this._snapIndicator.show();
+        this._snapActive = true;
+      }
+      _hideSnap() {
+        if (this._snapIndicator && this._snapActive) {
+          this._snapIndicator.hide();
+          this._snapActive = false;
+        }
+      }
     }
 
     var __defProp$n = Object.defineProperty;
@@ -5833,13 +5993,13 @@ ${timeString}`;
         __publicField$n(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.context.disableTools();
             this.enableClearListeners();
@@ -5849,7 +6009,7 @@ ${timeString}`;
         __publicField$n(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
-          this.endPoint = [params.offsetX, params.offsetY];
+          this.endPoint = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -6148,13 +6308,13 @@ ${timeString}`;
         __publicField$l(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             if (this.startPoint && this.endPoint) {
               const start = this.context.coordinateConversion.pixelToData({
@@ -6186,7 +6346,7 @@ ${timeString}`;
         __publicField$l(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
-          this.endPoint = [params.offsetX, params.offsetY];
+          this.endPoint = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -6397,13 +6557,13 @@ ${timeString}`;
         __publicField$j(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.saveDrawing();
             this.removeGraphic();
@@ -6412,7 +6572,7 @@ ${timeString}`;
         });
         __publicField$j(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
           }
         });
@@ -6686,18 +6846,18 @@ ${timeString}`;
         __publicField$h(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing-baseline";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing-baseline") {
             this.state = "drawing-width";
-            this.endPoint = [params.offsetX, params.offsetY];
-            this.widthPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
+            this.widthPoint = this.getPoint(params);
             this.updateGraphic();
           } else if (this.state === "drawing-width") {
             this.state = "finished";
-            this.widthPoint = [params.offsetX, params.offsetY];
+            this.widthPoint = this.getPoint(params);
             this.updateGraphic();
             this.saveDrawing();
             this.removeGraphic();
@@ -6706,10 +6866,10 @@ ${timeString}`;
         });
         __publicField$h(this, "onMouseMove", (params) => {
           if (this.state === "drawing-baseline") {
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
           } else if (this.state === "drawing-width") {
-            this.widthPoint = [params.offsetX, params.offsetY];
+            this.widthPoint = this.getPoint(params);
             this.updateGraphic();
           }
         });
@@ -7018,13 +7178,13 @@ ${timeString}`;
         __publicField$f(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.saveDrawing();
             this.removeGraphic();
@@ -7033,7 +7193,7 @@ ${timeString}`;
         });
         __publicField$f(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
           }
         });
@@ -7334,7 +7494,7 @@ ${timeString}`;
         __publicField$d(this, "state", "idle");
         __publicField$d(this, "graphicGroup", null);
         __publicField$d(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing-trend";
             this.points = [pt, [...pt]];
@@ -7356,10 +7516,10 @@ ${timeString}`;
         });
         __publicField$d(this, "onMouseMove", (params) => {
           if (this.state === "drawing-trend") {
-            this.points[1] = [params.offsetX, params.offsetY];
+            this.points[1] = this.getPoint(params);
             this.updateGraphic();
           } else if (this.state === "drawing-retracement") {
-            this.points[2] = [params.offsetX, params.offsetY];
+            this.points[2] = this.getPoint(params);
             this.updateGraphic();
           }
         });
@@ -7652,7 +7812,7 @@ ${timeString}`;
         __publicField$b(this, "state", "idle");
         __publicField$b(this, "graphicGroup", null);
         __publicField$b(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -7675,7 +7835,7 @@ ${timeString}`;
         __publicField$b(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -7936,7 +8096,7 @@ ${timeString}`;
         __publicField$9(this, "state", "idle");
         __publicField$9(this, "graphicGroup", null);
         __publicField$9(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -7959,7 +8119,7 @@ ${timeString}`;
         __publicField$9(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -8130,7 +8290,7 @@ ${timeString}`;
         __publicField$7(this, "state", "idle");
         __publicField$7(this, "graphicGroup", null);
         __publicField$7(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -8153,7 +8313,7 @@ ${timeString}`;
         __publicField$7(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -8316,7 +8476,7 @@ ${timeString}`;
         __publicField$5(this, "state", "idle");
         __publicField$5(this, "graphicGroup", null);
         __publicField$5(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -8339,7 +8499,7 @@ ${timeString}`;
         __publicField$5(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -8529,7 +8689,7 @@ ${timeString}`;
         __publicField$3(this, "state", "idle");
         __publicField$3(this, "graphicGroup", null);
         __publicField$3(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -8552,7 +8712,7 @@ ${timeString}`;
         __publicField$3(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -8736,7 +8896,7 @@ ${timeString}`;
         __publicField$1(this, "state", "idle");
         __publicField$1(this, "graphicGroup", null);
         __publicField$1(this, "onClick", (params) => {
-          const pt = [params.offsetX, params.offsetY];
+          const pt = this.getPoint(params);
           if (this.state === "idle") {
             this.state = "drawing";
             this.points = [pt, [...pt]];
@@ -8759,7 +8919,7 @@ ${timeString}`;
         __publicField$1(this, "onMouseMove", (params) => {
           if (this.state !== "drawing" || this.points.length < 2)
             return;
-          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.points[this.points.length - 1] = this.getPoint(params);
           this.updateGraphic();
         });
       }

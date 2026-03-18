@@ -53,7 +53,7 @@ export class XABCDPatternTool extends AbstractPlugin {
     }
 
     private onClick = (params: any) => {
-        const pt = [params.offsetX, params.offsetY];
+        const pt = this.getPoint(params);
 
         if (this.state === 'idle') {
             this.state = 'drawing';
@@ -82,7 +82,7 @@ export class XABCDPatternTool extends AbstractPlugin {
     private onMouseMove = (params: any) => {
         if (this.state !== 'drawing' || this.points.length < 2) return;
         // Update the last (preview) point
-        this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+        this.points[this.points.length - 1] = this.getPoint(params);
         this.updateGraphic();
     };
 

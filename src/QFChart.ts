@@ -694,6 +694,60 @@ export class QFChart implements ChartContext {
         this.drawingRenderers.register(renderer);
     }
 
+    public snapToCandle(point: { x: number; y: number }): { x: number; y: number } {
+        // Find which pane the point is in
+        const dataCoord = this.coordinateConversion.pixelToData(point);
+        if (!dataCoord) return point;
+
+        const paneIndex = dataCoord.paneIndex || 0;
+        // Only snap on the main pane (candlestick data)
+        if (paneIndex !== 0) return point;
+
+        // Get the nearest candle by time index
+        const realIndex = Math.round(dataCoord.timeIndex);
+        if (realIndex < 0 || realIndex >= this.marketData.length) return point;
+
+        const candle = this.marketData[realIndex];
+        if (!candle) return point;
+
+        // Snap X to the exact candle center
+        const snappedX = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, candle.close],
+        );
+        if (!snappedX) return point;
+        const snapPxX = snappedX[0];
+
+        // Find closest OHLC value by Y distance
+        const ohlc = [candle.open, candle.high, candle.low, candle.close];
+        let bestValue = ohlc[0];
+        let bestDist = Infinity;
+
+        for (const val of ohlc) {
+            const px = this.chart.convertToPixel(
+                { gridIndex: paneIndex },
+                [realIndex + this.dataIndexOffset, val],
+            );
+            if (px) {
+                const dist = Math.abs(px[1] - point.y);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestValue = val;
+                }
+            }
+        }
+
+        const snappedY = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, bestValue],
+        );
+
+        return {
+            x: snapPxX,
+            y: snappedY ? snappedY[1] : point.y,
+        };
+    }
+
     // --- Drawing System ---
 
     public addDrawing(drawing: import('./types').DrawingElement): void {
