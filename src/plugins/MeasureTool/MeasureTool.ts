@@ -1,5 +1,4 @@
-import { ChartContext, PluginConfig } from '../types';
-import { AbstractPlugin } from '../components/AbstractPlugin';
+import { AbstractPlugin } from '../../components/AbstractPlugin';
 import * as echarts from 'echarts';
 
 type PluginState = 'idle' | 'drawing' | 'finished';
@@ -14,15 +13,15 @@ export class MeasureTool extends AbstractPlugin {
 
     // ZRender Elements
     private group: any = null;
-    private rect: any = null; // Measurement Box
-    private labelRect: any = null; // Label Background
-    private labelText: any = null; // Label Text
-    private lineV: any = null; // Vertical Arrow Line
-    private lineH: any = null; // Horizontal Arrow Line
-    private arrowStart: any = null; // Start Arrow
-    private arrowEnd: any = null; // End Arrow
+    private rect: any = null;
+    private labelRect: any = null;
+    private labelText: any = null;
+    private lineV: any = null;
+    private lineH: any = null;
+    private arrowStart: any = null;
+    private arrowEnd: any = null;
 
-    constructor(options: { name?: string; icon?: string }) {
+    constructor(options: { name?: string; icon?: string } = {}) {
         super({
             id: 'measure',
             name: options?.name || 'Measure',
@@ -40,16 +39,8 @@ export class MeasureTool extends AbstractPlugin {
         this.state = 'idle';
         this.chart.getZr().setCursorStyle('crosshair');
 
-        // We can use this.on() to register listeners that will be cleaned up automatically on destroy
-        // BUT we need manual control over add/remove for deactivate() logic.
-        // AbstractPlugin.on() is for lifecycle-bound listeners.
-        // Here we toggle listeners based on tool state.
-        // So we'll use ZRender direct listeners as before, but maybe cleaner.
-
         this.zr.on('click', this.onClick);
         this.zr.on('mousemove', this.onMouseMove);
-
-        // We can still use the Event Bus for internal communication if needed
     }
 
     protected onDeactivate(): void {
@@ -59,7 +50,6 @@ export class MeasureTool extends AbstractPlugin {
         this.zr.off('click', this.onClick);
         this.zr.off('mousemove', this.onMouseMove);
 
-        // Clean up clear listeners if any
         this.disableClearListeners();
 
         // @ts-ignore - state type comparison
@@ -89,17 +79,16 @@ export class MeasureTool extends AbstractPlugin {
     private onClick = (params: any) => {
         if (this.state === 'idle') {
             this.state = 'drawing';
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
         } else if (this.state === 'drawing') {
             this.state = 'finished';
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.context.disableTools();
 
-            // Enable listeners to clear the graphic on interaction
             this.enableClearListeners();
         }
     };
@@ -135,7 +124,7 @@ export class MeasureTool extends AbstractPlugin {
 
     private onMouseMove = (params: any) => {
         if (this.state !== 'drawing') return;
-        this.endPoint = [params.offsetX, params.offsetY];
+        this.endPoint = this.getPoint(params);
         this.updateGraphic();
     };
 
@@ -146,14 +135,12 @@ export class MeasureTool extends AbstractPlugin {
 
         this.group = new echarts.graphic.Group();
 
-        // 1. Rectangle (Box)
         this.rect = new echarts.graphic.Rect({
             shape: { x: 0, y: 0, width: 0, height: 0 },
             style: { fill: 'rgba(0,0,0,0)', stroke: 'transparent', lineWidth: 0 },
             z: 100,
         });
 
-        // 2. Lines (Arrows)
         this.lineV = new echarts.graphic.Line({
             shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
             style: { stroke: '#fff', lineWidth: 1, lineDash: [4, 4] },
@@ -165,7 +152,6 @@ export class MeasureTool extends AbstractPlugin {
             z: 101,
         });
 
-        // Arrows
         this.arrowStart = new echarts.graphic.Polygon({
             shape: {
                 points: [
@@ -189,7 +175,6 @@ export class MeasureTool extends AbstractPlugin {
             z: 102,
         });
 
-        // 3. Label
         this.labelRect = new echarts.graphic.Rect({
             shape: { x: 0, y: 0, width: 0, height: 0, r: 4 },
             style: {
@@ -230,7 +215,6 @@ export class MeasureTool extends AbstractPlugin {
         if (this.group) {
             this.zr.remove(this.group);
             this.group = null;
-            // ... clear refs
             this.disableClearListeners();
         }
     }
@@ -241,7 +225,6 @@ export class MeasureTool extends AbstractPlugin {
         const [x1, y1] = this.startPoint;
         const [x2, y2] = this.endPoint;
 
-        // Use Context Helper
         const p1 = this.context.coordinateConversion.pixelToData({ x: x1, y: y1 });
         const p2 = this.context.coordinateConversion.pixelToData({ x: x2, y: y2 });
 
@@ -260,7 +243,6 @@ export class MeasureTool extends AbstractPlugin {
         const color = isUp ? 'rgba(33, 150, 243, 0.2)' : 'rgba(236, 0, 0, 0.2)';
         const strokeColor = isUp ? '#2196F3' : '#ec0000';
 
-        // --- Visuals ---
         this.rect.setShape({
             x: Math.min(x1, x2),
             y: Math.min(y1, y2),
@@ -278,7 +260,6 @@ export class MeasureTool extends AbstractPlugin {
         this.lineH.setShape({ x1: x1, y1: midY, x2: x2, y2: midY });
         this.lineH.setStyle({ stroke: strokeColor });
 
-        // Arrows
         const topY = Math.min(y1, y2);
         const bottomY = Math.max(y1, y2);
 
@@ -305,8 +286,7 @@ export class MeasureTool extends AbstractPlugin {
             this.arrowEnd.setStyle({ fill: strokeColor });
         }
 
-        // Label
-        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars, ${(bars * 0).toFixed(0)}d`].join('\n');
+        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars`].join('\n');
 
         const labelW = 140;
         const labelH = 40;

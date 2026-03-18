@@ -1,5 +1,5 @@
 import * as echarts from 'echarts';
-import { OHLCV, IndicatorPlot, QFChartOptions, Indicator as IndicatorInterface, ChartContext, Plugin } from './types';
+import { OHLCV, IndicatorPlot, QFChartOptions, Indicator as IndicatorInterface, ChartContext, Plugin, DrawingRenderer } from './types';
 import { Indicator } from './components/Indicator';
 import { LayoutManager, LayoutResult, PaneBoundary } from './components/LayoutManager';
 import { SeriesBuilder } from './components/SeriesBuilder';
@@ -7,6 +7,7 @@ import { GraphicBuilder } from './components/GraphicBuilder';
 import { TooltipFormatter } from './components/TooltipFormatter';
 import { PluginManager } from './components/PluginManager';
 import { DrawingEditor } from './components/DrawingEditor';
+import { DrawingRendererRegistry } from './components/DrawingRendererRegistry';
 import { EventBus } from './utils/EventBus';
 import { AxisUtils } from './utils/AxisUtils';
 import { TableOverlayRenderer } from './components/TableOverlayRenderer';
@@ -29,6 +30,7 @@ export class QFChart implements ChartContext {
 
     // Drawing System
     private drawings: import('./types').DrawingElement[] = [];
+    private drawingRenderers: DrawingRendererRegistry = new DrawingRendererRegistry();
 
     public coordinateConversion = {
         pixelToData: (point: { x: number; y: number }) => {
@@ -117,7 +119,7 @@ export class QFChart implements ChartContext {
     constructor(container: HTMLElement, options: QFChartOptions = {}) {
         this.rootContainer = container;
         this.options = {
-            title: 'Market',
+            title: undefined,
             height: '600px',
             backgroundColor: '#1e293b',
             upColor: '#00da3c',
@@ -213,6 +215,8 @@ export class QFChart implements ChartContext {
 
         this.pluginManager = new PluginManager(this, this.toolbarContainer);
         this.drawingEditor = new DrawingEditor(this);
+
+
 
         // Bind global chart/ZRender events to the EventBus
         this.chart.on('dataZoom', (params: any) => {
@@ -507,8 +511,8 @@ export class QFChart implements ChartContext {
                 });
                 // Set cursor
                 this.chart.getZr().setCursorStyle('move');
-            } else if (info.targetName?.startsWith('point')) {
-                const pointIdx = info.targetName === 'point-start' ? 0 : 1;
+            } else if (info.targetName?.startsWith('point-')) {
+                const pointIdx = parseInt(info.targetName.split('-')[1]) || 0;
                 this.events.emit('drawing:point:hover', {
                     id: info.drawing.id,
                     pointIndex: pointIdx,
@@ -549,8 +553,8 @@ export class QFChart implements ChartContext {
 
             if (info.targetName === 'line') {
                 this.events.emit('drawing:mouseout', { id: info.drawing.id });
-            } else if (info.targetName?.startsWith('point')) {
-                const pointIdx = info.targetName === 'point-start' ? 0 : 1;
+            } else if (info.targetName?.startsWith('point-')) {
+                const pointIdx = parseInt(info.targetName.split('-')[1]) || 0;
                 this.events.emit('drawing:point:mouseout', {
                     id: info.drawing.id,
                     pointIndex: pointIdx,
@@ -573,8 +577,8 @@ export class QFChart implements ChartContext {
                     x,
                     y,
                 });
-            } else if (info.targetName?.startsWith('point')) {
-                const pointIdx = info.targetName === 'point-start' ? 0 : 1;
+            } else if (info.targetName?.startsWith('point-')) {
+                const pointIdx = parseInt(info.targetName.split('-')[1]) || 0;
                 this.events.emit('drawing:point:mousedown', {
                     id: info.drawing.id,
                     pointIndex: pointIdx,
@@ -597,8 +601,8 @@ export class QFChart implements ChartContext {
 
             if (info.targetName === 'line') {
                 this.events.emit('drawing:click', { id: info.drawing.id });
-            } else if (info.targetName?.startsWith('point')) {
-                const pointIdx = info.targetName === 'point-start' ? 0 : 1;
+            } else if (info.targetName?.startsWith('point-')) {
+                const pointIdx = parseInt(info.targetName.split('-')[1]) || 0;
                 this.events.emit('drawing:point:click', {
                     id: info.drawing.id,
                     pointIndex: pointIdx,
@@ -684,6 +688,64 @@ export class QFChart implements ChartContext {
 
     public registerPlugin(plugin: Plugin): void {
         this.pluginManager.register(plugin);
+    }
+
+    public registerDrawingRenderer(renderer: DrawingRenderer): void {
+        this.drawingRenderers.register(renderer);
+    }
+
+    public snapToCandle(point: { x: number; y: number }): { x: number; y: number } {
+        // Find which pane the point is in
+        const dataCoord = this.coordinateConversion.pixelToData(point);
+        if (!dataCoord) return point;
+
+        const paneIndex = dataCoord.paneIndex || 0;
+        // Only snap on the main pane (candlestick data)
+        if (paneIndex !== 0) return point;
+
+        // Get the nearest candle by time index
+        const realIndex = Math.round(dataCoord.timeIndex);
+        if (realIndex < 0 || realIndex >= this.marketData.length) return point;
+
+        const candle = this.marketData[realIndex];
+        if (!candle) return point;
+
+        // Snap X to the exact candle center
+        const snappedX = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, candle.close],
+        );
+        if (!snappedX) return point;
+        const snapPxX = snappedX[0];
+
+        // Find closest OHLC value by Y distance
+        const ohlc = [candle.open, candle.high, candle.low, candle.close];
+        let bestValue = ohlc[0];
+        let bestDist = Infinity;
+
+        for (const val of ohlc) {
+            const px = this.chart.convertToPixel(
+                { gridIndex: paneIndex },
+                [realIndex + this.dataIndexOffset, val],
+            );
+            if (px) {
+                const dist = Math.abs(px[1] - point.y);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestValue = val;
+                }
+            }
+        }
+
+        const snappedY = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, bestValue],
+        );
+
+        return {
+            x: snapPxX,
+            y: snappedY ? snappedY[1] : point.y,
+        };
     }
 
     // --- Drawing System ---
@@ -1049,7 +1111,7 @@ export class QFChart implements ChartContext {
             this.chart.setOption({
                 series: [
                     {
-                        name: this.options.title || 'Market',
+                        id: '__candlestick__',
                         markLine: {
                             data: [
                                 {
@@ -1593,260 +1655,34 @@ export class QFChart implements ChartContext {
                     const drawing = drawings[params.dataIndex];
                     if (!drawing) return;
 
-                    const start = drawing.points[0];
-                    const end = drawing.points[1];
+                    const renderer = this.drawingRenderers.get(drawing.type);
+                    if (!renderer) return;
 
-                    if (!start || !end) return;
-
-                    // Convert real data indices to padded space for ECharts rendering
                     const drawingOffset = this.dataIndexOffset;
-                    const p1 = api.coord([start.timeIndex + drawingOffset, start.value]);
-                    const p2 = api.coord([end.timeIndex + drawingOffset, end.value]);
+                    const pixelPoints = drawing.points.map(
+                        (p) => api.coord([p.timeIndex + drawingOffset, p.value]) as [number, number],
+                    );
 
-                    const isSelected = drawing.id === this.selectedDrawingId;
-
-                    if (drawing.type === 'line') {
-                        return {
-                            type: 'group',
-                            children: [
-                                {
-                                    type: 'line',
-                                    name: 'line',
-                                    shape: {
-                                        x1: p1[0],
-                                        y1: p1[1],
-                                        x2: p2[0],
-                                        y2: p2[1],
-                                    },
-                                    style: {
-                                        stroke: drawing.style?.color || '#3b82f6',
-                                        lineWidth: drawing.style?.lineWidth || 2,
-                                    },
-                                },
-                                {
-                                    type: 'circle',
-                                    name: 'point-start',
-                                    shape: { cx: p1[0], cy: p1[1], r: 4 },
-                                    style: {
-                                        fill: '#fff',
-                                        stroke: drawing.style?.color || '#3b82f6',
-                                        lineWidth: 1,
-                                        opacity: isSelected ? 1 : 0, // Show if selected
-                                    },
-                                },
-                                {
-                                    type: 'circle',
-                                    name: 'point-end',
-                                    shape: { cx: p2[0], cy: p2[1], r: 4 },
-                                    style: {
-                                        fill: '#fff',
-                                        stroke: drawing.style?.color || '#3b82f6',
-                                        lineWidth: 1,
-                                        opacity: isSelected ? 1 : 0, // Show if selected
-                                    },
-                                },
-                            ],
-                        };
-                    } else if (drawing.type === 'fibonacci') {
-                        const x1 = p1[0];
-                        const y1 = p1[1];
-                        const x2 = p2[0];
-                        const y2 = p2[1];
-
-                        const startX = Math.min(x1, x2);
-                        const endX = Math.max(x1, x2);
-                        const width = endX - startX;
-                        const diffY = y2 - y1;
-
-                        const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-                        const colors = ['#787b86', '#f44336', '#ff9800', '#4caf50', '#2196f3', '#00bcd4', '#787b86'];
-
-                        const children: any[] = [];
-
-                        // 1. Diagonal Line
-                        children.push({
-                            type: 'line',
-                            name: 'line', // Use 'line' name to enable dragging logic in DrawingEditor
-                            shape: { x1, y1, x2, y2 },
-                            style: {
-                                stroke: '#999',
-                                lineWidth: 1,
-                                lineDash: [4, 4],
-                            },
-                        });
-
-                        // 2. Control Points (invisible by default)
-                        children.push({
-                            type: 'circle',
-                            name: 'point-start',
-                            shape: { cx: x1, cy: y1, r: 4 },
-                            style: {
-                                fill: '#fff',
-                                stroke: drawing.style?.color || '#3b82f6',
-                                lineWidth: 1,
-                                opacity: isSelected ? 1 : 0,
-                            },
-                            z: 100, // Ensure on top
-                        });
-                        children.push({
-                            type: 'circle',
-                            name: 'point-end',
-                            shape: { cx: x2, cy: y2, r: 4 },
-                            style: {
-                                fill: '#fff',
-                                stroke: drawing.style?.color || '#3b82f6',
-                                lineWidth: 1,
-                                opacity: isSelected ? 1 : 0,
-                            },
-                            z: 100,
-                        });
-
-                        // 3. Levels and Backgrounds
-                        levels.forEach((level, index) => {
-                            const levelY = y2 - diffY * level;
-                            const color = colors[index % colors.length];
-
-                            // Horizontal Line
-                            children.push({
-                                type: 'line',
-                                name: 'fib-line', // distinct name, maybe we don't want to drag by clicking these lines? or yes? 'line' triggers drag. 'fib-line' won't unless we update logic.
-                                // The user asked for "fib levels between start and end".
-                                shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                                style: { stroke: color, lineWidth: 1 },
-                                silent: true, // Make internal lines silent so clicks pass to background/diagonal?
-                            });
-
-                            const startVal = drawing.points[0].value;
-                            const endVal = drawing.points[1].value;
-                            const valDiff = endVal - startVal;
-                            const price = endVal - valDiff * level;
-
-                            children.push({
-                                type: 'text',
-                                style: {
-                                    text: `${level} (${price.toFixed(2)})`,
-                                    x: startX + 5,
-                                    y: levelY - 10,
-                                    fill: color,
-                                    fontSize: 10,
-                                },
-                                silent: true,
-                            });
-
-                            // Background
-                            if (index < levels.length - 1) {
-                                const nextLevel = levels[index + 1];
-                                const nextY = y2 - diffY * nextLevel;
-                                const rectH = Math.abs(nextY - levelY);
-                                const rectY = Math.min(levelY, nextY);
-
-                                children.push({
-                                    type: 'rect',
-                                    shape: { x: startX, y: rectY, width, height: rectH },
-                                    style: {
-                                        fill: colors[(index + 1) % colors.length],
-                                        opacity: 0.1,
-                                    },
-                                    silent: true, // Let clicks pass through?
-                                });
-                            }
-                        });
-
-                        const backgrounds: any[] = [];
-                        const linesAndText: any[] = [];
-
-                        levels.forEach((level, index) => {
-                            const levelY = y2 - diffY * level;
-                            const color = colors[index % colors.length];
-
-                            linesAndText.push({
-                                type: 'line',
-                                shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                                style: { stroke: color, lineWidth: 1 },
-                                silent: true,
-                            });
-
-                            const startVal = drawing.points[0].value;
-                            const endVal = drawing.points[1].value;
-                            const valDiff = endVal - startVal;
-                            const price = endVal - valDiff * level;
-
-                            linesAndText.push({
-                                type: 'text',
-                                style: {
-                                    text: `${level} (${price.toFixed(2)})`,
-                                    x: startX + 5,
-                                    y: levelY - 10,
-                                    fill: color,
-                                    fontSize: 10,
-                                },
-                                silent: true,
-                            });
-
-                            if (index < levels.length - 1) {
-                                const nextLevel = levels[index + 1];
-                                const nextY = y2 - diffY * nextLevel;
-                                const rectH = Math.abs(nextY - levelY);
-                                const rectY = Math.min(levelY, nextY);
-
-                                backgrounds.push({
-                                    type: 'rect',
-                                    name: 'line', // Enable dragging by clicking background!
-                                    shape: { x: startX, y: rectY, width, height: rectH },
-                                    style: {
-                                        fill: colors[(index + 1) % colors.length],
-                                        opacity: 0.1,
-                                    },
-                                });
-                            }
-                        });
-
-                        return {
-                            type: 'group',
-                            children: [
-                                ...backgrounds,
-                                ...linesAndText,
-                                {
-                                    type: 'line',
-                                    name: 'line',
-                                    shape: { x1, y1, x2, y2 },
-                                    style: { stroke: '#999', lineWidth: 1, lineDash: [4, 4] },
-                                },
-                                {
-                                    type: 'circle',
-                                    name: 'point-start',
-                                    shape: { cx: x1, cy: y1, r: 4 },
-                                    style: {
-                                        fill: '#fff',
-                                        stroke: drawing.style?.color || '#3b82f6',
-                                        lineWidth: 1,
-                                        opacity: isSelected ? 1 : 0,
-                                    },
-                                    z: 100,
-                                },
-                                {
-                                    type: 'circle',
-                                    name: 'point-end',
-                                    shape: { cx: x2, cy: y2, r: 4 },
-                                    style: {
-                                        fill: '#fff',
-                                        stroke: drawing.style?.color || '#3b82f6',
-                                        lineWidth: 1,
-                                        opacity: isSelected ? 1 : 0,
-                                    },
-                                    z: 100,
-                                },
-                            ],
-                        };
-                    }
+                    return renderer.render({
+                        drawing,
+                        pixelPoints,
+                        isSelected: drawing.id === this.selectedDrawingId,
+                        api,
+                    });
                 },
-                data: drawings.map((d) => [
-                    d.points[0].timeIndex + this.dataIndexOffset,
-                    d.points[0].value,
-                    d.points[1].timeIndex + this.dataIndexOffset,
-                    d.points[1].value,
-                ]),
-                encode: { x: [0, 2], y: [1, 3] },
+                data: drawings.map((d) => {
+                    const row: number[] = [];
+                    d.points.forEach((p) => {
+                        row.push(p.timeIndex + this.dataIndexOffset, p.value);
+                    });
+                    return row;
+                }),
+                encode: (() => {
+                    const maxPoints = drawings.reduce((max, d) => Math.max(max, d.points.length), 0);
+                    const xDims = Array.from({ length: maxPoints }, (_, i) => i * 2);
+                    const yDims = Array.from({ length: maxPoints }, (_, i) => i * 2 + 1);
+                    return { x: xDims, y: yDims };
+                })(),
                 z: 100,
                 silent: false,
             });

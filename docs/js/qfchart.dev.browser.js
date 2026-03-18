@@ -39,21 +39,21 @@
 
     var echarts__namespace = /*#__PURE__*/_interopNamespaceDefault(echarts);
 
-    var __defProp$a = Object.defineProperty;
-    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$a = (obj, key, value) => {
-      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$w = Object.defineProperty;
+    var __defNormalProp$w = (obj, key, value) => key in obj ? __defProp$w(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$w = (obj, key, value) => {
+      __defNormalProp$w(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class Indicator {
       constructor(id, plots, paneIndex, options = {}) {
-        __publicField$a(this, "id");
-        __publicField$a(this, "plots");
-        __publicField$a(this, "paneIndex");
-        __publicField$a(this, "height");
-        __publicField$a(this, "collapsed");
-        __publicField$a(this, "titleColor");
-        __publicField$a(this, "controls");
+        __publicField$w(this, "id");
+        __publicField$w(this, "plots");
+        __publicField$w(this, "paneIndex");
+        __publicField$w(this, "height");
+        __publicField$w(this, "collapsed");
+        __publicField$w(this, "titleColor");
+        __publicField$w(this, "controls");
         this.id = id;
         this.plots = plots;
         this.paneIndex = paneIndex;
@@ -178,12 +178,19 @@
     }
 
     class LayoutManager {
-      static calculate(containerHeight, indicators, options, isMainCollapsed = false, maximizedPaneId = null, marketData) {
+      static calculate(containerHeight, indicators, options, isMainCollapsed = false, maximizedPaneId = null, marketData, mainHeightOverride) {
         let pixelToPercent = 0;
         if (containerHeight > 0) {
           pixelToPercent = 1 / containerHeight * 100;
         }
         const yAxisPaddingPercent = options.yAxisPadding !== void 0 ? options.yAxisPadding : 5;
+        const gridShow = options.grid?.show === true;
+        const gridLineColor = options.grid?.lineColor ?? "#334155";
+        const gridLineOpacity = options.grid?.lineOpacity ?? 0.5;
+        const gridBorderColor = options.grid?.borderColor ?? "#334155";
+        const gridBorderShow = options.grid?.borderShow === true;
+        const layoutLeft = options.layout?.left ?? "10%";
+        const layoutRight = options.layout?.right ?? "10%";
         const separatePaneIndices = Array.from(indicators.values()).map((ind) => ind.paneIndex).filter((idx) => idx > 0).sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index);
         const hasSeparatePane = separatePaneIndices.length > 0;
         const dzVisible = options.dataZoom?.visible ?? true;
@@ -211,17 +218,17 @@
           const dataZoom2 = [];
           const dzStart2 = options.dataZoom?.start ?? 50;
           const dzEnd2 = options.dataZoom?.end ?? 100;
-          const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
-          if (zoomOnTouch) {
-            dataZoom2.push({ type: "inside", xAxisIndex: "all", start: dzStart2, end: dzEnd2 });
+          const zoomOnTouch2 = options.dataZoom?.zoomOnTouch ?? true;
+          if (zoomOnTouch2) {
+            dataZoom2.push({ type: "inside", xAxisIndex: "all", start: dzStart2, end: dzEnd2, filterMode: "weakFilter" });
           }
           const maxPaneIndex = hasSeparatePane ? Math.max(...separatePaneIndices) : 0;
           const paneConfigs2 = [];
           for (let i = 0; i <= maxPaneIndex; i++) {
             const isTarget = i === maximizeTargetIndex;
             grid2.push({
-              left: "10%",
-              right: "10%",
+              left: layoutLeft,
+              right: layoutRight,
               top: isTarget ? "5%" : "0%",
               height: isTarget ? "90%" : "0%",
               show: isTarget,
@@ -237,10 +244,10 @@
                 color: "#94a3b8",
                 fontFamily: options.fontFamily
               },
-              axisLine: { show: isTarget, lineStyle: { color: "#334155" } },
+              axisLine: { show: isTarget && gridBorderShow, lineStyle: { color: gridBorderColor } },
               splitLine: {
-                show: isTarget,
-                lineStyle: { color: "#334155", opacity: 0.5 }
+                show: isTarget && gridShow,
+                lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
               }
             });
             let yMin;
@@ -272,8 +279,8 @@
                 }
               },
               splitLine: {
-                show: isTarget,
-                lineStyle: { color: "#334155", opacity: 0.5 }
+                show: isTarget && gridShow,
+                lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
               }
             });
             if (i > 0) {
@@ -345,7 +352,9 @@
           const totalBottomSpace = totalIndicatorHeight + totalGaps;
           const totalAvailable = chartAreaBottom - mainPaneTop;
           mainHeightVal = totalAvailable - totalBottomSpace;
-          if (isMainCollapsed) {
+          if (mainHeightOverride !== void 0 && mainHeightOverride > 0 && !isMainCollapsed) {
+            mainHeightVal = mainHeightOverride;
+          } else if (isMainCollapsed) {
             mainHeightVal = 3;
           } else {
             if (mainHeightVal < 20) {
@@ -372,10 +381,25 @@
             mainHeightVal = 3;
           }
         }
+        const paneBoundaries = [];
+        if (paneConfigs.length > 0) {
+          paneBoundaries.push({
+            yPercent: mainPaneTop + mainHeightVal + gapPercent / 2,
+            aboveId: "main",
+            belowId: paneConfigs[0].indicatorId || ""
+          });
+          for (let i = 0; i < paneConfigs.length - 1; i++) {
+            paneBoundaries.push({
+              yPercent: paneConfigs[i].top + paneConfigs[i].height + gapPercent / 2,
+              aboveId: paneConfigs[i].indicatorId || "",
+              belowId: paneConfigs[i + 1].indicatorId || ""
+            });
+          }
+        }
         const grid = [];
         grid.push({
-          left: "10%",
-          right: "10%",
+          left: layoutLeft,
+          right: layoutRight,
           top: mainPaneTop + "%",
           height: mainHeightVal + "%",
           containLabel: false
@@ -383,8 +407,8 @@
         });
         paneConfigs.forEach((pane) => {
           grid.push({
-            left: "10%",
-            right: "10%",
+            left: layoutLeft,
+            right: layoutRight,
             top: pane.top + "%",
             height: pane.height + "%",
             containLabel: false
@@ -402,12 +426,12 @@
           // boundaryGap will be set in QFChart.ts based on padding option
           axisLine: {
             onZero: false,
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155" }
+            show: !isMainCollapsed && gridBorderShow,
+            lineStyle: { color: gridBorderColor }
           },
           splitLine: {
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155", opacity: 0.5 }
+            show: !isMainCollapsed && gridShow,
+            lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
           },
           axisLabel: {
             show: !isMainCollapsed,
@@ -440,7 +464,7 @@
             // Shared data
             axisLabel: { show: false },
             // Hide labels on indicator panes
-            axisLine: { show: !pane.isCollapsed, lineStyle: { color: "#334155" } },
+            axisLine: { show: !pane.isCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } },
             axisTick: { show: false },
             splitLine: { show: false },
             axisPointer: {
@@ -472,10 +496,10 @@
           max: mainYAxisMax,
           gridIndex: 0,
           splitLine: {
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155", opacity: 0.5 }
+            show: !isMainCollapsed && gridShow,
+            lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
           },
-          axisLine: { show: !isMainCollapsed, lineStyle: { color: "#334155" } },
+          axisLine: { show: !isMainCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } },
           axisLabel: {
             show: !isMainCollapsed,
             color: "#94a3b8",
@@ -503,7 +527,7 @@
               Object.entries(indicator.plots).forEach(([plotName, plot]) => {
                 const plotKey = `${id}::${plotName}`;
                 const visualOnlyStyles = ["background", "barcolor", "char"];
-                const isShapeWithPriceLocation = plot.options.style === "shape" && (plot.options.location === "abovebar" || plot.options.location === "belowbar");
+                const isShapeWithPriceLocation = plot.options.style === "shape" && (plot.options.location === "abovebar" || plot.options.location === "AboveBar" || plot.options.location === "belowbar" || plot.options.location === "BelowBar");
                 if (visualOnlyStyles.includes(plot.options.style)) {
                   if (!overlayYAxisMap.has(plotKey)) {
                     overlayYAxisMap.set(plotKey, nextYAxisIndex);
@@ -585,8 +609,8 @@
             max: AxisUtils.createMaxFunction(yAxisPaddingPercent),
             gridIndex: i + 1,
             splitLine: {
-              show: !pane.isCollapsed,
-              lineStyle: { color: "#334155", opacity: 0.3 }
+              show: !pane.isCollapsed && gridShow,
+              lineStyle: { color: gridLineColor, opacity: gridLineOpacity * 0.6 }
             },
             axisLabel: {
               show: !pane.isCollapsed,
@@ -601,20 +625,22 @@
                 return AxisUtils.formatValue(value, decimals);
               }
             },
-            axisLine: { show: !pane.isCollapsed, lineStyle: { color: "#334155" } }
+            axisLine: { show: !pane.isCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } }
           });
         });
         const dataZoom = [];
+        const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
+        const pannable = options.dataZoom?.pannable ?? true;
+        if (zoomOnTouch && pannable) {
+          dataZoom.push({
+            type: "inside",
+            xAxisIndex: allXAxisIndices,
+            start: dzStart,
+            end: dzEnd,
+            filterMode: "weakFilter"
+          });
+        }
         if (dzVisible) {
-          const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
-          if (zoomOnTouch) {
-            dataZoom.push({
-              type: "inside",
-              xAxisIndex: allXAxisIndices,
-              start: dzStart,
-              end: dzEnd
-            });
-          }
           if (dzPosition === "top") {
             dataZoom.push({
               type: "slider",
@@ -625,7 +651,8 @@
               end: dzEnd,
               borderColor: "#334155",
               textStyle: { color: "#cbd5e1" },
-              brushSelect: false
+              brushSelect: false,
+              filterMode: "weakFilter"
             });
           } else {
             dataZoom.push({
@@ -637,7 +664,8 @@
               end: dzEnd,
               borderColor: "#334155",
               textStyle: { color: "#cbd5e1" },
-              brushSelect: false
+              brushSelect: false,
+              filterMode: "weakFilter"
             });
           }
         }
@@ -650,6 +678,7 @@
           mainPaneHeight: mainHeightVal,
           mainPaneTop,
           pixelToPercent,
+          paneBoundaries,
           overlayYAxisMap,
           separatePaneYAxisOffset
         };
@@ -663,7 +692,8 @@
           paneLayout: [],
           mainPaneHeight: 0,
           mainPaneTop: 0,
-          pixelToPercent: 0
+          pixelToPercent: 0,
+          paneBoundaries: []
         };
       }
     }
@@ -748,16 +778,55 @@
       render(context) {
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray, plotOptions } = context;
         const defaultColor = "#2962ff";
+        const histbase = plotOptions.histbase ?? 0;
+        const isColumns = plotOptions.style === "columns";
+        const linewidth = plotOptions.linewidth ?? 1;
+        const customData = dataArray.map((val, i) => {
+          if (val === null || val === void 0 || typeof val === "number" && isNaN(val))
+            return null;
+          return [i, val, colorArray[i] || plotOptions.color || defaultColor];
+        });
         return {
           name: seriesName,
-          type: "bar",
+          type: "custom",
           xAxisIndex,
           yAxisIndex,
-          data: dataArray.map((val, i) => ({
-            value: val,
-            itemStyle: colorArray[i] ? { color: colorArray[i] } : void 0
-          })),
-          itemStyle: { color: plotOptions.color || defaultColor }
+          renderItem: (params, api) => {
+            const idx = api.value(0);
+            const value = api.value(1);
+            const color = api.value(2);
+            if (value === null || value === void 0 || isNaN(value)) {
+              return null;
+            }
+            const basePos = api.coord([idx, histbase]);
+            const valuePos = api.coord([idx, value]);
+            const candleWidth = api.size([1, 0])[0];
+            let barWidth;
+            if (isColumns) {
+              barWidth = candleWidth * 0.6;
+            } else {
+              barWidth = Math.max(1, linewidth);
+            }
+            const x = basePos[0];
+            const yBase = basePos[1];
+            const yValue = valuePos[1];
+            const top = Math.min(yBase, yValue);
+            const height = Math.abs(yValue - yBase);
+            return {
+              type: "rect",
+              shape: {
+                x: x - barWidth / 2,
+                y: top,
+                width: barWidth,
+                height: height || 1
+                // Minimum 1px for zero-height bars
+              },
+              style: {
+                fill: color
+              }
+            };
+          },
+          data: customData.filter((d) => d !== null)
         };
       }
     }
@@ -840,6 +909,7 @@
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray, optionsArray, plotOptions } = context;
         const defaultColor = "#2962ff";
         const isCandle = plotOptions.style === "candle";
+        const colorLookup = [];
         const ohlcData = dataArray.map((val, i) => {
           if (val === null || !Array.isArray(val) || val.length !== 4)
             return null;
@@ -848,7 +918,8 @@
           const color = pointOpts.color || colorArray[i] || plotOptions.color || defaultColor;
           const wickColor = pointOpts.wickcolor || plotOptions.wickcolor || color;
           const borderColor = pointOpts.bordercolor || plotOptions.bordercolor || wickColor;
-          return [i, open, close, low, high, color, wickColor, borderColor];
+          colorLookup[i] = { color, wickColor, borderColor };
+          return [i, open, close, low, high];
         }).filter((item) => item !== null);
         return {
           name: seriesName,
@@ -861,12 +932,13 @@
             const closeValue = api.value(2);
             const lowValue = api.value(3);
             const highValue = api.value(4);
-            const color = api.value(5);
-            const wickColor = api.value(6);
-            const borderColor = api.value(7);
             if (isNaN(openValue) || isNaN(closeValue) || isNaN(lowValue) || isNaN(highValue)) {
               return null;
             }
+            const colors = colorLookup[xValue] || { color: defaultColor, wickColor: defaultColor, borderColor: defaultColor };
+            const color = colors.color;
+            const wickColor = colors.wickColor;
+            const borderColor = colors.borderColor;
             const xPos = api.coord([xValue, 0])[0];
             const openPos = api.coord([xValue, openValue])[1];
             const closePos = api.coord([xValue, closeValue])[1];
@@ -986,28 +1058,46 @@
       static getShapeSymbol(shape) {
         switch (shape) {
           case "arrowdown":
+          case "shape_arrow_down":
             return "path://M12 24l-12-12h8v-12h8v12h8z";
           case "arrowup":
+          case "shape_arrow_up":
             return "path://M12 0l12 12h-8v12h-8v-12h-8z";
           case "circle":
+          case "shape_circle":
             return "circle";
           case "cross":
+          case "shape_cross":
             return "path://M11 2h2v9h9v2h-9v9h-2v-9h-9v-2h9z";
           case "diamond":
+          case "shape_diamond":
             return "diamond";
           case "flag":
+          case "shape_flag":
             return "path://M6 2v20h2v-8h12l-2-6 2-6h-12z";
           case "labeldown":
-            return "path://M4 2h16a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-6l-2 4l-2 -4h-6a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2z";
+          case "shape_label_down":
+            return "path://M2 1h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-8l-2 3-2-3h-8a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1z";
+          case "labelleft":
+          case "shape_label_left":
+            return "path://M0 10l3-3v-5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-18a1 1 0 0 1-1-1v-5z";
+          case "labelright":
+          case "shape_label_right":
+            return "path://M24 10l-3-3v-5a1 1 0 0 0-1-1h-18a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-5z";
           case "labelup":
-            return "path://M12 2l2 4h6a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h6z";
+          case "shape_label_up":
+            return "path://M12 1l2 3h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-20a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1h8z";
           case "square":
+          case "shape_square":
             return "rect";
           case "triangledown":
+          case "shape_triangle_down":
             return "path://M12 21l-10-18h20z";
           case "triangleup":
+          case "shape_triangle_up":
             return "triangle";
           case "xcross":
+          case "shape_xcross":
             return "path://M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
           default:
             return "circle";
@@ -1053,16 +1143,21 @@
       static getLabelConfig(shape, location) {
         switch (location) {
           case "abovebar":
+          case "AboveBar":
             return { position: "top", distance: 5 };
           case "belowbar":
+          case "BelowBar":
             return { position: "bottom", distance: 5 };
           case "top":
+          case "Top":
             return { position: "bottom", distance: 5 };
           case "bottom":
+          case "Bottom":
             return { position: "top", distance: 5 };
           case "absolute":
+          case "Absolute":
           default:
-            if (shape === "labelup" || shape === "labeldown") {
+            if (shape === "labelup" || shape === "labeldown" || shape === "shape_label_up" || shape === "shape_label_down") {
               return { position: "inside", distance: 0 };
             }
             return { position: "top", distance: 5 };
@@ -1078,7 +1173,7 @@
           const pointOpts = optionsArray[i] || {};
           const globalOpts = plotOptions;
           const location = pointOpts.location || globalOpts.location || "absolute";
-          if (location !== "absolute" && !val) {
+          if (location !== "absolute" && location !== "Absolute" && !val) {
             return null;
           }
           if (val === null || val === void 0) {
@@ -1093,20 +1188,20 @@
           const height = pointOpts.height || globalOpts.height;
           let yValue = val;
           let symbolOffset = [0, 0];
-          if (location === "abovebar") {
+          if (location === "abovebar" || location === "AboveBar" || location === "ab") {
             if (candlestickData && candlestickData[i]) {
               yValue = candlestickData[i].high;
             }
             symbolOffset = [0, "-150%"];
-          } else if (location === "belowbar") {
+          } else if (location === "belowbar" || location === "BelowBar" || location === "bl") {
             if (candlestickData && candlestickData[i]) {
               yValue = candlestickData[i].low;
             }
             symbolOffset = [0, "150%"];
-          } else if (location === "top") {
+          } else if (location === "top" || location === "Top") {
             yValue = val;
             symbolOffset = [0, 0];
-          } else if (location === "bottom") {
+          } else if (location === "bottom" || location === "Bottom") {
             yValue = val;
             symbolOffset = [0, 0];
           }
@@ -1153,9 +1248,75 @@
       }
     }
 
+    class ColorUtils {
+      /**
+       * Parse color string and extract opacity
+       * Supports: hex (#RRGGBB, #RRGGBBAA), named colors (green, red), rgba(r,g,b,a), rgb(r,g,b)
+       */
+      static parseColor(colorStr) {
+        if (!colorStr || typeof colorStr !== "string") {
+          return { color: "#888888", opacity: 0.2 };
+        }
+        const rgbaMatch = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const r = rgbaMatch[1];
+          const g = rgbaMatch[2];
+          const b = rgbaMatch[3];
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return {
+            color: `rgb(${r},${g},${b})`,
+            opacity: a
+          };
+        }
+        const hex8Match = colorStr.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hex8Match) {
+          const r = parseInt(hex8Match[1], 16);
+          const g = parseInt(hex8Match[2], 16);
+          const b = parseInt(hex8Match[3], 16);
+          const a = parseInt(hex8Match[4], 16) / 255;
+          return {
+            color: `rgb(${r},${g},${b})`,
+            opacity: a
+          };
+        }
+        return {
+          color: colorStr,
+          opacity: 0.3
+        };
+      }
+      /**
+       * Convert a parsed color + opacity to an rgba string.
+       */
+      static toRgba(color, opacity) {
+        const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+          return `rgba(${rgbMatch[1]},${rgbMatch[2]},${rgbMatch[3]},${opacity})`;
+        }
+        const hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hexMatch) {
+          const r = parseInt(hexMatch[1], 16);
+          const g = parseInt(hexMatch[2], 16);
+          const b = parseInt(hexMatch[3], 16);
+          return `rgba(${r},${g},${b},${opacity})`;
+        }
+        const hex8Match = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hex8Match) {
+          const r = parseInt(hex8Match[1], 16);
+          const g = parseInt(hex8Match[2], 16);
+          const b = parseInt(hex8Match[3], 16);
+          return `rgba(${r},${g},${b},${opacity})`;
+        }
+        return color;
+      }
+    }
+
     class BackgroundRenderer {
       render(context) {
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray } = context;
+        const parsedColors = [];
+        for (let i = 0; i < colorArray.length; i++) {
+          parsedColors[i] = colorArray[i] ? ColorUtils.parseColor(colorArray[i]) : { color: "", opacity: 0 };
+        }
         return {
           name: seriesName,
           type: "custom",
@@ -1175,6 +1336,9 @@
             const val = api.value(1);
             if (!barColor || val === null || val === void 0 || isNaN(val))
               return;
+            const parsed = parsedColors[params.dataIndex];
+            if (!parsed || parsed.opacity <= 0)
+              return;
             return {
               type: "rect",
               shape: {
@@ -1184,8 +1348,8 @@
                 height: sys.height
               },
               style: {
-                fill: barColor,
-                opacity: 0.3
+                fill: parsed.color,
+                opacity: parsed.opacity
               },
               silent: true
             };
@@ -1197,36 +1361,9 @@
       }
     }
 
-    class ColorUtils {
-      /**
-       * Parse color string and extract opacity
-       * Supports: hex (#RRGGBB), named colors (green, red), rgba(r,g,b,a), rgb(r,g,b)
-       */
-      static parseColor(colorStr) {
-        if (!colorStr) {
-          return { color: "#888888", opacity: 0.2 };
-        }
-        const rgbaMatch = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-        if (rgbaMatch) {
-          const r = rgbaMatch[1];
-          const g = rgbaMatch[2];
-          const b = rgbaMatch[3];
-          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
-          return {
-            color: `rgb(${r},${g},${b})`,
-            opacity: a
-          };
-        }
-        return {
-          color: colorStr,
-          opacity: 0.3
-        };
-      }
-    }
-
     class FillRenderer {
       render(context) {
-        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName, optionsArray } = context;
         const totalDataLength = context.dataArray.length;
         const plot1Key = plotOptions.plot1 ? `${indicatorId}::${plotOptions.plot1}` : null;
         const plot2Key = plotOptions.plot2 ? `${indicatorId}::${plotOptions.plot2}` : null;
@@ -1240,7 +1377,33 @@
           console.warn(`Fill plot "${plotName}" references non-existent plots: ${plotOptions.plot1}, ${plotOptions.plot2}`);
           return null;
         }
-        const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(plotOptions.color || "rgba(128, 128, 128, 0.2)");
+        const isGradient = plotOptions.gradient === true;
+        if (isGradient) {
+          return this.renderGradientFill(
+            seriesName,
+            xAxisIndex,
+            yAxisIndex,
+            plot1Data,
+            plot2Data,
+            totalDataLength,
+            optionsArray,
+            plotOptions
+          );
+        }
+        const { color: defaultFillColor, opacity: defaultFillOpacity } = ColorUtils.parseColor(plotOptions.color || "rgba(128, 128, 128, 0.2)");
+        const hasPerBarColor = optionsArray?.some((o) => o && o.color !== void 0);
+        let barColors = null;
+        if (hasPerBarColor) {
+          barColors = [];
+          for (let i = 0; i < totalDataLength; i++) {
+            const opts = optionsArray?.[i];
+            if (opts && opts.color !== void 0) {
+              barColors[i] = ColorUtils.parseColor(opts.color);
+            } else {
+              barColors[i] = { color: defaultFillColor, opacity: defaultFillOpacity };
+            }
+          }
+        }
         const fillDataWithPrev = [];
         for (let i = 0; i < totalDataLength; i++) {
           const y1 = plot1Data[i];
@@ -1254,8 +1417,142 @@
           type: "custom",
           xAxisIndex,
           yAxisIndex,
-          z: -5,
-          // Render behind lines but above background
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
+          renderItem: (params, api) => {
+            const index = params.dataIndex;
+            if (index === 0)
+              return null;
+            const y1 = api.value(1);
+            const y2 = api.value(2);
+            const prevY1 = api.value(3);
+            const prevY2 = api.value(4);
+            if (y1 === null || y2 === null || prevY1 === null || prevY2 === null || isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)) {
+              return null;
+            }
+            const fc = barColors ? barColors[index] : null;
+            const fillOpacity = fc ? fc.opacity : defaultFillOpacity;
+            if (fillOpacity < 0.01)
+              return null;
+            const p1Prev = api.coord([index - 1, prevY1]);
+            const p1Curr = api.coord([index, y1]);
+            const p2Curr = api.coord([index, y2]);
+            const p2Prev = api.coord([index - 1, prevY2]);
+            return {
+              type: "polygon",
+              shape: {
+                points: [p1Prev, p1Curr, p2Curr, p2Prev]
+              },
+              style: {
+                fill: fc ? fc.color : defaultFillColor,
+                opacity: fillOpacity
+              },
+              silent: true
+            };
+          },
+          data: fillDataWithPrev,
+          silent: true
+        };
+      }
+      /**
+       * Batch-render multiple fill bands as a single ECharts custom series.
+       * Instead of N separate series (one per fill), this creates ONE series
+       * where each renderItem call draws all fill bands as a group of children.
+       *
+       * Performance: reduces series count from N to 1, eliminates per-series
+       * ECharts overhead, and enables viewport culling via clip + encode.
+       */
+      renderBatched(seriesName, xAxisIndex, yAxisIndex, totalDataLength, fills) {
+        const data = Array.from({ length: totalDataLength }, (_, i) => [i]);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
+          renderItem: (params, api) => {
+            const index = params.dataIndex;
+            if (index === 0)
+              return null;
+            const children = [];
+            for (let f = 0; f < fills.length; f++) {
+              const fill = fills[f];
+              const y1 = fill.plot1Data[index];
+              const y2 = fill.plot2Data[index];
+              const prevY1 = fill.plot1Data[index - 1];
+              const prevY2 = fill.plot2Data[index - 1];
+              if (y1 == null || y2 == null || prevY1 == null || prevY2 == null || isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)) {
+                continue;
+              }
+              const fc = fill.barColors[index];
+              if (!fc || fc.opacity < 0.01)
+                continue;
+              const p1Prev = api.coord([index - 1, prevY1]);
+              const p1Curr = api.coord([index, y1]);
+              const p2Curr = api.coord([index, y2]);
+              const p2Prev = api.coord([index - 1, prevY2]);
+              children.push({
+                type: "polygon",
+                shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
+                style: { fill: fc.color, opacity: fc.opacity },
+                silent: true
+              });
+            }
+            return children.length > 0 ? { type: "group", children, silent: true } : null;
+          },
+          data,
+          silent: true
+        };
+      }
+      /**
+       * Render a gradient fill between two plots.
+       * Uses a vertical linear gradient from top_color (at the upper boundary)
+       * to bottom_color (at the lower boundary) for each polygon segment.
+       */
+      renderGradientFill(seriesName, xAxisIndex, yAxisIndex, plot1Data, plot2Data, totalDataLength, optionsArray, plotOptions) {
+        const gradientColors = [];
+        for (let i = 0; i < totalDataLength; i++) {
+          const opts = optionsArray?.[i];
+          if (opts && opts.top_color !== void 0) {
+            const top = ColorUtils.parseColor(opts.top_color);
+            const bottom = ColorUtils.parseColor(opts.bottom_color);
+            gradientColors[i] = {
+              topColor: top.color,
+              topOpacity: top.opacity,
+              bottomColor: bottom.color,
+              bottomOpacity: bottom.opacity
+            };
+          } else {
+            gradientColors[i] = {
+              topColor: "rgba(128,128,128,0.2)",
+              topOpacity: 0.2,
+              bottomColor: "rgba(128,128,128,0.2)",
+              bottomOpacity: 0.2
+            };
+          }
+        }
+        const fillDataWithPrev = [];
+        for (let i = 0; i < totalDataLength; i++) {
+          const y1 = plot1Data[i];
+          const y2 = plot2Data[i];
+          const prevY1 = i > 0 ? plot1Data[i - 1] : null;
+          const prevY2 = i > 0 ? plot2Data[i - 1] : null;
+          fillDataWithPrev.push([i, y1, y2, prevY1, prevY2]);
+        }
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
           renderItem: (params, api) => {
             const index = params.dataIndex;
             if (index === 0)
@@ -1271,36 +1568,955 @@
             const p1Curr = api.coord([index, y1]);
             const p2Curr = api.coord([index, y2]);
             const p2Prev = api.coord([index - 1, prevY2]);
+            const gc = gradientColors[index] || gradientColors[index - 1];
+            if (!gc)
+              return null;
+            if (gc.topOpacity < 0.01 && gc.bottomOpacity < 0.01)
+              return null;
+            const topRgba = ColorUtils.toRgba(gc.topColor, gc.topOpacity);
+            const bottomRgba = ColorUtils.toRgba(gc.bottomColor, gc.bottomOpacity);
+            const plot1IsAbove = y1 >= y2;
             return {
               type: "polygon",
               shape: {
-                points: [
-                  p1Prev,
-                  // Top-left
-                  p1Curr,
-                  // Top-right
-                  p2Curr,
-                  // Bottom-right
-                  p2Prev
-                  // Bottom-left
-                ]
+                points: [p1Prev, p1Curr, p2Curr, p2Prev]
               },
               style: {
-                fill: fillColor,
-                opacity: fillOpacity
+                fill: {
+                  type: "linear",
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  // vertical gradient
+                  colorStops: [
+                    { offset: 0, color: plot1IsAbove ? topRgba : bottomRgba },
+                    { offset: 1, color: plot1IsAbove ? bottomRgba : topRgba }
+                  ]
+                }
               },
               silent: true
             };
           },
-          data: fillDataWithPrev
+          data: fillDataWithPrev,
+          silent: true
         };
       }
     }
 
-    var __defProp$9 = Object.defineProperty;
-    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$9 = (obj, key, value) => {
-      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
+    class LabelRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, candlestickData, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const labelObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const lbl of items) {
+            if (lbl && typeof lbl === "object" && !lbl._deleted) {
+              labelObjects.push(lbl);
+            }
+          }
+        }
+        const labelData = labelObjects.map((lbl) => {
+          const resolve = (v) => typeof v === "function" ? v() : v;
+          const text = resolve(lbl.text) || "";
+          const rawColor = resolve(lbl.color);
+          const color = rawColor != null && rawColor !== "" ? rawColor : "transparent";
+          const textcolor = resolve(lbl.textcolor) || "#ffffff";
+          const yloc = resolve(lbl.yloc) || "price";
+          const styleRaw = resolve(lbl.style) || "style_label_down";
+          const size = resolve(lbl.size) || "normal";
+          const textalign = resolve(lbl.textalign) || "align_center";
+          const tooltip = resolve(lbl.tooltip) || "";
+          const shape = this.styleToShape(styleRaw);
+          const xPos = lbl.xloc === "bar_index" || lbl.xloc === "bi" ? lbl.x + offset : lbl.x;
+          let yValue = lbl.y;
+          let symbolOffset = [0, 0];
+          if (yloc === "abovebar" || yloc === "AboveBar" || yloc === "ab") {
+            if (candlestickData && candlestickData[xPos]) {
+              yValue = candlestickData[xPos].high;
+            }
+            symbolOffset = [0, "-150%"];
+          } else if (yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl") {
+            if (candlestickData && candlestickData[xPos]) {
+              yValue = candlestickData[xPos].low;
+            }
+            symbolOffset = [0, "150%"];
+          }
+          const symbol = ShapeUtils.getShapeSymbol(shape);
+          const symbolSize = ShapeUtils.getShapeSize(size);
+          const fontSize = this.getSizePx(size);
+          let finalSize;
+          const isBubble = shape === "labeldown" || shape === "shape_label_down" || shape === "labelup" || shape === "shape_label_up" || shape === "labelleft" || shape === "labelright";
+          let labelTextOffset = [0, 0];
+          if (isBubble) {
+            const textWidth = text.length * fontSize * 0.65;
+            const minWidth = fontSize * 2.5;
+            const bubbleWidth = Math.max(minWidth, textWidth + fontSize * 1.6);
+            const bubbleHeight = fontSize * 2.8;
+            const pointerRatio = 3 / 24;
+            if (shape === "labelleft" || shape === "labelright") {
+              const totalWidth = bubbleWidth / (1 - pointerRatio);
+              finalSize = [totalWidth, bubbleHeight];
+              const xOff = typeof symbolOffset[0] === "string" ? 0 : symbolOffset[0];
+              if (shape === "labelleft") {
+                symbolOffset = [xOff + totalWidth * 0.42, symbolOffset[1]];
+                labelTextOffset = [totalWidth * pointerRatio * 0.5, 0];
+              } else {
+                symbolOffset = [xOff - totalWidth * 0.42, symbolOffset[1]];
+                labelTextOffset = [-totalWidth * pointerRatio * 0.5, 0];
+              }
+            } else {
+              const totalHeight = bubbleHeight / (1 - pointerRatio);
+              finalSize = [bubbleWidth, totalHeight];
+              if (shape === "labeldown") {
+                symbolOffset = [symbolOffset[0], typeof symbolOffset[1] === "string" ? symbolOffset[1] : symbolOffset[1] - totalHeight * 0.42];
+                labelTextOffset = [0, -totalHeight * pointerRatio * 0.5];
+              } else {
+                symbolOffset = [symbolOffset[0], typeof symbolOffset[1] === "string" ? symbolOffset[1] : symbolOffset[1] + totalHeight * 0.42];
+                labelTextOffset = [0, totalHeight * pointerRatio * 0.5];
+              }
+            }
+          } else if (shape === "none") {
+            finalSize = 0;
+          } else {
+            if (Array.isArray(symbolSize)) {
+              finalSize = [symbolSize[0] * 1.5, symbolSize[1] * 1.5];
+            } else {
+              finalSize = symbolSize * 1.5;
+            }
+          }
+          const labelPosition = this.getLabelPosition(styleRaw, yloc);
+          const isInsideLabel = labelPosition === "inside" || labelPosition.startsWith("inside");
+          const item = {
+            value: [xPos, yValue],
+            symbol,
+            symbolSize: finalSize,
+            symbolOffset,
+            itemStyle: {
+              color
+            },
+            label: {
+              show: !!text,
+              position: labelPosition,
+              distance: isInsideLabel ? 0 : 5,
+              offset: labelTextOffset,
+              formatter: text,
+              color: textcolor,
+              fontSize,
+              fontWeight: "bold",
+              align: isInsideLabel ? "center" : textalign === "align_left" || textalign === "left" ? "left" : textalign === "align_right" || textalign === "right" ? "right" : "center",
+              verticalAlign: "middle",
+              padding: [2, 6]
+            }
+          };
+          if (tooltip) {
+            item._tooltipText = tooltip;
+            item.emphasis = {
+              scale: false,
+              itemStyle: { color },
+              label: {
+                show: item.label.show,
+                color: textcolor,
+                fontSize,
+                fontWeight: "bold"
+              }
+            };
+          } else {
+            item.emphasis = { disabled: true };
+          }
+          return item;
+        }).filter((item) => item !== null);
+        return {
+          name: seriesName,
+          type: "scatter",
+          xAxisIndex,
+          yAxisIndex,
+          data: labelData,
+          z: 20,
+          // Per-item emphasis: disabled for labels without tooltips,
+          // scale:false for labels with tooltips (allows hover for custom tooltip).
+          animation: false,
+          // Prevent labels disappearing on zoom
+          clip: false
+          // Keep labels visible when partially outside viewport
+        };
+      }
+      styleToShape(style) {
+        const s = style.startsWith("style_") ? style.substring(6) : style;
+        switch (s) {
+          case "label_down":
+            return "labeldown";
+          case "label_up":
+            return "labelup";
+          case "label_left":
+            return "labelleft";
+          case "label_right":
+            return "labelright";
+          case "label_lower_left":
+            return "labeldown";
+          case "label_lower_right":
+            return "labeldown";
+          case "label_upper_left":
+            return "labelup";
+          case "label_upper_right":
+            return "labelup";
+          case "label_center":
+            return "labeldown";
+          case "circle":
+            return "circle";
+          case "square":
+            return "square";
+          case "diamond":
+            return "diamond";
+          case "flag":
+            return "flag";
+          case "arrowup":
+            return "arrowup";
+          case "arrowdown":
+            return "arrowdown";
+          case "cross":
+            return "cross";
+          case "xcross":
+            return "xcross";
+          case "triangleup":
+            return "triangleup";
+          case "triangledown":
+            return "triangledown";
+          case "text_outline":
+            return "none";
+          case "none":
+            return "none";
+          default:
+            return "labeldown";
+        }
+      }
+      getLabelPosition(style, yloc) {
+        const s = style.startsWith("style_") ? style.substring(6) : style;
+        switch (s) {
+          case "label_down":
+          case "label_up":
+          case "label_left":
+          case "label_right":
+          case "label_lower_left":
+          case "label_lower_right":
+          case "label_upper_left":
+          case "label_upper_right":
+          case "label_center":
+            return "inside";
+          case "text_outline":
+          case "none":
+            return yloc === "abovebar" || yloc === "AboveBar" || yloc === "ab" ? "top" : yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl" ? "bottom" : "top";
+          default:
+            return yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl" ? "bottom" : "top";
+        }
+      }
+      getSizePx(size) {
+        switch (size) {
+          case "tiny":
+            return 8;
+          case "small":
+            return 9;
+          case "normal":
+          case "auto":
+            return 10;
+          case "large":
+            return 12;
+          case "huge":
+            return 14;
+          default:
+            return 10;
+        }
+      }
+    }
+
+    class DrawingLineRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const defaultColor = "#2962ff";
+        const lineObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const ln of items) {
+            if (ln && typeof ln === "object" && !ln._deleted) {
+              lineObjects.push(ln);
+            }
+          }
+        }
+        if (lineObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const ln of lineObjects) {
+              if (ln._deleted)
+                continue;
+              const xOff = ln.xloc === "bar_index" || ln.xloc === "bi" ? offset : 0;
+              let p1 = api.coord([ln.x1 + xOff, ln.y1]);
+              let p2 = api.coord([ln.x2 + xOff, ln.y2]);
+              const extend = ln.extend || "none";
+              if (extend !== "none" && extend !== "n") {
+                const cs = params.coordSys;
+                [p1, p2] = this.extendLine(p1, p2, extend, cs.x, cs.x + cs.width, cs.y, cs.y + cs.height);
+              }
+              const color = ln.color || defaultColor;
+              const lineWidth = ln.width || 1;
+              children.push({
+                type: "line",
+                shape: { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] },
+                style: {
+                  fill: "none",
+                  stroke: color,
+                  lineWidth,
+                  lineDash: this.getDashPattern(ln.style)
+                }
+              });
+              const style = ln.style || "style_solid";
+              if (style === "style_arrow_left" || style === "style_arrow_both") {
+                const arrow = this.arrowHead(p2, p1, lineWidth, color);
+                if (arrow)
+                  children.push(arrow);
+              }
+              if (style === "style_arrow_right" || style === "style_arrow_both") {
+                const arrow = this.arrowHead(p1, p2, lineWidth, color);
+                if (arrow)
+                  children.push(arrow);
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 15,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+      extendLine(p1, p2, extend, left, right, top, bottom) {
+        const dx = p2[0] - p1[0];
+        const dy = p2[1] - p1[1];
+        if (dx === 0 && dy === 0)
+          return [p1, p2];
+        const extendPoint = (origin, dir) => {
+          let tMax = Infinity;
+          if (dir[0] !== 0) {
+            const tx = dir[0] > 0 ? (right - origin[0]) / dir[0] : (left - origin[0]) / dir[0];
+            tMax = Math.min(tMax, tx);
+          }
+          if (dir[1] !== 0) {
+            const ty = dir[1] > 0 ? (bottom - origin[1]) / dir[1] : (top - origin[1]) / dir[1];
+            tMax = Math.min(tMax, ty);
+          }
+          if (!isFinite(tMax))
+            tMax = 0;
+          return [origin[0] + tMax * dir[0], origin[1] + tMax * dir[1]];
+        };
+        let newP1 = p1;
+        let newP2 = p2;
+        if (extend === "right" || extend === "r" || extend === "both" || extend === "b") {
+          newP2 = extendPoint(p1, [dx, dy]);
+        }
+        if (extend === "left" || extend === "l" || extend === "both" || extend === "b") {
+          newP1 = extendPoint(p2, [-dx, -dy]);
+        }
+        return [newP1, newP2];
+      }
+      arrowHead(from, to, lineWidth, color) {
+        const dx = to[0] - from[0];
+        const dy = to[1] - from[1];
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 1)
+          return null;
+        const size = Math.max(8, lineWidth * 4);
+        const nx = dx / len;
+        const ny = dy / len;
+        const bx = to[0] - nx * size;
+        const by = to[1] - ny * size;
+        const px = -ny * size * 0.4;
+        const py = nx * size * 0.4;
+        return {
+          type: "polygon",
+          shape: {
+            points: [
+              [to[0], to[1]],
+              [bx + px, by + py],
+              [bx - px, by - py]
+            ]
+          },
+          style: { fill: color }
+        };
+      }
+    }
+
+    class LinefillRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const fillObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const lf of items) {
+            if (!lf || typeof lf !== "object" || lf._deleted)
+              continue;
+            const line1 = lf.line1;
+            const line2 = lf.line2;
+            if (!line1 || !line2 || line1._deleted || line2._deleted)
+              continue;
+            fillObjects.push(lf);
+          }
+        }
+        if (fillObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const lf of fillObjects) {
+              if (lf._deleted)
+                continue;
+              const line1 = lf.line1;
+              const line2 = lf.line2;
+              if (!line1 || !line2 || line1._deleted || line2._deleted)
+                continue;
+              const xOff1 = line1.xloc === "bar_index" || line1.xloc === "bi" ? offset : 0;
+              const xOff2 = line2.xloc === "bar_index" || line2.xloc === "bi" ? offset : 0;
+              let p1Start = api.coord([line1.x1 + xOff1, line1.y1]);
+              let p1End = api.coord([line1.x2 + xOff1, line1.y2]);
+              let p2Start = api.coord([line2.x1 + xOff2, line2.y1]);
+              let p2End = api.coord([line2.x2 + xOff2, line2.y2]);
+              const extend1 = line1.extend || "none";
+              const extend2 = line2.extend || "none";
+              if (extend1 !== "none" || extend2 !== "none") {
+                const cs = params.coordSys;
+                const csLeft = cs.x, csRight = cs.x + cs.width;
+                const csTop = cs.y, csBottom = cs.y + cs.height;
+                if (extend1 !== "none") {
+                  [p1Start, p1End] = this.extendLine(p1Start, p1End, extend1, csLeft, csRight, csTop, csBottom);
+                }
+                if (extend2 !== "none") {
+                  [p2Start, p2End] = this.extendLine(p2Start, p2End, extend2, csLeft, csRight, csTop, csBottom);
+                }
+              }
+              const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(lf.color || "rgba(128, 128, 128, 0.2)");
+              children.push({
+                type: "polygon",
+                shape: { points: [p1Start, p1End, p2End, p2Start] },
+                style: { fill: fillColor, opacity: fillOpacity },
+                silent: true
+              });
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          z: 10,
+          // Behind lines (z=15) but above other elements
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      extendLine(p1, p2, extend, left, right, top, bottom) {
+        const dx = p2[0] - p1[0];
+        const dy = p2[1] - p1[1];
+        if (dx === 0 && dy === 0)
+          return [p1, p2];
+        const extendPoint = (origin, dir) => {
+          let tMax = Infinity;
+          if (dir[0] !== 0) {
+            const tx = dir[0] > 0 ? (right - origin[0]) / dir[0] : (left - origin[0]) / dir[0];
+            tMax = Math.min(tMax, tx);
+          }
+          if (dir[1] !== 0) {
+            const ty = dir[1] > 0 ? (bottom - origin[1]) / dir[1] : (top - origin[1]) / dir[1];
+            tMax = Math.min(tMax, ty);
+          }
+          if (!isFinite(tMax))
+            tMax = 0;
+          return [origin[0] + tMax * dir[0], origin[1] + tMax * dir[1]];
+        };
+        let newP1 = p1;
+        let newP2 = p2;
+        if (extend === "right" || extend === "both") {
+          newP2 = extendPoint(p1, [dx, dy]);
+        }
+        if (extend === "left" || extend === "both") {
+          newP1 = extendPoint(p2, [-dx, -dy]);
+        }
+        return [newP1, newP2];
+      }
+    }
+
+    class PolylineRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const polyObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const pl of items) {
+            if (pl && typeof pl === "object" && !pl._deleted && pl.points && pl.points.length >= 2) {
+              polyObjects.push(pl);
+            }
+          }
+        }
+        if (polyObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const pl of polyObjects) {
+              if (pl._deleted)
+                continue;
+              const points = pl.points;
+              if (!points || points.length < 2)
+                continue;
+              const useBi = pl.xloc === "bi" || pl.xloc === "bar_index";
+              const xOff = useBi ? offset : 0;
+              const pixelPoints = [];
+              for (const pt of points) {
+                const x = useBi ? (pt.index ?? 0) + xOff : pt.time ?? 0;
+                const y = pt.price ?? 0;
+                pixelPoints.push(api.coord([x, y]));
+              }
+              if (pixelPoints.length < 2)
+                continue;
+              const rawLineColor = pl.line_color;
+              const isNaLineColor = rawLineColor === null || rawLineColor === void 0 || typeof rawLineColor === "number" && isNaN(rawLineColor) || rawLineColor === "na" || rawLineColor === "NaN";
+              const lineColor = isNaLineColor ? null : rawLineColor || "#2962ff";
+              const lineWidth = pl.line_width || 1;
+              const dashPattern = this.getDashPattern(pl.line_style);
+              if (pl.fill_color && pl.fill_color !== "" && pl.fill_color !== "na") {
+                const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(pl.fill_color);
+                if (pl.curved) {
+                  const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
+                  children.push({
+                    type: "path",
+                    shape: { pathData: pathData + " Z" },
+                    style: { fill: fillColor, opacity: fillOpacity, stroke: "none" },
+                    silent: true
+                  });
+                } else {
+                  children.push({
+                    type: "polygon",
+                    shape: { points: pixelPoints },
+                    style: { fill: fillColor, opacity: fillOpacity, stroke: "none" },
+                    silent: true
+                  });
+                }
+              }
+              if (lineColor && lineWidth > 0) {
+                if (pl.curved) {
+                  const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
+                  children.push({
+                    type: "path",
+                    shape: { pathData },
+                    style: { fill: "none", stroke: lineColor, lineWidth, lineDash: dashPattern },
+                    silent: true
+                  });
+                } else {
+                  const allPoints = pl.closed ? [...pixelPoints, pixelPoints[0]] : pixelPoints;
+                  children.push({
+                    type: "polyline",
+                    shape: { points: allPoints },
+                    style: { fill: "none", stroke: lineColor, lineWidth, lineDash: dashPattern },
+                    silent: true
+                  });
+                }
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 15,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      /**
+       * Build an SVG path string for a smooth curve through all points
+       * using Catmull-Rom → cubic bezier conversion.
+       */
+      buildCurvedPath(points, closed) {
+        const n = points.length;
+        if (n < 2)
+          return "";
+        if (n === 2) {
+          return `M ${points[0][0]} ${points[0][1]} L ${points[1][0]} ${points[1][1]}`;
+        }
+        const tension = 0.5;
+        let path = `M ${points[0][0]} ${points[0][1]}`;
+        const getPoint = (i) => {
+          if (closed) {
+            return points[(i % n + n) % n];
+          }
+          if (i < 0)
+            return points[0];
+          if (i >= n)
+            return points[n - 1];
+          return points[i];
+        };
+        const segmentCount = closed ? n : n - 1;
+        for (let i = 0; i < segmentCount; i++) {
+          const p0 = getPoint(i - 1);
+          const p1 = getPoint(i);
+          const p2 = getPoint(i + 1);
+          const p3 = getPoint(i + 2);
+          const cp1x = p1[0] + (p2[0] - p0[0]) * tension / 3;
+          const cp1y = p1[1] + (p2[1] - p0[1]) * tension / 3;
+          const cp2x = p2[0] - (p3[0] - p1[0]) * tension / 3;
+          const cp2y = p2[1] - (p3[1] - p1[1]) * tension / 3;
+          path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2[0]} ${p2[1]}`;
+        }
+        if (closed) {
+          path += " Z";
+        }
+        return path;
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+    }
+
+    function normalizeColor(color) {
+      if (!color || typeof color !== "string")
+        return color;
+      if (color.startsWith("#")) {
+        const hex = color.slice(1);
+        if (hex.length === 8) {
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          const a = parseInt(hex.slice(6, 8), 16) / 255;
+          return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+        }
+      }
+      return color;
+    }
+    function parseRGB(color) {
+      if (!color || typeof color !== "string")
+        return null;
+      if (color.startsWith("#")) {
+        const hex = color.slice(1);
+        if (hex.length >= 6) {
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          if (!isNaN(r) && !isNaN(g) && !isNaN(b))
+            return { r, g, b };
+        }
+        if (hex.length === 3) {
+          const r = parseInt(hex[0] + hex[0], 16);
+          const g = parseInt(hex[1] + hex[1], 16);
+          const b = parseInt(hex[2] + hex[2], 16);
+          if (!isNaN(r) && !isNaN(g) && !isNaN(b))
+            return { r, g, b };
+        }
+        return null;
+      }
+      const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (m)
+        return { r: +m[1], g: +m[2], b: +m[3] };
+      return null;
+    }
+    function luminance(r, g, b) {
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+    class BoxRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const boxObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const bx of items) {
+            if (bx && typeof bx === "object" && !bx._deleted) {
+              boxObjects.push(bx);
+            }
+          }
+        }
+        if (boxObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const bx of boxObjects) {
+              if (bx._deleted)
+                continue;
+              const xOff = bx.xloc === "bar_index" || bx.xloc === "bi" ? offset : 0;
+              const pTopLeft = api.coord([bx.left + xOff, bx.top]);
+              const pBottomRight = api.coord([bx.right + xOff, bx.bottom]);
+              let x = pTopLeft[0];
+              let y = pTopLeft[1];
+              let w = pBottomRight[0] - pTopLeft[0];
+              let h = pBottomRight[1] - pTopLeft[1];
+              const extend = bx.extend || "none";
+              if (extend !== "none" && extend !== "n") {
+                const cs = params.coordSys;
+                if (extend === "left" || extend === "l" || extend === "both" || extend === "b") {
+                  x = cs.x;
+                  w = extend === "both" || extend === "b" ? cs.width : pBottomRight[0] - cs.x;
+                }
+                if (extend === "right" || extend === "r" || extend === "both" || extend === "b") {
+                  if (extend === "right" || extend === "r") {
+                    w = cs.x + cs.width - pTopLeft[0];
+                  }
+                }
+              }
+              const rawBgColor = bx.bgcolor;
+              const isNaBgColor = rawBgColor === null || rawBgColor === void 0 || typeof rawBgColor === "number" && isNaN(rawBgColor) || rawBgColor === "na" || rawBgColor === "NaN" || rawBgColor === "";
+              const bgColor = isNaBgColor ? null : normalizeColor(rawBgColor) || "#2962ff";
+              if (bgColor) {
+                children.push({
+                  type: "rect",
+                  shape: { x, y, width: w, height: h },
+                  style: { fill: bgColor, stroke: "none" }
+                });
+              }
+              const rawBorderColor = bx.border_color;
+              const isNaBorder = rawBorderColor === null || rawBorderColor === void 0 || typeof rawBorderColor === "number" && isNaN(rawBorderColor) || rawBorderColor === "na" || rawBorderColor === "NaN";
+              const borderColor = isNaBorder ? null : normalizeColor(rawBorderColor) || "#2962ff";
+              const borderWidth = bx.border_width ?? 1;
+              if (borderWidth > 0 && borderColor) {
+                children.push({
+                  type: "rect",
+                  shape: { x, y, width: w, height: h },
+                  style: {
+                    fill: "none",
+                    stroke: borderColor,
+                    lineWidth: borderWidth,
+                    lineDash: this.getDashPattern(bx.border_style)
+                  }
+                });
+              }
+              if (bx.text) {
+                const textX = this.getTextX(x, w, bx.text_halign);
+                const textY = this.getTextY(y, h, bx.text_valign);
+                let textFill = normalizeColor(bx.text_color) || "#000000";
+                const isDefaultTextColor = !bx.text_color || bx.text_color === "#000000" || bx.text_color === "black" || bx.text_color === "color.black";
+                if (isDefaultTextColor && bgColor) {
+                  const rgb = parseRGB(bgColor);
+                  if (rgb && luminance(rgb.r, rgb.g, rgb.b) < 0.5) {
+                    textFill = "#FFFFFF";
+                  }
+                }
+                const isBold = !bx.text_formatting || bx.text_formatting === "format_none" || bx.text_formatting === "format_bold";
+                const fontSize = this.computeFontSize(bx.text_size, bx.text, Math.abs(w), Math.abs(h), isBold);
+                children.push({
+                  type: "text",
+                  style: {
+                    x: textX,
+                    y: textY,
+                    text: bx.text,
+                    fill: textFill,
+                    fontSize,
+                    fontFamily: bx.text_font_family === "monospace" ? "monospace" : "sans-serif",
+                    fontWeight: isBold ? "bold" : "normal",
+                    fontStyle: bx.text_formatting === "format_italic" ? "italic" : "normal",
+                    textAlign: this.mapHAlign(bx.text_halign),
+                    textVerticalAlign: this.mapVAlign(bx.text_valign)
+                  }
+                });
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 14,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+      /**
+       * Compute font size for box text.
+       * For 'auto'/'size.auto' (the default), dynamically scale text to fit within
+       * the box dimensions with a small gap — matching TradingView behavior.
+       * For explicit named sizes, return fixed pixel values.
+       */
+      computeFontSize(size, text, boxW, boxH, bold) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 14;
+          case "large":
+          case "size.large":
+            return 20;
+          case "huge":
+          case "size.huge":
+            return 36;
+        }
+        if (!text || boxW <= 0 || boxH <= 0)
+          return 12;
+        const padding = 6;
+        const availW = boxW - padding * 2;
+        const availH = boxH - padding * 2;
+        if (availW <= 0 || availH <= 0)
+          return 6;
+        const lines = text.split("\n");
+        const numLines = lines.length;
+        let maxChars = 1;
+        for (const line of lines) {
+          if (line.length > maxChars)
+            maxChars = line.length;
+        }
+        const charWidthRatio = bold ? 0.62 : 0.55;
+        const maxByWidth = availW / (maxChars * charWidthRatio);
+        const lineHeight = 1.3;
+        const maxByHeight = availH / (numLines * lineHeight);
+        const computed = Math.min(maxByWidth, maxByHeight);
+        return Math.max(6, Math.min(computed, 48));
+      }
+      mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          case "center":
+          case "text.align_center":
+          default:
+            return "center";
+        }
+      }
+      mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          case "center":
+          case "text.align_center":
+          default:
+            return "middle";
+        }
+      }
+      getTextX(x, w, halign) {
+        switch (halign) {
+          case "left":
+          case "text.align_left":
+            return x + 4;
+          case "right":
+          case "text.align_right":
+            return x + w - 4;
+          case "center":
+          case "text.align_center":
+          default:
+            return x + w / 2;
+        }
+      }
+      getTextY(y, h, valign) {
+        switch (valign) {
+          case "top":
+          case "text.align_top":
+            return y + 4;
+          case "bottom":
+          case "text.align_bottom":
+            return y + h - 4;
+          case "center":
+          case "text.align_center":
+          default:
+            return y + h / 2;
+        }
+      }
+    }
+
+    var __defProp$v = Object.defineProperty;
+    var __defNormalProp$v = (obj, key, value) => key in obj ? __defProp$v(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$v = (obj, key, value) => {
+      __defNormalProp$v(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesRendererFactory = class _SeriesRendererFactory {
@@ -1311,7 +2527,7 @@
         return this.renderers.get(style) || this.renderers.get("line");
       }
     };
-    __publicField$9(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
+    __publicField$v(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
     _SeriesRendererFactory.register("line", new LineRenderer());
     _SeriesRendererFactory.register("step", new StepRenderer());
     _SeriesRendererFactory.register("histogram", new HistogramRenderer());
@@ -1324,12 +2540,17 @@
     _SeriesRendererFactory.register("shape", new ShapeRenderer());
     _SeriesRendererFactory.register("background", new BackgroundRenderer());
     _SeriesRendererFactory.register("fill", new FillRenderer());
+    _SeriesRendererFactory.register("label", new LabelRenderer());
+    _SeriesRendererFactory.register("drawing_line", new DrawingLineRenderer());
+    _SeriesRendererFactory.register("linefill", new LinefillRenderer());
+    _SeriesRendererFactory.register("drawing_polyline", new PolylineRenderer());
+    _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
-    var __defProp$8 = Object.defineProperty;
-    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$8 = (obj, key, value) => {
-      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$u = Object.defineProperty;
+    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$u = (obj, key, value) => {
+      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesBuilder = class _SeriesBuilder {
@@ -1393,7 +2614,8 @@
         }
         return {
           type: "candlestick",
-          name: options.title || "Market",
+          id: "__candlestick__",
+          name: options.title,
           data,
           itemStyle: {
             color: upColor,
@@ -1425,12 +2647,25 @@
               return -1;
             return 0;
           });
+          const pendingFills = /* @__PURE__ */ new Map();
           sortedPlots.forEach((plotName) => {
             const plot = indicator.plots[plotName];
+            const isDisplayNone = plot.options.display === "none";
             const seriesName = `${id}::${plotName}`;
             let xAxisIndex = 0;
             let yAxisIndex = 0;
-            const plotOverlay = plot.options.overlay;
+            let plotOverlay = plot.options.overlay;
+            if (plot.options.style === "fill" && plotOverlay === void 0) {
+              const p1Name = plot.options.plot1;
+              const p2Name = plot.options.plot2;
+              if (p1Name && p2Name) {
+                const p1 = indicator.plots[p1Name];
+                const p2 = indicator.plots[p2Name];
+                if (p1?.options?.overlay === true && p2?.options?.overlay === true) {
+                  plotOverlay = true;
+                }
+              }
+            }
             const isPlotOverlay = indicator.paneIndex === 0 || plotOverlay === true;
             if (isPlotOverlay) {
               xAxisIndex = 0;
@@ -1447,6 +2682,7 @@
               }
             }
             const dataArray = new Array(totalDataLength).fill(null);
+            const rawDataArray = new Array(totalDataLength).fill(null);
             const colorArray = new Array(totalDataLength).fill(null);
             const optionsArray = new Array(totalDataLength).fill(null);
             plot.data?.forEach((point) => {
@@ -1457,17 +2693,21 @@
                 if (offsetIndex >= 0 && offsetIndex < totalDataLength) {
                   let value = point.value;
                   const pointColor = point.options?.color;
-                  const isNaColor = pointColor === null || pointColor === "na" || pointColor === "NaN" || typeof pointColor === "number" && isNaN(pointColor);
+                  rawDataArray[offsetIndex] = value;
+                  const hasExplicitColorKey = point.options != null && "color" in point.options;
+                  const isNaColor = pointColor === null || pointColor === "na" || pointColor === "NaN" || typeof pointColor === "number" && isNaN(pointColor) || hasExplicitColorKey && pointColor === void 0;
                   if (isNaColor) {
                     value = null;
                   }
                   dataArray[offsetIndex] = value;
-                  colorArray[offsetIndex] = pointColor || plot.options.color || _SeriesBuilder.DEFAULT_COLOR;
+                  colorArray[offsetIndex] = isNaColor ? null : pointColor || plot.options.color || _SeriesBuilder.DEFAULT_COLOR;
                   optionsArray[offsetIndex] = point.options || {};
                 }
               }
             });
-            plotDataArrays.set(`${id}::${plotName}`, dataArray);
+            plotDataArrays.set(`${id}::${plotName}`, rawDataArray);
+            if (isDisplayNone)
+              return;
             if (plot.options?.style?.startsWith("style_")) {
               plot.options.style = plot.options.style.replace("style_", "");
             }
@@ -1488,6 +2728,56 @@
               });
               return;
             }
+            if (plot.options.style === "table") {
+              return;
+            }
+            if (plot.options.style === "fill" && plot.options.gradient !== true) {
+              const plot1Key = plot.options.plot1 ? `${id}::${plot.options.plot1}` : null;
+              const plot2Key = plot.options.plot2 ? `${id}::${plot.options.plot2}` : null;
+              if (plot1Key && plot2Key) {
+                const plot1Data = plotDataArrays.get(plot1Key);
+                const plot2Data = plotDataArrays.get(plot2Key);
+                if (plot1Data && plot2Data) {
+                  const { color: defaultColor, opacity: defaultOpacity } = ColorUtils.parseColor(
+                    plot.options.color || "rgba(128, 128, 128, 0.2)"
+                  );
+                  const hasPerBarColor = optionsArray.some((o) => o && o.color !== void 0);
+                  const fillBarColors = [];
+                  for (let i = 0; i < totalDataLength; i++) {
+                    const opts = optionsArray[i];
+                    if (hasPerBarColor && opts && opts.color !== void 0) {
+                      fillBarColors[i] = ColorUtils.parseColor(opts.color);
+                    } else {
+                      fillBarColors[i] = { color: defaultColor, opacity: defaultOpacity };
+                    }
+                  }
+                  const axisKey = `${xAxisIndex}:${yAxisIndex}`;
+                  if (!pendingFills.has(axisKey)) {
+                    pendingFills.set(axisKey, { entries: [], xAxisIndex, yAxisIndex });
+                  }
+                  pendingFills.get(axisKey).entries.push({
+                    plot1Data,
+                    plot2Data,
+                    barColors: fillBarColors
+                  });
+                  return;
+                }
+              }
+            }
+            if (plot.options.color && typeof plot.options.color === "string") {
+              const parsed = ColorUtils.parseColor(plot.options.color);
+              if (parsed.opacity < 0.01) {
+                const hasVisibleBarColor = colorArray.some((c) => {
+                  if (c == null)
+                    return false;
+                  const pc = ColorUtils.parseColor(c);
+                  return pc.opacity >= 0.01;
+                });
+                if (!hasVisibleBarColor) {
+                  return;
+                }
+              }
+            }
             const renderer = SeriesRendererFactory.get(plot.options.style);
             const seriesConfig = renderer.render({
               seriesName,
@@ -1500,21 +2790,50 @@
               candlestickData,
               plotDataArrays,
               indicatorId: id,
-              plotName
+              plotName,
+              dataIndexOffset
             });
             if (seriesConfig) {
               series.push(seriesConfig);
             }
           });
+          if (pendingFills.size > 0) {
+            const fillRenderer = new FillRenderer();
+            pendingFills.forEach(({ entries, xAxisIndex, yAxisIndex }, axisKey) => {
+              if (entries.length >= 2) {
+                const batchedConfig = fillRenderer.renderBatched(
+                  `${id}::fills_batch_${axisKey}`,
+                  xAxisIndex,
+                  yAxisIndex,
+                  totalDataLength,
+                  entries
+                );
+                if (batchedConfig) {
+                  series.push(batchedConfig);
+                }
+              } else if (entries.length === 1) {
+                const batchedConfig = fillRenderer.renderBatched(
+                  `${id}::fills_batch_${axisKey}`,
+                  xAxisIndex,
+                  yAxisIndex,
+                  totalDataLength,
+                  entries
+                );
+                if (batchedConfig) {
+                  series.push(batchedConfig);
+                }
+              }
+            });
+          }
         });
         return { series, barColors };
       }
     };
-    __publicField$8(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
+    __publicField$u(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
-      static build(layout, options, onToggle, isMainCollapsed = false, maximizedPaneId = null) {
+      static build(layout, options, onToggle, isMainCollapsed = false, maximizedPaneId = null, overlayIndicators = []) {
         const graphic = [];
         const pixelToPercent = layout.pixelToPercent;
         const mainPaneTop = layout.mainPaneTop;
@@ -1527,12 +2846,30 @@
             top: mainPaneTop + titleTopMargin + "%",
             z: 10,
             style: {
-              text: options.title || "Market",
+              text: options.title || "",
               fill: options.titleColor || "#fff",
               font: `bold 16px ${options.fontFamily || "sans-serif"}`,
               textVerticalAlign: "top"
             }
           });
+          if (overlayIndicators.length > 0) {
+            const mainTitleHeight = 20 * pixelToPercent;
+            const overlayLineHeight = 16 * pixelToPercent;
+            overlayIndicators.forEach((overlay, i) => {
+              graphic.push({
+                type: "text",
+                left: "8.5%",
+                top: mainPaneTop + titleTopMargin + mainTitleHeight + i * overlayLineHeight + "%",
+                z: 10,
+                style: {
+                  text: overlay.id,
+                  fill: overlay.titleColor || "#9e9e9e",
+                  font: `bold 12px ${options.fontFamily || "sans-serif"}`,
+                  textVerticalAlign: "top"
+                }
+              });
+            });
+          }
           if (options.watermark !== false) {
             const bottomY = layout.mainPaneTop + layout.mainPaneHeight;
             graphic.push({
@@ -1740,7 +3077,7 @@
       static format(params, options) {
         if (!params || params.length === 0)
           return "";
-        const marketName = options.title || "Market";
+        const marketName = options.title || "";
         const upColor = options.upColor || "#00da3c";
         const downColor = options.downColor || "#ec0000";
         const fontFamily = options.fontFamily || "sans-serif";
@@ -1806,20 +3143,20 @@
       }
     }
 
-    var __defProp$7 = Object.defineProperty;
-    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$7 = (obj, key, value) => {
-      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$t = Object.defineProperty;
+    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$t = (obj, key, value) => {
+      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class PluginManager {
       constructor(context, toolbarContainer) {
-        __publicField$7(this, "plugins", /* @__PURE__ */ new Map());
-        __publicField$7(this, "activePluginId", null);
-        __publicField$7(this, "context");
-        __publicField$7(this, "toolbarContainer");
-        __publicField$7(this, "tooltipElement", null);
-        __publicField$7(this, "hideTimeout", null);
+        __publicField$t(this, "plugins", /* @__PURE__ */ new Map());
+        __publicField$t(this, "activePluginId", null);
+        __publicField$t(this, "context");
+        __publicField$t(this, "toolbarContainer");
+        __publicField$t(this, "tooltipElement", null);
+        __publicField$t(this, "hideTimeout", null);
         this.context = context;
         this.toolbarContainer = toolbarContainer;
         this.createTooltip();
@@ -2003,28 +3340,27 @@
       }
     }
 
-    var __defProp$6 = Object.defineProperty;
-    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$6 = (obj, key, value) => {
-      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$s = Object.defineProperty;
+    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$s = (obj, key, value) => {
+      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingEditor {
       constructor(context) {
-        __publicField$6(this, "context");
-        __publicField$6(this, "isEditing", false);
-        __publicField$6(this, "currentDrawing", null);
-        __publicField$6(this, "editingPointIndex", null);
-        __publicField$6(this, "zr");
+        __publicField$s(this, "context");
+        __publicField$s(this, "isEditing", false);
+        __publicField$s(this, "currentDrawing", null);
+        __publicField$s(this, "editingPointIndex", null);
+        __publicField$s(this, "zr");
         // Temporary ZRender elements for visual feedback during drag
-        __publicField$6(this, "editGroup", null);
-        __publicField$6(this, "editLine", null);
-        __publicField$6(this, "editStartPoint", null);
-        __publicField$6(this, "editEndPoint", null);
-        __publicField$6(this, "isMovingShape", false);
-        __publicField$6(this, "dragStart", null);
-        __publicField$6(this, "initialPixelPoints", []);
-        __publicField$6(this, "onDrawingMouseDown", (payload) => {
+        __publicField$s(this, "editGroup", null);
+        __publicField$s(this, "editLines", []);
+        __publicField$s(this, "editPoints", []);
+        __publicField$s(this, "isMovingShape", false);
+        __publicField$s(this, "dragStart", null);
+        __publicField$s(this, "initialPixelPoints", []);
+        __publicField$s(this, "onDrawingMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -2042,8 +3378,9 @@
           this.createEditGraphic();
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
+          window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$6(this, "onPointMouseDown", (payload) => {
+        __publicField$s(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -2052,12 +3389,17 @@
           this.isEditing = true;
           this.currentDrawing = JSON.parse(JSON.stringify(drawing));
           this.editingPointIndex = payload.pointIndex;
+          this.initialPixelPoints = drawing.points.map((p) => {
+            const pixel = this.context.coordinateConversion.dataToPixel(p);
+            return pixel ? { x: pixel.x, y: pixel.y } : { x: 0, y: 0 };
+          });
           this.context.lockChart();
           this.createEditGraphic();
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
+          window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$6(this, "onMouseMove", (e) => {
+        __publicField$s(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
             return;
           const x = e.offsetX;
@@ -2065,36 +3407,57 @@
           if (this.isMovingShape && this.dragStart) {
             const dx = x - this.dragStart.x;
             const dy = y - this.dragStart.y;
-            const newP1 = {
-              x: this.initialPixelPoints[0].x + dx,
-              y: this.initialPixelPoints[0].y + dy
-            };
-            const newP2 = {
-              x: this.initialPixelPoints[1].x + dx,
-              y: this.initialPixelPoints[1].y + dy
-            };
-            this.editLine.setShape({
-              x1: newP1.x,
-              y1: newP1.y,
-              x2: newP2.x,
-              y2: newP2.y
-            });
-            this.editStartPoint.setShape({ cx: newP1.x, cy: newP1.y });
-            this.editEndPoint.setShape({ cx: newP2.x, cy: newP2.y });
-          } else if (this.editingPointIndex !== null) {
-            if (this.editingPointIndex === 0) {
-              this.editLine.setShape({ x1: x, y1: y });
-              this.editStartPoint.setShape({ cx: x, cy: y });
-            } else {
-              this.editLine.setShape({ x2: x, y2: y });
-              this.editEndPoint.setShape({ cx: x, cy: y });
+            const newPts = this.initialPixelPoints.map((p) => ({
+              x: p.x + dx,
+              y: p.y + dy
+            }));
+            for (let i = 0; i < this.editLines.length; i++) {
+              this.editLines[i].setShape({
+                x1: newPts[i].x,
+                y1: newPts[i].y,
+                x2: newPts[i + 1].x,
+                y2: newPts[i + 1].y
+              });
             }
+            for (let i = 0; i < this.editPoints.length; i++) {
+              this.editPoints[i].setShape({ cx: newPts[i].x, cy: newPts[i].y });
+            }
+          } else if (this.editingPointIndex !== null) {
+            const newPts = this.initialPixelPoints.map((p) => ({ x: p.x, y: p.y }));
+            newPts[this.editingPointIndex] = { x, y };
+            for (let i = 0; i < this.editLines.length; i++) {
+              this.editLines[i].setShape({
+                x1: newPts[i].x,
+                y1: newPts[i].y,
+                x2: newPts[i + 1].x,
+                y2: newPts[i + 1].y
+              });
+            }
+            this.editPoints[this.editingPointIndex].setShape({ cx: x, cy: y });
           }
         });
-        __publicField$6(this, "onMouseUp", (e) => {
+        __publicField$s(this, "onMouseUp", (e) => {
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
+        });
+        /**
+         * Safety net: catches mouseup when the cursor leaves the canvas area.
+         * Uses the last known pixel positions to compute the final drop location
+         * relative to the chart container.
+         */
+        __publicField$s(this, "onWindowMouseUp", (e) => {
+          if (!this.isEditing)
+            return;
+          const dom = this.zr.dom;
+          if (dom) {
+            const rect = dom.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
+            this.finishEditing(offsetX, offsetY);
+          } else {
+            this.finishEditing(this.dragStart?.x ?? 0, this.dragStart?.y ?? 0);
+          }
         });
         this.context = context;
         this.zr = this.context.getChart().getZr();
@@ -2108,67 +3471,86 @@
         if (!this.currentDrawing)
           return;
         this.editGroup = new echarts__namespace.graphic.Group();
-        const p1Data = this.currentDrawing.points[0];
-        const p2Data = this.currentDrawing.points[1];
-        const p1 = this.context.coordinateConversion.dataToPixel(p1Data);
-        const p2 = this.context.coordinateConversion.dataToPixel(p2Data);
-        if (!p1 || !p2)
+        this.editLines = [];
+        this.editPoints = [];
+        const pixelPts = this.currentDrawing.points.map((p) => {
+          const px = this.context.coordinateConversion.dataToPixel(p);
+          return px ? { x: px.x, y: px.y } : null;
+        });
+        if (pixelPts.some((p) => !p))
           return;
-        this.editLine = new echarts__namespace.graphic.Line({
-          shape: { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y },
-          style: {
-            stroke: this.currentDrawing.style?.color || "#3b82f6",
-            lineWidth: this.currentDrawing.style?.lineWidth || 2,
-            lineDash: [4, 4]
-            // Dashed to indicate editing
-          },
-          silent: true
-          // Events pass through to handlers
-        });
-        this.editStartPoint = new echarts__namespace.graphic.Circle({
-          shape: { cx: p1.x, cy: p1.y, r: 5 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
-          z: 1e3
-        });
-        this.editEndPoint = new echarts__namespace.graphic.Circle({
-          shape: { cx: p2.x, cy: p2.y, r: 5 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
-          z: 1e3
-        });
-        this.editGroup.add(this.editLine);
-        this.editGroup.add(this.editStartPoint);
-        this.editGroup.add(this.editEndPoint);
+        const pts = pixelPts;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const line = new echarts__namespace.graphic.Line({
+            shape: { x1: pts[i].x, y1: pts[i].y, x2: pts[i + 1].x, y2: pts[i + 1].y },
+            style: {
+              stroke: this.currentDrawing.style?.color || "#3b82f6",
+              lineWidth: this.currentDrawing.style?.lineWidth || 2,
+              lineDash: [4, 4]
+            },
+            silent: true
+          });
+          this.editLines.push(line);
+          this.editGroup.add(line);
+        }
+        for (let i = 0; i < pts.length; i++) {
+          const circle = new echarts__namespace.graphic.Circle({
+            shape: { cx: pts[i].x, cy: pts[i].y, r: 5 },
+            style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 2 },
+            z: 1e3
+          });
+          this.editPoints.push(circle);
+          this.editGroup.add(circle);
+        }
         this.zr.add(this.editGroup);
       }
-      finishEditing(finalX, finishY) {
-        if (!this.currentDrawing)
+      /**
+       * Convert pixel to data, falling back to the drawing's known pane
+       * when the point is outside the grid (e.g., dragged beyond viewport).
+       * Uses convertFromPixel with the specific gridIndex directly, bypassing
+       * the containPixel check that would return null for out-of-bounds points.
+       */
+      pixelToDataForPane(x, y, paneIndex) {
+        const normal = this.context.coordinateConversion.pixelToData({ x, y });
+        if (normal)
+          return normal;
+        try {
+          const chart = this.context.getChart();
+          const p = chart.convertFromPixel({ gridIndex: paneIndex }, [x, y]);
+          if (p) {
+            const option = chart.getOption();
+            const xAxisData = option?.xAxis?.[paneIndex]?.data;
+            const marketData = this.context.getMarketData();
+            const dataIndexOffset = xAxisData ? Math.round((xAxisData.length - marketData.length) / 2) : 0;
+            return { timeIndex: Math.round(p[0]) - dataIndexOffset, value: p[1], paneIndex };
+          }
+        } catch (_) {
+        }
+        return null;
+      }
+      finishEditing(finalX, finalY) {
+        if (!this.currentDrawing) {
+          this.cleanup();
           return;
+        }
+        const paneIndex = this.currentDrawing.paneIndex || 0;
         if (this.isMovingShape && this.dragStart) {
           const dx = finalX - this.dragStart.x;
-          const dy = finishY - this.dragStart.y;
-          const newPoints = this.initialPixelPoints.map((p, i) => {
-            const newX = p.x + dx;
-            const newY = p.y + dy;
-            return this.context.coordinateConversion.pixelToData({
-              x: newX,
-              y: newY
-            });
-          });
+          const dy = finalY - this.dragStart.y;
+          const newPoints = this.initialPixelPoints.map(
+            (p) => this.pixelToDataForPane(p.x + dx, p.y + dy, paneIndex)
+          );
           if (newPoints.every((p) => p !== null)) {
-            if (newPoints[0] && newPoints[1]) {
-              this.currentDrawing.points[0] = newPoints[0];
-              this.currentDrawing.points[1] = newPoints[1];
-              if (newPoints[0].paneIndex !== void 0) {
-                this.currentDrawing.paneIndex = newPoints[0].paneIndex;
-              }
-              this.context.updateDrawing(this.currentDrawing);
+            for (let i = 0; i < newPoints.length; i++) {
+              this.currentDrawing.points[i] = newPoints[i];
             }
+            if (newPoints[0]?.paneIndex !== void 0) {
+              this.currentDrawing.paneIndex = newPoints[0].paneIndex;
+            }
+            this.context.updateDrawing(this.currentDrawing);
           }
         } else if (this.editingPointIndex !== null) {
-          const newData = this.context.coordinateConversion.pixelToData({
-            x: finalX,
-            y: finishY
-          });
+          const newData = this.pixelToDataForPane(finalX, finalY, paneIndex);
           if (newData) {
             this.currentDrawing.points[this.editingPointIndex] = newData;
             if (this.editingPointIndex === 0 && newData.paneIndex !== void 0) {
@@ -2177,31 +3559,55 @@
             this.context.updateDrawing(this.currentDrawing);
           }
         }
+        this.cleanup();
+      }
+      cleanup() {
         this.isEditing = false;
         this.isMovingShape = false;
         this.dragStart = null;
         this.initialPixelPoints = [];
         this.currentDrawing = null;
         this.editingPointIndex = null;
+        this.editLines = [];
+        this.editPoints = [];
         if (this.editGroup) {
           this.zr.remove(this.editGroup);
           this.editGroup = null;
         }
         this.zr.off("mousemove", this.onMouseMove);
         this.zr.off("mouseup", this.onMouseUp);
+        window.removeEventListener("mouseup", this.onWindowMouseUp);
         this.context.unlockChart();
       }
     }
 
-    var __defProp$5 = Object.defineProperty;
-    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$5 = (obj, key, value) => {
-      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$r = Object.defineProperty;
+    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$r = (obj, key, value) => {
+      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class DrawingRendererRegistry {
+      constructor() {
+        __publicField$r(this, "renderers", /* @__PURE__ */ new Map());
+      }
+      register(renderer) {
+        this.renderers.set(renderer.type, renderer);
+      }
+      get(type) {
+        return this.renderers.get(type);
+      }
+    }
+
+    var __defProp$q = Object.defineProperty;
+    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$q = (obj, key, value) => {
+      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class EventBus {
       constructor() {
-        __publicField$5(this, "handlers", /* @__PURE__ */ new Map());
+        __publicField$q(this, "handlers", /* @__PURE__ */ new Map());
       }
       on(event, handler) {
         if (!this.handlers.has(event)) {
@@ -2232,30 +3638,758 @@
       }
     }
 
-    var __defProp$4 = Object.defineProperty;
-    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$4 = (obj, key, value) => {
-      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+    class TableOverlayRenderer {
+      /**
+       * Parse a color value for table rendering.
+       * Unlike ColorUtils.parseColor (which defaults to 0.3 opacity for fills),
+       * tables treat hex/named colors as fully opaque — only rgba provides opacity.
+       */
+      static safeParseColor(val) {
+        if (!val || typeof val !== "string") {
+          return { color: "#888888", opacity: 1 };
+        }
+        const rgbaMatch = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return { color: `rgb(${rgbaMatch[1]},${rgbaMatch[2]},${rgbaMatch[3]})`, opacity: a };
+        }
+        return { color: val, opacity: 1 };
+      }
+      /**
+       * Clear all existing table overlays and render new ones.
+       * @param getGridRect Function that returns the ECharts grid rect for a given pane index.
+       */
+      static render(container, tables, getGridRect) {
+        TableOverlayRenderer.clearAll(container);
+        const byPosition = /* @__PURE__ */ new Map();
+        for (const tbl of tables) {
+          if (tbl && !tbl._deleted) {
+            byPosition.set(tbl.position, tbl);
+          }
+        }
+        byPosition.forEach((tbl) => {
+          const paneIndex = tbl._paneIndex ?? 0;
+          const gridRect = getGridRect ? getGridRect(paneIndex) : void 0;
+          const el = TableOverlayRenderer.buildTable(tbl, gridRect);
+          TableOverlayRenderer.positionTable(el, tbl.position, gridRect);
+          container.appendChild(el);
+        });
+      }
+      static clearAll(container) {
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+      }
+      static buildTable(tbl, gridRect) {
+        const table = document.createElement("table");
+        const borderWidth = tbl.border_width ?? 0;
+        const frameWidth = tbl.frame_width ?? 0;
+        const hasVisibleBorders = borderWidth > 0 && !!tbl.border_color || frameWidth > 0 && !!tbl.frame_color;
+        if (hasVisibleBorders) {
+          table.style.borderCollapse = "separate";
+          table.style.borderSpacing = "0";
+        } else {
+          table.style.borderCollapse = "collapse";
+        }
+        table.style.pointerEvents = "none";
+        table.style.fontSize = "14px";
+        table.style.lineHeight = "1.4";
+        table.style.fontFamily = "sans-serif";
+        table.style.margin = "4px";
+        if (gridRect) {
+          table.style.maxHeight = gridRect.height + "px";
+          table.style.maxWidth = gridRect.width + "px";
+          table.style.overflow = "hidden";
+        }
+        if (tbl.bgcolor) {
+          const { color, opacity } = TableOverlayRenderer.safeParseColor(tbl.bgcolor);
+          table.style.backgroundColor = color;
+          if (opacity < 1)
+            table.style.opacity = String(opacity);
+        }
+        if (frameWidth > 0 && tbl.frame_color) {
+          const { color: fc } = TableOverlayRenderer.safeParseColor(tbl.frame_color);
+          table.style.border = `${frameWidth}px solid ${fc}`;
+        } else {
+          table.style.border = "none";
+        }
+        const mergeMap = /* @__PURE__ */ new Map();
+        const mergedCells = /* @__PURE__ */ new Set();
+        if (tbl.merges) {
+          for (const m of tbl.merges) {
+            const key = `${m.startCol},${m.startRow}`;
+            mergeMap.set(key, {
+              colspan: m.endCol - m.startCol + 1,
+              rowspan: m.endRow - m.startRow + 1
+            });
+            for (let r = m.startRow; r <= m.endRow; r++) {
+              for (let c = m.startCol; c <= m.endCol; c++) {
+                if (r === m.startRow && c === m.startCol)
+                  continue;
+                mergedCells.add(`${c},${r}`);
+              }
+            }
+          }
+        }
+        const hasCellBorders = borderWidth > 0 && !!tbl.border_color;
+        const borderColorStr = hasCellBorders ? TableOverlayRenderer.safeParseColor(tbl.border_color).color : "";
+        const rows = tbl.rows || 0;
+        const cols = tbl.columns || 0;
+        for (let r = 0; r < rows; r++) {
+          const tr = document.createElement("tr");
+          for (let c = 0; c < cols; c++) {
+            const cellKey = `${c},${r}`;
+            if (mergedCells.has(cellKey))
+              continue;
+            const td = document.createElement("td");
+            const merge = mergeMap.get(cellKey);
+            if (merge) {
+              if (merge.colspan > 1)
+                td.colSpan = merge.colspan;
+              if (merge.rowspan > 1)
+                td.rowSpan = merge.rowspan;
+            }
+            if (hasCellBorders) {
+              td.style.border = `${borderWidth}px solid ${borderColorStr}`;
+            } else {
+              td.style.border = "none";
+            }
+            const cellData = tbl.cells?.[r]?.[c];
+            if (cellData && !cellData._merged) {
+              td.textContent = cellData.text || "";
+              if (cellData.bgcolor && typeof cellData.bgcolor === "string" && cellData.bgcolor.length > 0) {
+                const { color: bg, opacity: bgOp } = TableOverlayRenderer.safeParseColor(cellData.bgcolor);
+                td.style.backgroundColor = bg;
+                if (bgOp < 1) {
+                  td.style.backgroundColor = cellData.bgcolor;
+                }
+              }
+              if (cellData.text_color) {
+                const { color: tc } = TableOverlayRenderer.safeParseColor(cellData.text_color);
+                td.style.color = tc;
+              }
+              td.style.fontSize = TableOverlayRenderer.getSizePixels(cellData.text_size) + "px";
+              td.style.textAlign = TableOverlayRenderer.mapHAlign(cellData.text_halign);
+              td.style.verticalAlign = TableOverlayRenderer.mapVAlign(cellData.text_valign);
+              if (cellData.text_font_family === "monospace") {
+                td.style.fontFamily = "monospace";
+              }
+              if (cellData.width > 0) {
+                if (gridRect) {
+                  const px = Math.max(1, cellData.width * gridRect.width / 100);
+                  td.style.width = px + "px";
+                } else {
+                  td.style.width = cellData.width + "%";
+                }
+              }
+              if (cellData.height > 0) {
+                if (gridRect) {
+                  const px = Math.max(1, cellData.height * gridRect.height / 100);
+                  td.style.height = px + "px";
+                } else {
+                  td.style.height = cellData.height + "%";
+                }
+              }
+              if (cellData.tooltip) {
+                td.title = cellData.tooltip;
+              }
+            }
+            const cellHeight = cellData?.height ?? 0;
+            if (cellHeight > 0 && gridRect && cellHeight * gridRect.height / 100 < 4) {
+              td.style.padding = "0";
+            } else {
+              td.style.padding = "4px 6px";
+            }
+            td.style.whiteSpace = "nowrap";
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        return table;
+      }
+      static positionTable(el, position, gridRect) {
+        el.style.position = "absolute";
+        const PAD = 8;
+        const top = gridRect ? gridRect.y + "px" : "0";
+        const left = gridRect ? gridRect.x + "px" : "0";
+        const bottom = gridRect ? gridRect.y + gridRect.height - PAD + "px" : "0";
+        const right = gridRect ? gridRect.x + gridRect.width - PAD + "px" : "0";
+        const centerX = gridRect ? gridRect.x + gridRect.width / 2 + "px" : "50%";
+        const centerY = gridRect ? gridRect.y + gridRect.height / 2 + "px" : "50%";
+        switch (position) {
+          case "top_left":
+            el.style.top = top;
+            el.style.left = left;
+            break;
+          case "top_center":
+            el.style.top = top;
+            el.style.left = centerX;
+            el.style.transform = "translateX(-50%)";
+            break;
+          case "top_right":
+            el.style.top = top;
+            el.style.left = right;
+            el.style.transform = "translateX(-100%)";
+            break;
+          case "middle_left":
+            el.style.top = centerY;
+            el.style.left = left;
+            el.style.transform = "translateY(-50%)";
+            break;
+          case "middle_center":
+            el.style.top = centerY;
+            el.style.left = centerX;
+            el.style.transform = "translate(-50%, -50%)";
+            break;
+          case "middle_right":
+            el.style.top = centerY;
+            el.style.left = right;
+            el.style.transform = "translate(-100%, -50%)";
+            break;
+          case "bottom_left":
+            el.style.top = bottom;
+            el.style.left = left;
+            el.style.transform = "translateY(-100%)";
+            break;
+          case "bottom_center":
+            el.style.top = bottom;
+            el.style.left = centerX;
+            el.style.transform = "translate(-50%, -100%)";
+            break;
+          case "bottom_right":
+            el.style.top = bottom;
+            el.style.left = right;
+            el.style.transform = "translate(-100%, -100%)";
+            break;
+          default:
+            el.style.top = top;
+            el.style.left = right;
+            el.style.transform = "translateX(-100%)";
+            break;
+        }
+      }
+      static getSizePixels(size) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "auto":
+          case "size.auto":
+            return 12;
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 14;
+          case "large":
+          case "size.large":
+            return 20;
+          case "huge":
+          case "size.huge":
+            return 36;
+          default:
+            return 14;
+        }
+      }
+      static mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          case "center":
+          case "text.align_center":
+          default:
+            return "center";
+        }
+      }
+      static mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          case "center":
+          case "text.align_center":
+          default:
+            return "middle";
+        }
+      }
+    }
+
+    class TableCanvasRenderer {
+      // ── Color Parsing ──────────────────────────────────────────
+      static parseColor(val) {
+        if (!val || typeof val !== "string" || val.length === 0) {
+          return { color: "", opacity: 0 };
+        }
+        const rgbaMatch = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return { color: `rgb(${rgbaMatch[1]},${rgbaMatch[2]},${rgbaMatch[3]})`, opacity: a };
+        }
+        if (/^#[0-9a-fA-F]{8}$/.test(val)) {
+          const r = parseInt(val.slice(1, 3), 16);
+          const g = parseInt(val.slice(3, 5), 16);
+          const b = parseInt(val.slice(5, 7), 16);
+          const a = parseInt(val.slice(7, 9), 16) / 255;
+          return { color: `rgb(${r},${g},${b})`, opacity: a };
+        }
+        return { color: val, opacity: 1 };
+      }
+      // ── Size / Alignment Mapping ───────────────────────────────
+      // TradingView reference sizes (approximate px at 1× DPR)
+      static getSizePixels(size) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "auto":
+          case "size.auto":
+            return 11;
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 12;
+          case "large":
+          case "size.large":
+            return 16;
+          case "huge":
+          case "size.huge":
+            return 24;
+          default:
+            return 12;
+        }
+      }
+      static mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          default:
+            return "center";
+        }
+      }
+      static mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          default:
+            return "middle";
+        }
+      }
+      // ── Main Entry Point ──────────────────────────────────────
+      /**
+       * Build flat ECharts graphic elements for all tables.
+       * Returns an array of rect/text elements with absolute positions.
+       */
+      static buildGraphicElements(tables, getGridRect) {
+        if (!tables || tables.length === 0)
+          return [];
+        const byPosition = /* @__PURE__ */ new Map();
+        for (const tbl of tables) {
+          if (tbl && !tbl._deleted) {
+            byPosition.set(tbl.position, tbl);
+          }
+        }
+        const elements = [];
+        byPosition.forEach((tbl) => {
+          const paneIndex = tbl._paneIndex ?? 0;
+          const gridRect = getGridRect(paneIndex);
+          if (!gridRect)
+            return;
+          const tableElements = TableCanvasRenderer.buildTableElements(tbl, gridRect);
+          elements.push(...tableElements);
+        });
+        return elements;
+      }
+      // ── Table Layout Engine ──────────────────────────────────
+      /**
+       * Measure and layout a table, producing flat absolute-positioned elements.
+       * Returns an array of ECharts graphic rect/text elements.
+       */
+      static buildTableElements(tbl, gridRect) {
+        const rows = tbl.rows || 0;
+        const cols = tbl.columns || 0;
+        if (rows === 0 || cols === 0)
+          return [];
+        const borderWidth = tbl.border_width ?? 0;
+        const frameWidth = tbl.frame_width ?? 0;
+        const hasCellBorders = borderWidth > 0 && !!tbl.border_color;
+        const hasFrame = frameWidth > 0 && !!tbl.frame_color;
+        const mergeMap = /* @__PURE__ */ new Map();
+        const mergedCells = /* @__PURE__ */ new Set();
+        if (tbl.merges) {
+          for (const m of tbl.merges) {
+            mergeMap.set(`${m.startCol},${m.startRow}`, {
+              colspan: m.endCol - m.startCol + 1,
+              rowspan: m.endRow - m.startRow + 1
+            });
+            for (let r = m.startRow; r <= m.endRow; r++) {
+              for (let c = m.startCol; c <= m.endCol; c++) {
+                if (r === m.startRow && c === m.startCol)
+                  continue;
+                mergedCells.add(`${c},${r}`);
+              }
+            }
+          }
+        }
+        const PAD_X = 4;
+        const PAD_Y = 2;
+        const LINE_HEIGHT = 1.25;
+        const cellInfos = [];
+        for (let r = 0; r < rows; r++) {
+          cellInfos[r] = [];
+          for (let c = 0; c < cols; c++) {
+            if (mergedCells.has(`${c},${r}`)) {
+              cellInfos[r][c] = {
+                text: "",
+                lines: [],
+                fontSize: 12,
+                fontFamily: "sans-serif",
+                textColor: { color: "", opacity: 0 },
+                bgColor: { color: "", opacity: 0 },
+                halign: "center",
+                valign: "middle",
+                explicitWidth: 0,
+                explicitHeight: 0,
+                colspan: 1,
+                rowspan: 1,
+                skip: true,
+                padX: 0,
+                padY: 0
+              };
+              continue;
+            }
+            const cellData = tbl.cells?.[r]?.[c];
+            const merge = mergeMap.get(`${c},${r}`);
+            const colspan = merge?.colspan ?? 1;
+            const rowspan = merge?.rowspan ?? 1;
+            const text = cellData && !cellData._merged ? cellData.text || "" : "";
+            const lines = text ? text.split("\n") : [];
+            const fontSize = cellData ? TableCanvasRenderer.getSizePixels(cellData.text_size) : 12;
+            const fontFamily = cellData?.text_font_family === "monospace" ? "monospace" : "sans-serif";
+            let explicitWidth = 0;
+            let explicitHeight = 0;
+            if (cellData?.width > 0)
+              explicitWidth = Math.max(1, cellData.width * gridRect.width / 100);
+            if (cellData?.height > 0)
+              explicitHeight = Math.max(1, cellData.height * gridRect.height / 100);
+            const isTiny = explicitHeight > 0 && explicitHeight < 4;
+            const padX = isTiny ? 0 : PAD_X;
+            const padY = isTiny ? 0 : PAD_Y;
+            const bgRaw = cellData && !cellData._merged && cellData.bgcolor && typeof cellData.bgcolor === "string" && cellData.bgcolor.length > 0 ? cellData.bgcolor : "";
+            const textColorRaw = cellData?.text_color || "";
+            cellInfos[r][c] = {
+              text,
+              lines,
+              fontSize,
+              fontFamily,
+              textColor: textColorRaw ? TableCanvasRenderer.parseColor(textColorRaw) : { color: "#e0e0e0", opacity: 1 },
+              bgColor: bgRaw ? TableCanvasRenderer.parseColor(bgRaw) : { color: "", opacity: 0 },
+              halign: cellData ? TableCanvasRenderer.mapHAlign(cellData.text_halign) : "center",
+              valign: cellData ? TableCanvasRenderer.mapVAlign(cellData.text_valign) : "middle",
+              explicitWidth,
+              explicitHeight,
+              colspan,
+              rowspan,
+              skip: false,
+              padX,
+              padY
+            };
+          }
+        }
+        const colWidths = new Array(cols).fill(0);
+        const rowHeights = new Array(rows).fill(0);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip || info.colspan > 1 || info.rowspan > 1)
+              continue;
+            const textW = TableCanvasRenderer.measureMultiLineWidth(info.lines, info.fontSize, info.fontFamily);
+            const numLines = Math.max(info.lines.length, 1);
+            const cellW = info.explicitWidth > 0 ? info.explicitWidth : textW + info.padX * 2;
+            const cellH = info.explicitHeight > 0 ? info.explicitHeight : numLines * info.fontSize * LINE_HEIGHT + info.padY * 2;
+            colWidths[c] = Math.max(colWidths[c], cellW);
+            rowHeights[r] = Math.max(rowHeights[r], cellH);
+          }
+        }
+        for (let c = 0; c < cols; c++) {
+          if (colWidths[c] === 0)
+            colWidths[c] = 20;
+        }
+        for (let r = 0; r < rows; r++) {
+          if (rowHeights[r] === 0)
+            rowHeights[r] = 4;
+        }
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip)
+              continue;
+            const numLines = Math.max(info.lines.length, 1);
+            const neededH = info.explicitHeight > 0 ? info.explicitHeight : numLines * info.fontSize * LINE_HEIGHT + info.padY * 2;
+            if (info.colspan > 1) {
+              const spanned = TableCanvasRenderer.sumRange(colWidths, c, info.colspan);
+              const textW = TableCanvasRenderer.measureMultiLineWidth(info.lines, info.fontSize, info.fontFamily);
+              const neededW = info.explicitWidth > 0 ? info.explicitWidth : textW + info.padX * 2;
+              if (neededW > spanned) {
+                const perCol = (neededW - spanned) / info.colspan;
+                for (let i = 0; i < info.colspan; i++)
+                  colWidths[c + i] += perCol;
+              }
+              if (info.rowspan === 1) {
+                rowHeights[r] = Math.max(rowHeights[r], neededH);
+              }
+            }
+            if (info.rowspan > 1) {
+              const spanned = TableCanvasRenderer.sumRange(rowHeights, r, info.rowspan);
+              if (neededH > spanned) {
+                const perRow = (neededH - spanned) / info.rowspan;
+                for (let i = 0; i < info.rowspan; i++)
+                  rowHeights[r + i] += perRow;
+              }
+            }
+          }
+        }
+        for (let c = 0; c < cols; c++)
+          colWidths[c] = Math.round(colWidths[c]);
+        for (let r = 0; r < rows; r++)
+          rowHeights[r] = Math.round(rowHeights[r]);
+        const colX = new Array(cols + 1).fill(0);
+        for (let c = 0; c < cols; c++)
+          colX[c + 1] = colX[c] + colWidths[c];
+        const rowY = new Array(rows + 1).fill(0);
+        for (let r = 0; r < rows; r++)
+          rowY[r + 1] = rowY[r] + rowHeights[r];
+        const frameOffset = hasFrame ? frameWidth : 0;
+        const totalWidth = colX[cols] + frameOffset * 2;
+        const totalHeight = rowY[rows] + frameOffset * 2;
+        const clampedWidth = Math.min(totalWidth, gridRect.width);
+        const clampedHeight = Math.min(totalHeight, gridRect.height);
+        const pos = TableCanvasRenderer.computePosition(
+          tbl.position,
+          gridRect,
+          clampedWidth,
+          clampedHeight
+        );
+        const tableX = Math.round(pos.x);
+        const tableY = Math.round(pos.y);
+        const elements = [];
+        const ox = tableX + frameOffset;
+        const oy = tableY + frameOffset;
+        if (tbl.bgcolor) {
+          const { color, opacity } = TableCanvasRenderer.parseColor(tbl.bgcolor);
+          if (opacity > 0) {
+            elements.push({
+              type: "rect",
+              shape: { x: tableX, y: tableY, width: clampedWidth, height: clampedHeight },
+              style: { fill: color, opacity },
+              silent: true,
+              z: 0,
+              z2: 0
+            });
+          }
+        }
+        if (hasFrame) {
+          const { color: fc } = TableCanvasRenderer.parseColor(tbl.frame_color);
+          const half = frameWidth / 2;
+          elements.push({
+            type: "rect",
+            shape: {
+              x: tableX + half,
+              y: tableY + half,
+              width: clampedWidth - frameWidth,
+              height: clampedHeight - frameWidth
+            },
+            style: { fill: "none", stroke: fc, lineWidth: frameWidth },
+            silent: true,
+            z: 0,
+            z2: 1
+          });
+        }
+        const bdrColor = hasCellBorders ? TableCanvasRenderer.parseColor(tbl.border_color).color : "";
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip)
+              continue;
+            const cx = ox + colX[c];
+            const cy = oy + rowY[r];
+            const cw = TableCanvasRenderer.sumRange(colWidths, c, info.colspan);
+            const ch = TableCanvasRenderer.sumRange(rowHeights, r, info.rowspan);
+            if (cx - tableX >= clampedWidth || cy - tableY >= clampedHeight)
+              continue;
+            const drawW = Math.min(cw, clampedWidth - (cx - tableX));
+            const drawH = Math.min(ch, clampedHeight - (cy - tableY));
+            if (info.bgColor.opacity > 0) {
+              elements.push({
+                type: "rect",
+                shape: { x: cx, y: cy, width: drawW, height: drawH },
+                style: { fill: info.bgColor.color, opacity: info.bgColor.opacity },
+                silent: true,
+                z: 0,
+                z2: 2
+              });
+            }
+            if (hasCellBorders) {
+              elements.push({
+                type: "rect",
+                shape: { x: cx, y: cy, width: drawW, height: drawH },
+                style: { fill: "none", stroke: bdrColor, lineWidth: borderWidth },
+                silent: true,
+                z: 0,
+                z2: 3
+              });
+            }
+            if (info.text) {
+              let textX, textAlign;
+              switch (info.halign) {
+                case "left":
+                  textX = cx + info.padX;
+                  textAlign = "left";
+                  break;
+                case "right":
+                  textX = cx + drawW - info.padX;
+                  textAlign = "right";
+                  break;
+                default:
+                  textX = cx + drawW / 2;
+                  textAlign = "center";
+                  break;
+              }
+              let textY, textVAlign;
+              switch (info.valign) {
+                case "top":
+                  textY = cy + info.padY;
+                  textVAlign = "top";
+                  break;
+                case "bottom":
+                  textY = cy + drawH - info.padY;
+                  textVAlign = "bottom";
+                  break;
+                default:
+                  textY = cy + drawH / 2;
+                  textVAlign = "middle";
+                  break;
+              }
+              elements.push({
+                type: "text",
+                x: textX,
+                y: textY,
+                style: {
+                  text: info.text,
+                  fill: info.textColor.color,
+                  opacity: info.textColor.opacity,
+                  font: `${info.fontSize}px ${info.fontFamily}`,
+                  textAlign,
+                  textVerticalAlign: textVAlign,
+                  lineHeight: Math.round(info.fontSize * LINE_HEIGHT)
+                },
+                silent: true,
+                z: 0,
+                z2: 4
+              });
+            }
+          }
+        }
+        return elements;
+      }
+      // ── Position Computation ─────────────────────────────────
+      static computePosition(position, gridRect, tableWidth, tableHeight) {
+        const PAD = 4;
+        const gx = gridRect.x;
+        const gy = gridRect.y;
+        const gw = gridRect.width;
+        const gh = gridRect.height;
+        switch (position) {
+          case "top_left":
+            return { x: gx + PAD, y: gy + PAD };
+          case "top_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + PAD };
+          case "top_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + PAD };
+          case "middle_left":
+            return { x: gx + PAD, y: gy + (gh - tableHeight) / 2 };
+          case "middle_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + (gh - tableHeight) / 2 };
+          case "middle_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + (gh - tableHeight) / 2 };
+          case "bottom_left":
+            return { x: gx + PAD, y: gy + gh - tableHeight - PAD };
+          case "bottom_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + gh - tableHeight - PAD };
+          case "bottom_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + gh - tableHeight - PAD };
+          default:
+            return { x: gx + gw - tableWidth - PAD, y: gy + PAD };
+        }
+      }
+      // ── Utilities ────────────────────────────────────────────
+      /**
+       * Measure the max width across all lines of a multi-line text string.
+       */
+      static measureMultiLineWidth(lines, fontSize, fontFamily) {
+        if (!lines || lines.length === 0)
+          return 0;
+        const ratio = fontFamily === "monospace" ? 0.6 : 0.55;
+        let maxW = 0;
+        for (const line of lines) {
+          maxW = Math.max(maxW, line.length * fontSize * ratio);
+        }
+        return maxW;
+      }
+      static sumRange(arr, start, count) {
+        let sum = 0;
+        for (let i = start; i < start + count && i < arr.length; i++)
+          sum += arr[i];
+        return sum;
+      }
+    }
+
+    var __defProp$p = Object.defineProperty;
+    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$p = (obj, key, value) => {
+      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class QFChart {
       constructor(container, options = {}) {
-        __publicField$4(this, "chart");
-        __publicField$4(this, "options");
-        __publicField$4(this, "marketData", []);
-        __publicField$4(this, "indicators", /* @__PURE__ */ new Map());
-        __publicField$4(this, "timeToIndex", /* @__PURE__ */ new Map());
-        __publicField$4(this, "pluginManager");
-        __publicField$4(this, "drawingEditor");
-        __publicField$4(this, "events", new EventBus());
-        __publicField$4(this, "isMainCollapsed", false);
-        __publicField$4(this, "maximizedPaneId", null);
-        __publicField$4(this, "countdownInterval", null);
-        __publicField$4(this, "selectedDrawingId", null);
+        __publicField$p(this, "chart");
+        __publicField$p(this, "options");
+        __publicField$p(this, "marketData", []);
+        __publicField$p(this, "indicators", /* @__PURE__ */ new Map());
+        __publicField$p(this, "timeToIndex", /* @__PURE__ */ new Map());
+        __publicField$p(this, "pluginManager");
+        __publicField$p(this, "drawingEditor");
+        __publicField$p(this, "events", new EventBus());
+        __publicField$p(this, "isMainCollapsed", false);
+        __publicField$p(this, "maximizedPaneId", null);
+        __publicField$p(this, "countdownInterval", null);
+        __publicField$p(this, "selectedDrawingId", null);
         // Track selected drawing
         // Drawing System
-        __publicField$4(this, "drawings", []);
-        __publicField$4(this, "coordinateConversion", {
+        __publicField$p(this, "drawings", []);
+        __publicField$p(this, "drawingRenderers", new DrawingRendererRegistry());
+        __publicField$p(this, "coordinateConversion", {
           pixelToData: (point) => {
             const option = this.chart.getOption();
             if (!option || !option.grid)
@@ -2266,7 +4400,7 @@
                 this.chart.convertFromPixel({ seriesIndex: i }, [point.x, point.y]);
                 const pGrid = this.chart.convertFromPixel({ gridIndex: i }, [point.x, point.y]);
                 if (pGrid) {
-                  return { timeIndex: Math.round(pGrid[0]), value: pGrid[1], paneIndex: i };
+                  return { timeIndex: Math.round(pGrid[0]) - this.dataIndexOffset, value: pGrid[1], paneIndex: i };
                 }
               }
             }
@@ -2274,7 +4408,7 @@
           },
           dataToPixel: (point) => {
             const paneIdx = point.paneIndex || 0;
-            const p = this.chart.convertToPixel({ gridIndex: paneIdx }, [point.timeIndex, point.value]);
+            const p = this.chart.convertToPixel({ gridIndex: paneIdx }, [point.timeIndex + this.dataIndexOffset, point.value]);
             if (p) {
               return { x: p[0], y: p[1] };
             }
@@ -2282,36 +4416,61 @@
           }
         });
         // Default colors and constants
-        __publicField$4(this, "upColor", "#00da3c");
-        __publicField$4(this, "downColor", "#ec0000");
-        __publicField$4(this, "defaultPadding", 0);
-        __publicField$4(this, "padding");
-        __publicField$4(this, "dataIndexOffset", 0);
+        __publicField$p(this, "upColor", "#00da3c");
+        __publicField$p(this, "downColor", "#ec0000");
+        __publicField$p(this, "defaultPadding", 0);
+        __publicField$p(this, "padding");
+        __publicField$p(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
+        __publicField$p(this, "_paddingPoints", 0);
+        // Current symmetric padding (empty bars per side)
+        __publicField$p(this, "LAZY_MIN_PADDING", 5);
+        // Always have a tiny buffer so edge scroll triggers
+        __publicField$p(this, "LAZY_MAX_PADDING", 500);
+        // Hard cap per side
+        __publicField$p(this, "LAZY_CHUNK_SIZE", 50);
+        // Bars added per expansion
+        __publicField$p(this, "LAZY_EDGE_THRESHOLD", 10);
+        // Bars from edge to trigger
+        __publicField$p(this, "_expandScheduled", false);
+        // Debounce flag
         // DOM Elements for Layout
-        __publicField$4(this, "rootContainer");
-        __publicField$4(this, "layoutContainer");
-        __publicField$4(this, "toolbarContainer");
+        __publicField$p(this, "rootContainer");
+        __publicField$p(this, "layoutContainer");
+        __publicField$p(this, "toolbarContainer");
         // New Toolbar
-        __publicField$4(this, "leftSidebar");
-        __publicField$4(this, "rightSidebar");
-        __publicField$4(this, "chartContainer");
-        __publicField$4(this, "onKeyDown", (e) => {
+        __publicField$p(this, "leftSidebar");
+        __publicField$p(this, "rightSidebar");
+        __publicField$p(this, "chartContainer");
+        __publicField$p(this, "overlayContainer");
+        __publicField$p(this, "_lastTables", []);
+        __publicField$p(this, "_tableGraphicIds", []);
+        // Track canvas table graphic IDs for cleanup
+        __publicField$p(this, "_baseGraphics", []);
+        // Non-table graphic elements (title, watermark, pane labels)
+        __publicField$p(this, "_labelTooltipEl", null);
+        // Floating tooltip for label.set_tooltip()
+        // Pane drag-resize state
+        __publicField$p(this, "_lastLayout", null);
+        __publicField$p(this, "_mainHeightOverride", null);
+        __publicField$p(this, "_paneDragState", null);
+        __publicField$p(this, "_paneResizeRafId", null);
+        __publicField$p(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
             this.selectedDrawingId = null;
             this.render();
           }
         });
-        __publicField$4(this, "onFullscreenChange", () => {
+        __publicField$p(this, "onFullscreenChange", () => {
           this.render();
         });
         // --- Interaction Locking ---
-        __publicField$4(this, "isLocked", false);
-        __publicField$4(this, "lockedState", null);
+        __publicField$p(this, "isLocked", false);
+        __publicField$p(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
-          title: "Market",
+          title: void 0,
           height: "600px",
           backgroundColor: "#1e293b",
           upColor: "#00da3c",
@@ -2384,6 +4543,10 @@
         this.rightSidebar.style.fontFamily = this.options.fontFamily || "sans-serif";
         this.layoutContainer.appendChild(this.rightSidebar);
         this.chart = echarts__namespace.init(this.chartContainer);
+        this.chartContainer.style.position = "relative";
+        this.overlayContainer = document.createElement("div");
+        this.overlayContainer.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;overflow:hidden;";
+        this.chartContainer.appendChild(this.overlayContainer);
         this.pluginManager = new PluginManager(this, this.toolbarContainer);
         this.drawingEditor = new DrawingEditor(this);
         this.chart.on("dataZoom", (params) => {
@@ -2391,28 +4554,150 @@
           const triggerOn = this.options.databox?.triggerOn;
           const position = this.options.databox?.position;
           if (triggerOn === "click" && position === "floating") {
-            this.chart.dispatchAction({
-              type: "hideTip"
-            });
+            this.chart.dispatchAction({ type: "hideTip" });
           }
+          this._checkEdgeAndExpand();
         });
         this.chart.on("finished", (params) => this.events.emit("chart:updated", params));
-        this.chart.getZr().on("mousedown", (params) => this.events.emit("mouse:down", params));
-        this.chart.getZr().on("mousemove", (params) => this.events.emit("mouse:move", params));
+        this.chart.getZr().on("mousedown", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:down", params);
+        });
+        this.chart.getZr().on("mousemove", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:move", params);
+        });
         this.chart.getZr().on("mouseup", (params) => this.events.emit("mouse:up", params));
-        this.chart.getZr().on("click", (params) => this.events.emit("mouse:click", params));
+        this.chart.getZr().on("click", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:click", params);
+        });
         const zr = this.chart.getZr();
         const originalSetCursorStyle = zr.setCursorStyle;
+        const self = this;
         zr.setCursorStyle = function(cursorStyle) {
+          if (self._paneDragState) {
+            originalSetCursorStyle.call(this, "row-resize");
+            return;
+          }
           if (cursorStyle === "grab") {
             cursorStyle = "crosshair";
           }
           originalSetCursorStyle.call(this, cursorStyle);
         };
         this.bindDrawingEvents();
+        this.bindPaneResizeEvents();
         window.addEventListener("resize", this.resize.bind(this));
         document.addEventListener("fullscreenchange", this.onFullscreenChange);
         document.addEventListener("keydown", this.onKeyDown);
+      }
+      // ── Pane border drag-resize ────────────────────────────────
+      bindPaneResizeEvents() {
+        const MIN_MAIN = 10;
+        const MIN_INDICATOR = 5;
+        const HIT_ZONE = 6;
+        const zr = this.chart.getZr();
+        const findBoundary = (mouseY) => {
+          if (!this._lastLayout || this._lastLayout.paneBoundaries.length === 0)
+            return null;
+          if (this.maximizedPaneId)
+            return null;
+          const containerH = this.chart.getHeight();
+          if (containerH <= 0)
+            return null;
+          for (const b of this._lastLayout.paneBoundaries) {
+            const bY = b.yPercent / 100 * containerH;
+            if (Math.abs(mouseY - bY) <= HIT_ZONE) {
+              if (b.aboveId === "main" && this.isMainCollapsed)
+                continue;
+              const belowInd = this.indicators.get(b.belowId);
+              if (belowInd?.collapsed)
+                continue;
+              if (b.aboveId !== "main") {
+                const aboveInd = this.indicators.get(b.aboveId);
+                if (aboveInd?.collapsed)
+                  continue;
+              }
+              return b;
+            }
+          }
+          return null;
+        };
+        const getPaneHeight = (id) => {
+          if (id === "main") {
+            return this._lastLayout?.mainPaneHeight ?? 50;
+          }
+          const ind = this.indicators.get(id);
+          return ind?.height ?? 15;
+        };
+        zr.on("mousemove", (e) => {
+          if (this._paneDragState) {
+            const deltaY = e.offsetY - this._paneDragState.startY;
+            const containerH = this.chart.getHeight();
+            if (containerH <= 0)
+              return;
+            const deltaPct = deltaY / containerH * 100;
+            const minAbove = this._paneDragState.aboveId === "main" ? MIN_MAIN : MIN_INDICATOR;
+            const minBelow = MIN_INDICATOR;
+            let newAbove = this._paneDragState.startAboveHeight + deltaPct;
+            let newBelow = this._paneDragState.startBelowHeight - deltaPct;
+            if (newAbove < minAbove) {
+              newAbove = minAbove;
+              newBelow = this._paneDragState.startAboveHeight + this._paneDragState.startBelowHeight - minAbove;
+            }
+            if (newBelow < minBelow) {
+              newBelow = minBelow;
+              newAbove = this._paneDragState.startAboveHeight + this._paneDragState.startBelowHeight - minBelow;
+            }
+            if (this._paneDragState.aboveId === "main") {
+              this._mainHeightOverride = newAbove;
+            } else {
+              const aboveInd = this.indicators.get(this._paneDragState.aboveId);
+              if (aboveInd)
+                aboveInd.height = newAbove;
+            }
+            const belowInd = this.indicators.get(this._paneDragState.belowId);
+            if (belowInd)
+              belowInd.height = newBelow;
+            if (!this._paneResizeRafId) {
+              this._paneResizeRafId = requestAnimationFrame(() => {
+                this._paneResizeRafId = null;
+                this.render();
+              });
+            }
+            zr.setCursorStyle("row-resize");
+            e.stop?.();
+            return;
+          }
+          const boundary = findBoundary(e.offsetY);
+          if (boundary) {
+            zr.setCursorStyle("row-resize");
+          }
+        });
+        zr.on("mousedown", (e) => {
+          const boundary = findBoundary(e.offsetY);
+          if (!boundary)
+            return;
+          this._paneDragState = {
+            startY: e.offsetY,
+            aboveId: boundary.aboveId,
+            belowId: boundary.belowId,
+            startAboveHeight: getPaneHeight(boundary.aboveId),
+            startBelowHeight: getPaneHeight(boundary.belowId)
+          };
+          zr.setCursorStyle("row-resize");
+          e.stop?.();
+        });
+        zr.on("mouseup", () => {
+          if (this._paneDragState) {
+            this._paneDragState = null;
+            if (this._paneResizeRafId) {
+              cancelAnimationFrame(this._paneResizeRafId);
+              this._paneResizeRafId = null;
+            }
+            this.render();
+          }
+        });
       }
       bindDrawingEvents() {
         let hideTimeout = null;
@@ -2457,8 +4742,8 @@
               type: info.drawing.type
             });
             this.chart.getZr().setCursorStyle("move");
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:hover", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -2487,8 +4772,8 @@
           }, 50);
           if (info.targetName === "line") {
             this.events.emit("drawing:mouseout", { id: info.drawing.id });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:mouseout", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -2509,8 +4794,8 @@
               x,
               y
             });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:mousedown", {
               id: info.drawing.id,
               pointIndex: pointIdx,
@@ -2530,8 +4815,8 @@
           }
           if (info.targetName === "line") {
             this.events.emit("drawing:click", { id: info.drawing.id });
-          } else if (info.targetName?.startsWith("point")) {
-            const pointIdx = info.targetName === "point-start" ? 0 : 1;
+          } else if (info.targetName?.startsWith("point-")) {
+            const pointIdx = parseInt(info.targetName.split("-")[1]) || 0;
             this.events.emit("drawing:point:click", {
               id: info.drawing.id,
               pointIndex: pointIdx
@@ -2545,6 +4830,31 @@
               this.selectedDrawingId = null;
               this.render();
             }
+          }
+        });
+        this._labelTooltipEl = document.createElement("div");
+        this._labelTooltipEl.style.cssText = "position:absolute;display:none;pointer-events:none;z-index:200;background:rgba(30,41,59,0.95);color:#fff;border:1px solid #475569;border-radius:4px;padding:6px 10px;font-size:12px;line-height:1.5;white-space:pre-wrap;max-width:350px;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-family:" + (this.options.fontFamily || "sans-serif") + ";";
+        this.chartContainer.appendChild(this._labelTooltipEl);
+        this.chart.on("mouseover", { seriesType: "scatter" }, (params) => {
+          const tooltipText = params.data?._tooltipText;
+          if (!tooltipText || !this._labelTooltipEl)
+            return;
+          this._labelTooltipEl.textContent = tooltipText;
+          this._labelTooltipEl.style.display = "block";
+          const chartRect = this.chartContainer.getBoundingClientRect();
+          const event = params.event?.event;
+          if (event) {
+            const x = event.clientX - chartRect.left;
+            const y = event.clientY - chartRect.top;
+            const tipWidth = this._labelTooltipEl.offsetWidth;
+            const left = Math.min(x - tipWidth / 2, chartRect.width - tipWidth - 8);
+            this._labelTooltipEl.style.left = Math.max(4, left) + "px";
+            this._labelTooltipEl.style.top = y + 18 + "px";
+          }
+        });
+        this.chart.on("mouseout", { seriesType: "scatter" }, () => {
+          if (this._labelTooltipEl) {
+            this._labelTooltipEl.style.display = "none";
           }
         });
       }
@@ -2566,6 +4876,54 @@
       }
       registerPlugin(plugin) {
         this.pluginManager.register(plugin);
+      }
+      registerDrawingRenderer(renderer) {
+        this.drawingRenderers.register(renderer);
+      }
+      snapToCandle(point) {
+        const dataCoord = this.coordinateConversion.pixelToData(point);
+        if (!dataCoord)
+          return point;
+        const paneIndex = dataCoord.paneIndex || 0;
+        if (paneIndex !== 0)
+          return point;
+        const realIndex = Math.round(dataCoord.timeIndex);
+        if (realIndex < 0 || realIndex >= this.marketData.length)
+          return point;
+        const candle = this.marketData[realIndex];
+        if (!candle)
+          return point;
+        const snappedX = this.chart.convertToPixel(
+          { gridIndex: paneIndex },
+          [realIndex + this.dataIndexOffset, candle.close]
+        );
+        if (!snappedX)
+          return point;
+        const snapPxX = snappedX[0];
+        const ohlc = [candle.open, candle.high, candle.low, candle.close];
+        let bestValue = ohlc[0];
+        let bestDist = Infinity;
+        for (const val of ohlc) {
+          const px = this.chart.convertToPixel(
+            { gridIndex: paneIndex },
+            [realIndex + this.dataIndexOffset, val]
+          );
+          if (px) {
+            const dist = Math.abs(px[1] - point.y);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestValue = val;
+            }
+          }
+        }
+        const snappedY = this.chart.convertToPixel(
+          { gridIndex: paneIndex },
+          [realIndex + this.dataIndexOffset, bestValue]
+        );
+        return {
+          x: snapPxX,
+          y: snappedY ? snappedY[1] : point.y
+        };
       }
       // --- Drawing System ---
       addDrawing(drawing) {
@@ -2708,8 +5066,10 @@
           this.options,
           this.isMainCollapsed,
           this.maximizedPaneId,
-          this.marketData
+          this.marketData,
+          this._mainHeightOverride ?? void 0
         );
+        this._lastLayout = layout;
         const paddedOHLCVForShapes = [...Array(paddingPoints).fill(null), ...this.marketData, ...Array(paddingPoints).fill(null)];
         const { series: indicatorSeries, barColors } = SeriesBuilder.buildIndicatorSeries(
           this.indicators,
@@ -2726,13 +5086,15 @@
         );
         const coloredCandlestickData = paddedCandlestickData.map((candle, i) => {
           if (barColors[i]) {
+            const vals = candle.value || candle;
             return {
-              value: candle.value || candle,
+              value: vals,
               itemStyle: {
                 color: barColors[i],
-                color0: barColors[i],
-                borderColor: barColors[i],
-                borderColor0: barColors[i]
+                // up-candle body fill
+                color0: barColors[i]
+                // down-candle body fill
+                // borderColor/borderColor0 intentionally omitted → inherits series default (green/red)
               }
             };
           }
@@ -2748,28 +5110,48 @@
               markLine: candlestickSeries.markLine
               // Ensure markLine is updated
             },
-            ...indicatorSeries.map((s) => {
-              const update = { data: s.data };
-              if (s.renderItem) {
-                update.renderItem = s.renderItem;
-              }
-              return update;
-            })
+            ...indicatorSeries
           ]
         };
         this.chart.setOption(updateOption, { notMerge: false });
+        const allTables = [];
+        this.indicators.forEach((indicator) => {
+          Object.values(indicator.plots).forEach((plot) => {
+            if (plot.options?.style === "table") {
+              plot.data?.forEach((entry) => {
+                const tables = Array.isArray(entry.value) ? entry.value : [entry.value];
+                tables.forEach((t) => {
+                  if (t && !t._deleted) {
+                    t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
+                    allTables.push(t);
+                  }
+                });
+              });
+            }
+          });
+        });
+        this._lastTables = allTables;
+        this._renderTableOverlays();
         this.startCountdown();
       }
       startCountdown() {
         this.stopCountdown();
-        if (!this.options.lastPriceLine?.showCountdown || !this.options.interval || this.marketData.length === 0) {
+        if (!this.options.lastPriceLine?.showCountdown || this.marketData.length === 0) {
           return;
         }
+        let interval = this.options.interval;
+        if (!interval && this.marketData.length >= 2) {
+          const last = this.marketData[this.marketData.length - 1];
+          const prev = this.marketData[this.marketData.length - 2];
+          interval = last.time - prev.time;
+        }
+        if (!interval)
+          return;
         const updateLabel = () => {
           if (this.marketData.length === 0)
             return;
           const lastBar = this.marketData[this.marketData.length - 1];
-          const nextCloseTime = lastBar.time + (this.options.interval || 0);
+          const nextCloseTime = lastBar.time + interval;
           const now = Date.now();
           const diff = nextCloseTime - now;
           if (diff <= 0) {
@@ -2804,7 +5186,7 @@ ${timeString}`;
           this.chart.setOption({
             series: [
               {
-                name: this.options.title || "Market",
+                id: "__candlestick__",
                 markLine: {
                   data: [
                     {
@@ -2893,6 +5275,35 @@ ${timeString}`;
       }
       resize() {
         this.chart.resize();
+        this._renderTableOverlays();
+      }
+      /**
+       * Build table canvas graphic elements from the current _lastTables.
+       * Must be called AFTER setOption so grid rects are available from ECharts.
+       * Returns an array of ECharts graphic elements.
+       */
+      _buildTableGraphics() {
+        const model = this.chart.getModel();
+        const getGridRect = (paneIndex) => model.getComponent("grid", paneIndex)?.coordinateSystem?.getRect();
+        const elements = TableCanvasRenderer.buildGraphicElements(this._lastTables, getGridRect);
+        this._tableGraphicIds = [];
+        for (let i = 0; i < elements.length; i++) {
+          const id = `__qf_table_${i}`;
+          elements[i].id = id;
+          this._tableGraphicIds.push(id);
+        }
+        return elements;
+      }
+      /**
+       * Render table overlays after a non-replacing setOption (updateData, resize).
+       * Uses replaceMerge to cleanly replace all graphic elements without disrupting
+       * other interactive components (dataZoom, tooltip, etc.).
+       */
+      _renderTableOverlays() {
+        const tableGraphics = this._buildTableGraphics();
+        const allGraphics = [...this._baseGraphics, ...tableGraphics];
+        this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ["graphic"] });
+        TableOverlayRenderer.clearAll(this.overlayContainer);
       }
       destroy() {
         this.stopCountdown();
@@ -2909,8 +5320,167 @@ ${timeString}`;
           this.timeToIndex.set(k.time, index);
         });
         const dataLength = this.marketData.length;
-        const paddingPoints = Math.ceil(dataLength * this.padding);
-        this.dataIndexOffset = paddingPoints;
+        const initialPadding = Math.ceil(dataLength * this.padding);
+        this._paddingPoints = Math.max(this._paddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        this.dataIndexOffset = this._paddingPoints;
+      }
+      /**
+       * Expand symmetric padding to the given number of points per side.
+       * No-op if newPaddingPoints <= current. Performs a full render() and
+       * restores the viewport position so there is no visual jump.
+       */
+      expandPadding(newPaddingPoints) {
+        this._resizePadding(newPaddingPoints);
+      }
+      /**
+       * Resize symmetric padding to the given number of points per side.
+       * Works for both growing and shrinking. Clamps to [min, max].
+       * Uses merge-mode setOption to preserve drag/interaction state.
+       */
+      _resizePadding(newPaddingPoints) {
+        const initialPadding = Math.ceil(this.marketData.length * this.padding);
+        newPaddingPoints = Math.max(newPaddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        newPaddingPoints = Math.min(newPaddingPoints, this.LAZY_MAX_PADDING);
+        if (newPaddingPoints === this._paddingPoints)
+          return;
+        const oldPadding = this._paddingPoints;
+        const oldTotal = this.marketData.length + 2 * oldPadding;
+        const currentOption = this.chart.getOption();
+        const zoomComp = currentOption?.dataZoom?.find((dz) => dz.type === "slider" || dz.type === "inside");
+        const oldStartIdx = zoomComp ? zoomComp.start / 100 * oldTotal : 0;
+        const oldEndIdx = zoomComp ? zoomComp.end / 100 * oldTotal : oldTotal;
+        const delta = newPaddingPoints - oldPadding;
+        this._paddingPoints = newPaddingPoints;
+        this.dataIndexOffset = this._paddingPoints;
+        const paddingPoints = this._paddingPoints;
+        const emptyCandle = { value: [NaN, NaN, NaN, NaN], itemStyle: { opacity: 0 } };
+        const candlestickSeries = SeriesBuilder.buildCandlestickSeries(this.marketData, this.options);
+        const paddedCandlestickData = [
+          ...Array(paddingPoints).fill(emptyCandle),
+          ...candlestickSeries.data,
+          ...Array(paddingPoints).fill(emptyCandle)
+        ];
+        const categoryData = [
+          ...Array(paddingPoints).fill(""),
+          ...this.marketData.map((k) => new Date(k.time).toLocaleString()),
+          ...Array(paddingPoints).fill("")
+        ];
+        const paddedOHLCVForShapes = [...Array(paddingPoints).fill(null), ...this.marketData, ...Array(paddingPoints).fill(null)];
+        const layout = LayoutManager.calculate(
+          this.chart.getHeight(),
+          this.indicators,
+          this.options,
+          this.isMainCollapsed,
+          this.maximizedPaneId,
+          this.marketData,
+          this._mainHeightOverride ?? void 0
+        );
+        const { series: indicatorSeries, barColors } = SeriesBuilder.buildIndicatorSeries(
+          this.indicators,
+          this.timeToIndex,
+          layout.paneLayout,
+          categoryData.length,
+          paddingPoints,
+          paddedOHLCVForShapes,
+          layout.overlayYAxisMap,
+          layout.separatePaneYAxisOffset
+        );
+        const coloredCandlestickData = paddedCandlestickData.map((candle, i) => {
+          if (barColors[i]) {
+            const vals = candle.value || candle;
+            return {
+              value: vals,
+              itemStyle: {
+                color: barColors[i],
+                color0: barColors[i]
+              }
+            };
+          }
+          return candle;
+        });
+        const newTotal = this.marketData.length + 2 * newPaddingPoints;
+        const newStart = Math.max(0, (oldStartIdx + delta) / newTotal * 100);
+        const newEnd = Math.min(100, (oldEndIdx + delta) / newTotal * 100);
+        const drawingSeriesUpdates = [];
+        const drawingsByPane = /* @__PURE__ */ new Map();
+        this.drawings.forEach((d) => {
+          const paneIdx = d.paneIndex || 0;
+          if (!drawingsByPane.has(paneIdx))
+            drawingsByPane.set(paneIdx, []);
+          drawingsByPane.get(paneIdx).push(d);
+        });
+        drawingsByPane.forEach((paneDrawings) => {
+          drawingSeriesUpdates.push({
+            data: paneDrawings.map((d) => [
+              d.points[0].timeIndex + this.dataIndexOffset,
+              d.points[0].value,
+              d.points[1].timeIndex + this.dataIndexOffset,
+              d.points[1].value
+            ])
+          });
+        });
+        const updateOption = {
+          xAxis: currentOption.xAxis.map(() => ({ data: categoryData })),
+          dataZoom: [
+            { start: newStart, end: newEnd },
+            { start: newStart, end: newEnd }
+          ],
+          series: [
+            { data: coloredCandlestickData, markLine: candlestickSeries.markLine },
+            ...indicatorSeries.map((s) => {
+              const update = { data: s.data };
+              if (s.renderItem)
+                update.renderItem = s.renderItem;
+              return update;
+            }),
+            ...drawingSeriesUpdates
+          ]
+        };
+        this.chart.setOption(updateOption, { notMerge: false });
+      }
+      /**
+       * Check if user scrolled near an edge (expand) or away from edges (contract).
+       * Uses requestAnimationFrame to avoid cascading re-renders inside
+       * the ECharts dataZoom event callback.
+       */
+      _checkEdgeAndExpand() {
+        if (this._expandScheduled)
+          return;
+        const zoomComp = this.chart.getOption()?.dataZoom?.find((dz) => dz.type === "slider" || dz.type === "inside");
+        if (!zoomComp)
+          return;
+        const paddingPoints = this._paddingPoints;
+        const dataLength = this.marketData.length;
+        const totalLength = dataLength + 2 * paddingPoints;
+        const startIdx = Math.round(zoomComp.start / 100 * totalLength);
+        const endIdx = Math.round(zoomComp.end / 100 * totalLength);
+        const dataStart = paddingPoints;
+        const dataEnd = paddingPoints + dataLength - 1;
+        const visibleCandles = Math.max(0, Math.min(endIdx, dataEnd) - Math.max(startIdx, dataStart) + 1);
+        const nearLeftEdge = startIdx < this.LAZY_EDGE_THRESHOLD;
+        const nearRightEdge = endIdx > totalLength - this.LAZY_EDGE_THRESHOLD;
+        if ((nearLeftEdge || nearRightEdge) && paddingPoints < this.LAZY_MAX_PADDING && visibleCandles >= 3) {
+          this._expandScheduled = true;
+          requestAnimationFrame(() => {
+            this._expandScheduled = false;
+            this._resizePadding(paddingPoints + this.LAZY_CHUNK_SIZE);
+          });
+          return;
+        }
+        const leftPadUsed = Math.max(0, paddingPoints - startIdx);
+        const rightPadUsed = Math.max(0, endIdx - (paddingPoints + dataLength - 1));
+        const neededPadding = Math.max(
+          leftPadUsed + this.LAZY_CHUNK_SIZE,
+          // keep one chunk of buffer
+          rightPadUsed + this.LAZY_CHUNK_SIZE
+        );
+        if (paddingPoints > neededPadding + this.LAZY_CHUNK_SIZE) {
+          this._expandScheduled = true;
+          requestAnimationFrame(() => {
+            this._expandScheduled = false;
+            this._resizePadding(neededPadding);
+          });
+        }
       }
       render() {
         if (this.marketData.length === 0)
@@ -2953,8 +5523,10 @@ ${timeString}`;
           this.options,
           this.isMainCollapsed,
           this.maximizedPaneId,
-          this.marketData
+          this.marketData,
+          this._mainHeightOverride ?? void 0
         );
+        this._lastLayout = layout;
         if (!currentZoomState && layout.dataZoom && this.marketData.length > 0) {
           const realDataLength = this.marketData.length;
           const totalLength = categoryData.length;
@@ -3002,19 +5574,31 @@ ${timeString}`;
         );
         candlestickSeries.data = candlestickSeries.data.map((candle, i) => {
           if (barColors[i]) {
+            const vals = candle.value || candle;
             return {
-              value: candle.value || candle,
+              value: vals,
               itemStyle: {
                 color: barColors[i],
-                color0: barColors[i],
-                borderColor: barColors[i],
-                borderColor0: barColors[i]
+                color0: barColors[i]
               }
             };
           }
           return candle;
         });
-        const graphic = GraphicBuilder.build(layout, this.options, this.toggleIndicator.bind(this), this.isMainCollapsed, this.maximizedPaneId);
+        const overlayIndicators = [];
+        this.indicators.forEach((ind, id) => {
+          if (ind.paneIndex === 0) {
+            overlayIndicators.push({ id, titleColor: ind.titleColor });
+          }
+        });
+        const graphic = GraphicBuilder.build(
+          layout,
+          this.options,
+          this.toggleIndicator.bind(this),
+          this.isMainCollapsed,
+          this.maximizedPaneId,
+          overlayIndicators
+        );
         const drawingsByPane = /* @__PURE__ */ new Map();
         this.drawings.forEach((d) => {
           const paneIdx = d.paneIndex || 0;
@@ -3035,233 +5619,33 @@ ${timeString}`;
               const drawing = drawings[params.dataIndex];
               if (!drawing)
                 return;
-              const start = drawing.points[0];
-              const end = drawing.points[1];
-              if (!start || !end)
+              const renderer = this.drawingRenderers.get(drawing.type);
+              if (!renderer)
                 return;
-              const p1 = api.coord([start.timeIndex, start.value]);
-              const p2 = api.coord([end.timeIndex, end.value]);
-              const isSelected = drawing.id === this.selectedDrawingId;
-              if (drawing.type === "line") {
-                return {
-                  type: "group",
-                  children: [
-                    {
-                      type: "line",
-                      name: "line",
-                      shape: {
-                        x1: p1[0],
-                        y1: p1[1],
-                        x2: p2[0],
-                        y2: p2[1]
-                      },
-                      style: {
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: drawing.style?.lineWidth || 2
-                      }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-start",
-                      shape: { cx: p1[0], cy: p1[1], r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                        // Show if selected
-                      }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-end",
-                      shape: { cx: p2[0], cy: p2[1], r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                        // Show if selected
-                      }
-                    }
-                  ]
-                };
-              } else if (drawing.type === "fibonacci") {
-                const x1 = p1[0];
-                const y1 = p1[1];
-                const x2 = p2[0];
-                const y2 = p2[1];
-                const startX = Math.min(x1, x2);
-                const endX = Math.max(x1, x2);
-                const width = endX - startX;
-                const diffY = y2 - y1;
-                const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-                const colors = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
-                const children = [];
-                children.push({
-                  type: "line",
-                  name: "line",
-                  // Use 'line' name to enable dragging logic in DrawingEditor
-                  shape: { x1, y1, x2, y2 },
-                  style: {
-                    stroke: "#999",
-                    lineWidth: 1,
-                    lineDash: [4, 4]
-                  }
-                });
-                children.push({
-                  type: "circle",
-                  name: "point-start",
-                  shape: { cx: x1, cy: y1, r: 4 },
-                  style: {
-                    fill: "#fff",
-                    stroke: drawing.style?.color || "#3b82f6",
-                    lineWidth: 1,
-                    opacity: isSelected ? 1 : 0
-                  },
-                  z: 100
-                  // Ensure on top
-                });
-                children.push({
-                  type: "circle",
-                  name: "point-end",
-                  shape: { cx: x2, cy: y2, r: 4 },
-                  style: {
-                    fill: "#fff",
-                    stroke: drawing.style?.color || "#3b82f6",
-                    lineWidth: 1,
-                    opacity: isSelected ? 1 : 0
-                  },
-                  z: 100
-                });
-                levels.forEach((level, index) => {
-                  const levelY = y2 - diffY * level;
-                  const color = colors[index % colors.length];
-                  children.push({
-                    type: "line",
-                    name: "fib-line",
-                    // distinct name, maybe we don't want to drag by clicking these lines? or yes? 'line' triggers drag. 'fib-line' won't unless we update logic.
-                    // The user asked for "fib levels between start and end".
-                    shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                    style: { stroke: color, lineWidth: 1 },
-                    silent: true
-                    // Make internal lines silent so clicks pass to background/diagonal?
-                  });
-                  const startVal = drawing.points[0].value;
-                  const endVal = drawing.points[1].value;
-                  const valDiff = endVal - startVal;
-                  const price = endVal - valDiff * level;
-                  children.push({
-                    type: "text",
-                    style: {
-                      text: `${level} (${price.toFixed(2)})`,
-                      x: startX + 5,
-                      y: levelY - 10,
-                      fill: color,
-                      fontSize: 10
-                    },
-                    silent: true
-                  });
-                  if (index < levels.length - 1) {
-                    const nextLevel = levels[index + 1];
-                    const nextY = y2 - diffY * nextLevel;
-                    const rectH = Math.abs(nextY - levelY);
-                    const rectY = Math.min(levelY, nextY);
-                    children.push({
-                      type: "rect",
-                      shape: { x: startX, y: rectY, width, height: rectH },
-                      style: {
-                        fill: colors[(index + 1) % colors.length],
-                        opacity: 0.1
-                      },
-                      silent: true
-                      // Let clicks pass through?
-                    });
-                  }
-                });
-                const backgrounds = [];
-                const linesAndText = [];
-                levels.forEach((level, index) => {
-                  const levelY = y2 - diffY * level;
-                  const color = colors[index % colors.length];
-                  linesAndText.push({
-                    type: "line",
-                    shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
-                    style: { stroke: color, lineWidth: 1 },
-                    silent: true
-                  });
-                  const startVal = drawing.points[0].value;
-                  const endVal = drawing.points[1].value;
-                  const valDiff = endVal - startVal;
-                  const price = endVal - valDiff * level;
-                  linesAndText.push({
-                    type: "text",
-                    style: {
-                      text: `${level} (${price.toFixed(2)})`,
-                      x: startX + 5,
-                      y: levelY - 10,
-                      fill: color,
-                      fontSize: 10
-                    },
-                    silent: true
-                  });
-                  if (index < levels.length - 1) {
-                    const nextLevel = levels[index + 1];
-                    const nextY = y2 - diffY * nextLevel;
-                    const rectH = Math.abs(nextY - levelY);
-                    const rectY = Math.min(levelY, nextY);
-                    backgrounds.push({
-                      type: "rect",
-                      name: "line",
-                      // Enable dragging by clicking background!
-                      shape: { x: startX, y: rectY, width, height: rectH },
-                      style: {
-                        fill: colors[(index + 1) % colors.length],
-                        opacity: 0.1
-                      }
-                    });
-                  }
-                });
-                return {
-                  type: "group",
-                  children: [
-                    ...backgrounds,
-                    ...linesAndText,
-                    {
-                      type: "line",
-                      name: "line",
-                      shape: { x1, y1, x2, y2 },
-                      style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
-                    },
-                    {
-                      type: "circle",
-                      name: "point-start",
-                      shape: { cx: x1, cy: y1, r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                      },
-                      z: 100
-                    },
-                    {
-                      type: "circle",
-                      name: "point-end",
-                      shape: { cx: x2, cy: y2, r: 4 },
-                      style: {
-                        fill: "#fff",
-                        stroke: drawing.style?.color || "#3b82f6",
-                        lineWidth: 1,
-                        opacity: isSelected ? 1 : 0
-                      },
-                      z: 100
-                    }
-                  ]
-                };
-              }
+              const drawingOffset = this.dataIndexOffset;
+              const pixelPoints = drawing.points.map(
+                (p) => api.coord([p.timeIndex + drawingOffset, p.value])
+              );
+              return renderer.render({
+                drawing,
+                pixelPoints,
+                isSelected: drawing.id === this.selectedDrawingId,
+                api
+              });
             },
-            data: drawings.map((d) => [d.points[0].timeIndex, d.points[0].value, d.points[1].timeIndex, d.points[1].value]),
+            data: drawings.map((d) => {
+              const row = [];
+              d.points.forEach((p) => {
+                row.push(p.timeIndex + this.dataIndexOffset, p.value);
+              });
+              return row;
+            }),
+            encode: (() => {
+              const maxPoints = drawings.reduce((max, d) => Math.max(max, d.points.length), 0);
+              const xDims = Array.from({ length: maxPoints }, (_, i) => i * 2);
+              const yDims = Array.from({ length: maxPoints }, (_, i) => i * 2 + 1);
+              return { x: xDims, y: yDims };
+            })(),
             z: 100,
             silent: false
           });
@@ -3282,6 +5666,22 @@ ${timeString}`;
           }
           return `<div style="min-width: 200px;">${html}</div>`;
         };
+        const allTables = [];
+        this.indicators.forEach((indicator) => {
+          Object.values(indicator.plots).forEach((plot) => {
+            if (plot.options?.style === "table") {
+              plot.data?.forEach((entry) => {
+                const tables = Array.isArray(entry.value) ? entry.value : [entry.value];
+                tables.forEach((t) => {
+                  if (t && !t._deleted) {
+                    t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
+                    allTables.push(t);
+                  }
+                });
+              });
+            }
+          });
+        });
         const option = {
           backgroundColor: this.options.backgroundColor,
           animation: false,
@@ -3329,22 +5729,42 @@ ${timeString}`;
           series: [candlestickSeries, ...indicatorSeries, ...drawingSeriesList]
         };
         this.chart.setOption(option, true);
+        this._baseGraphics = graphic;
+        this._lastTables = allTables;
+        if (allTables.length > 0) {
+          const tableGraphics = this._buildTableGraphics();
+          if (tableGraphics.length > 0) {
+            const allGraphics = [...graphic, ...tableGraphics];
+            this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ["graphic"] });
+          }
+        } else {
+          this._tableGraphicIds = [];
+        }
+        TableOverlayRenderer.clearAll(this.overlayContainer);
       }
     }
 
-    var __defProp$3 = Object.defineProperty;
-    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$3 = (obj, key, value) => {
-      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$o = Object.defineProperty;
+    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$o = (obj, key, value) => {
+      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class AbstractPlugin {
       constructor(config) {
-        __publicField$3(this, "id");
-        __publicField$3(this, "name");
-        __publicField$3(this, "icon");
-        __publicField$3(this, "context");
-        __publicField$3(this, "eventListeners", []);
+        __publicField$o(this, "id");
+        __publicField$o(this, "name");
+        __publicField$o(this, "icon");
+        __publicField$o(this, "context");
+        __publicField$o(this, "eventListeners", []);
+        // Snap indicator
+        __publicField$o(this, "_snapIndicator", null);
+        __publicField$o(this, "_snapMoveHandler", null);
+        __publicField$o(this, "_snapKeyDownHandler", null);
+        __publicField$o(this, "_snapKeyUpHandler", null);
+        __publicField$o(this, "_snapBlurHandler", null);
+        __publicField$o(this, "_snapActive", false);
+        __publicField$o(this, "_lastMouseEvent", null);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -3361,6 +5781,7 @@ ${timeString}`;
       }
       activate() {
         this.onActivate();
+        this._bindSnapIndicator();
         this.context.events.emit("plugin:activated", this.id);
       }
       /**
@@ -3369,6 +5790,7 @@ ${timeString}`;
       onActivate() {
       }
       deactivate() {
+        this._unbindSnapIndicator();
         this.onDeactivate();
         this.context.events.emit("plugin:deactivated", this.id);
       }
@@ -3378,6 +5800,7 @@ ${timeString}`;
       onDeactivate() {
       }
       destroy() {
+        this._unbindSnapIndicator();
         this.removeAllListeners();
         this.onDestroy();
       }
@@ -3424,72 +5847,169 @@ ${timeString}`;
       get marketData() {
         return this.context.getMarketData();
       }
+      /**
+       * Get the event point coordinates, snapping to nearest candle OHLC if Ctrl is held.
+       * Use this instead of [params.offsetX, params.offsetY] in click/mousemove handlers.
+       */
+      getPoint(params) {
+        const x = params.offsetX;
+        const y = params.offsetY;
+        const event = params.event;
+        const ctrlKey = event?.ctrlKey || event?.metaKey;
+        if (ctrlKey) {
+          const snapped = this.context.snapToCandle({ x, y });
+          return [snapped.x, snapped.y];
+        }
+        return [x, y];
+      }
+      // --- Snap Indicator (internal) ---
+      _bindSnapIndicator() {
+        const zr = this.context.getChart().getZr();
+        this._snapMoveHandler = (e) => {
+          this._lastMouseEvent = e;
+          const ctrlKey = e.event?.ctrlKey || e.event?.metaKey;
+          if (ctrlKey) {
+            this._showSnapAt(e.offsetX, e.offsetY);
+          } else {
+            this._hideSnap();
+          }
+        };
+        this._snapKeyDownHandler = (e) => {
+          if ((e.key === "Control" || e.key === "Meta") && this._lastMouseEvent) {
+            this._showSnapAt(this._lastMouseEvent.offsetX, this._lastMouseEvent.offsetY);
+          }
+        };
+        this._snapKeyUpHandler = (e) => {
+          if (e.key === "Control" || e.key === "Meta") {
+            this._hideSnap();
+          }
+        };
+        this._snapBlurHandler = () => {
+          this._hideSnap();
+        };
+        zr.on("mousemove", this._snapMoveHandler);
+        window.addEventListener("keydown", this._snapKeyDownHandler);
+        window.addEventListener("keyup", this._snapKeyUpHandler);
+        window.addEventListener("blur", this._snapBlurHandler);
+      }
+      _unbindSnapIndicator() {
+        if (this._snapMoveHandler) {
+          try {
+            this.context.getChart().getZr().off("mousemove", this._snapMoveHandler);
+          } catch {
+          }
+          this._snapMoveHandler = null;
+        }
+        if (this._snapKeyDownHandler) {
+          window.removeEventListener("keydown", this._snapKeyDownHandler);
+          this._snapKeyDownHandler = null;
+        }
+        if (this._snapKeyUpHandler) {
+          window.removeEventListener("keyup", this._snapKeyUpHandler);
+          this._snapKeyUpHandler = null;
+        }
+        if (this._snapBlurHandler) {
+          window.removeEventListener("blur", this._snapBlurHandler);
+          this._snapBlurHandler = null;
+        }
+        this._removeSnapGraphic();
+        this._lastMouseEvent = null;
+      }
+      _removeSnapGraphic() {
+        if (this._snapIndicator) {
+          try {
+            this.context.getChart().getZr().remove(this._snapIndicator);
+          } catch {
+          }
+          this._snapIndicator = null;
+          this._snapActive = false;
+        }
+      }
+      _showSnapAt(x, y) {
+        const snapped = this.context.snapToCandle({ x, y });
+        const zr = this.context.getChart().getZr();
+        if (!this._snapIndicator) {
+          this._snapIndicator = new echarts__namespace.graphic.Circle({
+            shape: { cx: 0, cy: 0, r: 5 },
+            style: {
+              fill: "rgba(59, 130, 246, 0.3)",
+              stroke: "#3b82f6",
+              lineWidth: 1.5
+            },
+            z: 9999,
+            silent: true
+          });
+          zr.add(this._snapIndicator);
+        }
+        this._snapIndicator.setShape({ cx: snapped.x, cy: snapped.y });
+        this._snapIndicator.show();
+        this._snapActive = true;
+      }
+      _hideSnap() {
+        if (this._snapIndicator && this._snapActive) {
+          this._snapIndicator.hide();
+          this._snapActive = false;
+        }
+      }
     }
 
-    var __defProp$2 = Object.defineProperty;
-    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$2 = (obj, key, value) => {
-      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$n = Object.defineProperty;
+    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$n = (obj, key, value) => {
+      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class MeasureTool extends AbstractPlugin {
-      // End Arrow
-      constructor(options) {
+      constructor(options = {}) {
         super({
           id: "measure",
           name: options?.name || "Measure",
           icon: options?.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></svg>`
         });
-        __publicField$2(this, "zr");
-        __publicField$2(this, "state", "idle");
-        __publicField$2(this, "startPoint", null);
-        __publicField$2(this, "endPoint", null);
+        __publicField$n(this, "zr");
+        __publicField$n(this, "state", "idle");
+        __publicField$n(this, "startPoint", null);
+        __publicField$n(this, "endPoint", null);
         // ZRender Elements
-        __publicField$2(this, "group", null);
-        __publicField$2(this, "rect", null);
-        // Measurement Box
-        __publicField$2(this, "labelRect", null);
-        // Label Background
-        __publicField$2(this, "labelText", null);
-        // Label Text
-        __publicField$2(this, "lineV", null);
-        // Vertical Arrow Line
-        __publicField$2(this, "lineH", null);
-        // Horizontal Arrow Line
-        __publicField$2(this, "arrowStart", null);
-        // Start Arrow
-        __publicField$2(this, "arrowEnd", null);
+        __publicField$n(this, "group", null);
+        __publicField$n(this, "rect", null);
+        __publicField$n(this, "labelRect", null);
+        __publicField$n(this, "labelText", null);
+        __publicField$n(this, "lineV", null);
+        __publicField$n(this, "lineH", null);
+        __publicField$n(this, "arrowStart", null);
+        __publicField$n(this, "arrowEnd", null);
         // --- Interaction Handlers ---
-        __publicField$2(this, "onMouseDown", () => {
+        __publicField$n(this, "onMouseDown", () => {
           if (this.state === "finished") {
             this.removeGraphic();
           }
         });
-        __publicField$2(this, "onChartInteraction", () => {
+        __publicField$n(this, "onChartInteraction", () => {
           if (this.group) {
             this.removeGraphic();
           }
         });
-        __publicField$2(this, "onClick", (params) => {
+        __publicField$n(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.context.disableTools();
             this.enableClearListeners();
           }
         });
-        __publicField$2(this, "clearHandlers", {});
-        __publicField$2(this, "onMouseMove", (params) => {
+        __publicField$n(this, "clearHandlers", {});
+        __publicField$n(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
-          this.endPoint = [params.offsetX, params.offsetY];
+          this.endPoint = this.getPoint(params);
           this.updateGraphic();
         });
       }
@@ -3676,7 +6196,7 @@ ${timeString}`;
           });
           this.arrowEnd.setStyle({ fill: strokeColor });
         }
-        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars, ${(bars * 0).toFixed(0)}d`].join("\n");
+        const textContent = [`${priceDiff.toFixed(2)} (${priceChangePercent.toFixed(2)}%)`, `${bars} bars`].join("\n");
         const labelW = 140;
         const labelH = 40;
         const rectBottomY = Math.max(y1, y2);
@@ -3708,43 +6228,93 @@ ${timeString}`;
       }
     }
 
-    var __defProp$1 = Object.defineProperty;
-    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$1 = (obj, key, value) => {
-      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$m = Object.defineProperty;
+    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$m = (obj, key, value) => {
+      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class LineDrawingRenderer {
+      constructor() {
+        __publicField$m(this, "type", "line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2, y2 },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 2
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              }
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$l = Object.defineProperty;
+    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$l = (obj, key, value) => {
+      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineTool extends AbstractPlugin {
-      constructor(options) {
+      constructor(options = {}) {
         super({
           id: "trend-line",
           name: options?.name || "Trend Line",
           icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2" /></svg>`
         });
-        __publicField$1(this, "zr");
-        __publicField$1(this, "state", "idle");
-        __publicField$1(this, "startPoint", null);
-        __publicField$1(this, "endPoint", null);
+        __publicField$l(this, "zr");
+        __publicField$l(this, "state", "idle");
+        __publicField$l(this, "startPoint", null);
+        __publicField$l(this, "endPoint", null);
         // ZRender Elements
-        __publicField$1(this, "group", null);
-        __publicField$1(this, "line", null);
-        __publicField$1(this, "startCircle", null);
-        __publicField$1(this, "endCircle", null);
+        __publicField$l(this, "group", null);
+        __publicField$l(this, "line", null);
+        __publicField$l(this, "startCircle", null);
+        __publicField$l(this, "endCircle", null);
         // --- Interaction Handlers ---
-        __publicField$1(this, "onMouseDown", () => {
-        });
-        __publicField$1(this, "onChartInteraction", () => {
-        });
-        __publicField$1(this, "onClick", (params) => {
+        __publicField$l(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             if (this.startPoint && this.endPoint) {
               const start = this.context.coordinateConversion.pixelToData({
@@ -3773,16 +6343,16 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$1(this, "clearHandlers", {});
-        __publicField$1(this, "onMouseMove", (params) => {
+        __publicField$l(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
-          this.endPoint = [params.offsetX, params.offsetY];
+          this.endPoint = this.getPoint(params);
           this.updateGraphic();
         });
       }
       onInit() {
         this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new LineDrawingRenderer());
       }
       onActivate() {
         this.state = "idle";
@@ -3795,21 +6365,12 @@ ${timeString}`;
         this.chart.getZr().setCursorStyle("default");
         this.zr.off("click", this.onClick);
         this.zr.off("mousemove", this.onMouseMove);
-        this.disableClearListeners();
         if (this.state === "drawing") {
           this.removeGraphic();
         }
       }
       onDestroy() {
         this.removeGraphic();
-      }
-      saveDataCoordinates() {
-      }
-      updateGraphicFromData() {
-      }
-      enableClearListeners() {
-      }
-      disableClearListeners() {
       }
       // --- Graphics ---
       initGraphic() {
@@ -3840,7 +6401,6 @@ ${timeString}`;
         if (this.group) {
           this.zr.remove(this.group);
           this.group = null;
-          this.disableClearListeners();
         }
       }
       updateGraphic() {
@@ -3854,10 +6414,114 @@ ${timeString}`;
       }
     }
 
-    var __defProp = Object.defineProperty;
-    var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField = (obj, key, value) => {
-      __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$k = Object.defineProperty;
+    var __defNormalProp$k = (obj, key, value) => key in obj ? __defProp$k(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$k = (obj, key, value) => {
+      __defNormalProp$k(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$5 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$5 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibonacciDrawingRenderer {
+      constructor() {
+        __publicField$k(this, "type", "fibonacci");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        const startX = Math.min(x1, x2);
+        const endX = Math.max(x1, x2);
+        const width = endX - startX;
+        const diffY = y2 - y1;
+        const startVal = drawing.points[0].value;
+        const endVal = drawing.points[1].value;
+        const valDiff = endVal - startVal;
+        const backgrounds = [];
+        const linesAndText = [];
+        LEVELS$5.forEach((level, index) => {
+          const levelY = y2 - diffY * level;
+          const levelColor = COLORS$5[index % COLORS$5.length];
+          linesAndText.push({
+            type: "line",
+            shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          const price = endVal - valDiff * level;
+          linesAndText.push({
+            type: "text",
+            style: {
+              text: `${level} (${price.toFixed(2)})`,
+              x: startX + 5,
+              y: levelY - 10,
+              fill: levelColor,
+              fontSize: 10
+            },
+            silent: true
+          });
+          if (index < LEVELS$5.length - 1) {
+            const nextLevel = LEVELS$5[index + 1];
+            const nextY = y2 - diffY * nextLevel;
+            const rectH = Math.abs(nextY - levelY);
+            const rectY = Math.min(levelY, nextY);
+            backgrounds.push({
+              type: "rect",
+              name: "line",
+              // Enable dragging by clicking background
+              shape: { x: startX, y: rectY, width, height: rectH },
+              style: {
+                fill: COLORS$5[(index + 1) % COLORS$5.length],
+                opacity: 0.1
+              }
+            });
+          }
+        });
+        return {
+          type: "group",
+          children: [
+            ...backgrounds,
+            ...linesAndText,
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              },
+              z: 100
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: {
+                fill: "#fff",
+                stroke: color,
+                lineWidth: 1,
+                opacity: isSelected ? 1 : 0
+              },
+              z: 100
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$j = Object.defineProperty;
+    var __defNormalProp$j = (obj, key, value) => key in obj ? __defProp$j(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$j = (obj, key, value) => {
+      __defNormalProp$j(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciTool extends AbstractPlugin {
@@ -3867,14 +6531,14 @@ ${timeString}`;
           name: options.name || "Fibonacci Retracement",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Z"/></svg>`
         });
-        __publicField(this, "startPoint", null);
-        __publicField(this, "endPoint", null);
-        __publicField(this, "state", "idle");
+        __publicField$j(this, "startPoint", null);
+        __publicField$j(this, "endPoint", null);
+        __publicField$j(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField(this, "graphicGroup", null);
+        __publicField$j(this, "graphicGroup", null);
         // Fib levels config
-        __publicField(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField(this, "colors", [
+        __publicField$j(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$j(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -3890,28 +6554,31 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField(this, "onClick", (params) => {
+        __publicField$j(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
-            this.startPoint = [params.offsetX, params.offsetY];
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
             this.initGraphic();
             this.updateGraphic();
           } else if (this.state === "drawing") {
             this.state = "finished";
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
             this.saveDrawing();
             this.removeGraphic();
             this.context.disableTools();
           }
         });
-        __publicField(this, "onMouseMove", (params) => {
+        __publicField$j(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
-            this.endPoint = [params.offsetX, params.offsetY];
+            this.endPoint = this.getPoint(params);
             this.updateGraphic();
           }
         });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibonacciDrawingRenderer());
       }
       onActivate() {
         this.state = "idle";
@@ -3991,7 +6658,6 @@ ${timeString}`;
               shape: { x: startX, y: rectY, width, height: rectH },
               style: {
                 fill: this.colors[(index + 1) % this.colors.length],
-                // Use next level's color
                 opacity: 0.1
               },
               silent: true
@@ -4020,7 +6686,6 @@ ${timeString}`;
             paneIndex,
             style: {
               color: "#3b82f6",
-              // Default color, though individual lines use specific colors
               lineWidth: 1
             }
           });
@@ -4028,11 +6693,2507 @@ ${timeString}`;
       }
     }
 
+    var __defProp$i = Object.defineProperty;
+    var __defNormalProp$i = (obj, key, value) => key in obj ? __defProp$i(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$i = (obj, key, value) => {
+      __defNormalProp$i(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$4 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$4 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibonacciChannelDrawingRenderer {
+      constructor() {
+        __publicField$i(this, "type", "fibonacci_channel");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const [wx, wy] = pixelPoints[2];
+        const color = drawing.style?.color || "#3b82f6";
+        const bdx = x2 - x1;
+        const bdy = y2 - y1;
+        const blen = Math.sqrt(bdx * bdx + bdy * bdy);
+        if (blen === 0)
+          return;
+        const nx = -bdy / blen;
+        const ny = bdx / blen;
+        const dist = (wx - x1) * nx + (wy - y1) * ny;
+        const children = [];
+        const levelCoords = [];
+        LEVELS$4.forEach((level, index) => {
+          const ox = nx * dist * level;
+          const oy = ny * dist * level;
+          const lx1 = x1 + ox;
+          const ly1 = y1 + oy;
+          const lx2 = x2 + ox;
+          const ly2 = y2 + oy;
+          levelCoords.push({ lx1, ly1, lx2, ly2 });
+          if (index < LEVELS$4.length - 1) {
+            const nextLevel = LEVELS$4[index + 1];
+            const nox = nx * dist * nextLevel;
+            const noy = ny * dist * nextLevel;
+            children.push({
+              type: "polygon",
+              name: "line",
+              // Enable dragging by clicking background
+              shape: {
+                points: [
+                  [lx1, ly1],
+                  [lx2, ly2],
+                  [x2 + nox, y2 + noy],
+                  [x1 + nox, y1 + noy]
+                ]
+              },
+              style: {
+                fill: COLORS$4[(index + 1) % COLORS$4.length],
+                opacity: 0.1
+              }
+            });
+          }
+        });
+        levelCoords.forEach((coords, index) => {
+          const levelColor = COLORS$4[index % COLORS$4.length];
+          children.push({
+            type: "line",
+            shape: { x1: coords.lx1, y1: coords.ly1, x2: coords.lx2, y2: coords.ly2 },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${LEVELS$4[index]}`,
+              x: coords.lx2 + 5,
+              y: coords.ly2 - 5,
+              fill: levelColor,
+              fontSize: 10
+            },
+            silent: true
+          });
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-2",
+          shape: { cx: wx, cy: wy, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$h = Object.defineProperty;
+    var __defNormalProp$h = (obj, key, value) => key in obj ? __defProp$h(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$h = (obj, key, value) => {
+      __defNormalProp$h(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class FibonacciChannelTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fibonacci-channel-tool",
+          name: options.name || "Fibonacci Channel",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-200v-80l80-80H120v-80h160l120-120H120v-80h360l120-120H120v-80h720v80H520l-120 120h440v80H320L200-440h640v80H280l-80 80h640v80H120Z"/></svg>`
+        });
+        __publicField$h(this, "startPoint", null);
+        __publicField$h(this, "endPoint", null);
+        __publicField$h(this, "widthPoint", null);
+        __publicField$h(this, "state", "idle");
+        // Temporary ZRender elements
+        __publicField$h(this, "graphicGroup", null);
+        // Fib levels config
+        __publicField$h(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$h(this, "colors", [
+          "#787b86",
+          // 0
+          "#f44336",
+          // 0.236
+          "#ff9800",
+          // 0.382
+          "#4caf50",
+          // 0.5
+          "#2196f3",
+          // 0.618
+          "#00bcd4",
+          // 0.786
+          "#787b86"
+          // 1
+        ]);
+        __publicField$h(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing-baseline";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing-baseline") {
+            this.state = "drawing-width";
+            this.endPoint = this.getPoint(params);
+            this.widthPoint = this.getPoint(params);
+            this.updateGraphic();
+          } else if (this.state === "drawing-width") {
+            this.state = "finished";
+            this.widthPoint = this.getPoint(params);
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$h(this, "onMouseMove", (params) => {
+          if (this.state === "drawing-baseline") {
+            this.endPoint = this.getPoint(params);
+            this.updateGraphic();
+          } else if (this.state === "drawing-width") {
+            this.widthPoint = this.getPoint(params);
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibonacciChannelDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.widthPoint = null;
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.widthPoint = null;
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup || !this.startPoint || !this.endPoint)
+          return;
+        this.graphicGroup.removeAll();
+        const x1 = this.startPoint[0];
+        const y1 = this.startPoint[1];
+        const x2 = this.endPoint[0];
+        const y2 = this.endPoint[1];
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#787b86", lineWidth: 2 },
+            silent: true
+          })
+        );
+        if (this.widthPoint && this.state !== "drawing-baseline") {
+          const wp = this.widthPoint;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len === 0)
+            return;
+          const nx = -dy / len;
+          const ny = dx / len;
+          const dist = (wp[0] - x1) * nx + (wp[1] - y1) * ny;
+          this.levels.forEach((level, index) => {
+            const offsetX = nx * dist * level;
+            const offsetY = ny * dist * level;
+            const lx1 = x1 + offsetX;
+            const ly1 = y1 + offsetY;
+            const lx2 = x2 + offsetX;
+            const ly2 = y2 + offsetY;
+            const color = this.colors[index % this.colors.length];
+            this.graphicGroup.add(
+              new echarts__namespace.graphic.Line({
+                shape: { x1: lx1, y1: ly1, x2: lx2, y2: ly2 },
+                style: { stroke: color, lineWidth: 1 },
+                silent: true
+              })
+            );
+            if (index < this.levels.length - 1) {
+              const nextLevel = this.levels[index + 1];
+              const nOffsetX = nx * dist * nextLevel;
+              const nOffsetY = ny * dist * nextLevel;
+              const nx1 = x1 + nOffsetX;
+              const ny1 = y1 + nOffsetY;
+              const nx2 = x2 + nOffsetX;
+              const ny2 = y2 + nOffsetY;
+              this.graphicGroup.add(
+                new echarts__namespace.graphic.Polygon({
+                  shape: {
+                    points: [
+                      [lx1, ly1],
+                      [lx2, ly2],
+                      [nx2, ny2],
+                      [nx1, ny1]
+                    ]
+                  },
+                  style: {
+                    fill: this.colors[(index + 1) % this.colors.length],
+                    opacity: 0.1
+                  },
+                  silent: true
+                })
+              );
+            }
+          });
+        }
+      }
+      saveDrawing() {
+        if (!this.startPoint || !this.endPoint || !this.widthPoint)
+          return;
+        const start = this.context.coordinateConversion.pixelToData({
+          x: this.startPoint[0],
+          y: this.startPoint[1]
+        });
+        const end = this.context.coordinateConversion.pixelToData({
+          x: this.endPoint[0],
+          y: this.endPoint[1]
+        });
+        const width = this.context.coordinateConversion.pixelToData({
+          x: this.widthPoint[0],
+          y: this.widthPoint[1]
+        });
+        if (start && end && width) {
+          const paneIndex = start.paneIndex || 0;
+          this.context.addDrawing({
+            id: `fib-channel-${Date.now()}`,
+            type: "fibonacci_channel",
+            points: [start, end, width],
+            paneIndex,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 1
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp$g = Object.defineProperty;
+    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$g = (obj, key, value) => {
+      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$3 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$3 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibSpeedResistanceFanDrawingRenderer {
+      constructor() {
+        __publicField$g(this, "type", "fib_speed_resistance_fan");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const children = [];
+        const priceRays = [];
+        const timeRays = [];
+        for (const level of LEVELS$3) {
+          priceRays.push([x1 + dx, y1 + dy * level]);
+          timeRays.push([x1 + dx * level, y1 + dy]);
+        }
+        for (let i = 0; i < priceRays.length - 1; i++) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: [
+                [x1, y1],
+                priceRays[i],
+                priceRays[i + 1]
+              ]
+            },
+            style: {
+              fill: COLORS$3[(i + 1) % COLORS$3.length],
+              opacity: 0.06
+            }
+          });
+        }
+        for (let i = 0; i < timeRays.length - 1; i++) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: [
+                [x1, y1],
+                timeRays[i],
+                timeRays[i + 1]
+              ]
+            },
+            style: {
+              fill: COLORS$3[(i + 1) % COLORS$3.length],
+              opacity: 0.06
+            }
+          });
+        }
+        LEVELS$3.forEach((level, index) => {
+          const [ex, ey] = priceRays[index];
+          const levelColor = COLORS$3[index % COLORS$3.length];
+          children.push({
+            type: "line",
+            shape: { x1, y1, x2: ex, y2: ey },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${level}`,
+              x: ex + 3,
+              y: ey - 2,
+              fill: levelColor,
+              fontSize: 9
+            },
+            silent: true
+          });
+        });
+        LEVELS$3.forEach((level, index) => {
+          const [ex, ey] = timeRays[index];
+          const levelColor = COLORS$3[index % COLORS$3.length];
+          children.push({
+            type: "line",
+            shape: { x1, y1, x2: ex, y2: ey },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${level}`,
+              x: ex - 2,
+              y: ey + 8,
+              fill: levelColor,
+              fontSize: 9
+            },
+            silent: true
+          });
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1: x2, y1, x2, y2 },
+          style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1: y2, x2, y2 },
+          style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$f = Object.defineProperty;
+    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$f = (obj, key, value) => {
+      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$2 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$2 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibSpeedResistanceFanTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fib-speed-resistance-fan-tool",
+          name: options.name || "Fib Speed Resistance Fan",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e3e3e3"><path d="M2 21L22 3M2 21l20-6M2 21l20-9M2 21l20-12M2 21l20-15M2 21l6-18M2 21l9-18M2 21l12-18M2 21l15-18" stroke="#e3e3e3" stroke-width="1" fill="none"/></svg>`
+        });
+        __publicField$f(this, "startPoint", null);
+        __publicField$f(this, "endPoint", null);
+        __publicField$f(this, "state", "idle");
+        // Temporary ZRender elements
+        __publicField$f(this, "graphicGroup", null);
+        __publicField$f(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = this.getPoint(params);
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$f(this, "onMouseMove", (params) => {
+          if (this.state === "drawing") {
+            this.endPoint = this.getPoint(params);
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibSpeedResistanceFanDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup || !this.startPoint || !this.endPoint)
+          return;
+        this.graphicGroup.removeAll();
+        const x1 = this.startPoint[0];
+        const y1 = this.startPoint[1];
+        const x2 = this.endPoint[0];
+        const y2 = this.endPoint[1];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        LEVELS$2.forEach((level, index) => {
+          const color = COLORS$2[index % COLORS$2.length];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2: x1 + dx, y2: y1 + dy * level },
+              style: { stroke: color, lineWidth: 1 },
+              silent: true
+            })
+          );
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2: x1 + dx * level, y2: y1 + dy },
+              style: { stroke: color, lineWidth: 1 },
+              silent: true
+            })
+          );
+        });
+        for (let i = 0; i < LEVELS$2.length - 1; i++) {
+          const pr1 = [x1 + dx, y1 + dy * LEVELS$2[i]];
+          const pr2 = [x1 + dx, y1 + dy * LEVELS$2[i + 1]];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: [[x1, y1], pr1, pr2] },
+              style: { fill: COLORS$2[(i + 1) % COLORS$2.length], opacity: 0.06 },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < LEVELS$2.length - 1; i++) {
+          const tr1 = [x1 + dx * LEVELS$2[i], y1 + dy];
+          const tr2 = [x1 + dx * LEVELS$2[i + 1], y1 + dy];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: [[x1, y1], tr1, tr2] },
+              style: { fill: COLORS$2[(i + 1) % COLORS$2.length], opacity: 0.06 },
+              silent: true
+            })
+          );
+        }
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1: x2, y1, x2, y2 },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] },
+            silent: true
+          })
+        );
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1: y2, x2, y2 },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] },
+            silent: true
+          })
+        );
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          })
+        );
+      }
+      saveDrawing() {
+        if (!this.startPoint || !this.endPoint)
+          return;
+        const start = this.context.coordinateConversion.pixelToData({
+          x: this.startPoint[0],
+          y: this.startPoint[1]
+        });
+        const end = this.context.coordinateConversion.pixelToData({
+          x: this.endPoint[0],
+          y: this.endPoint[1]
+        });
+        if (start && end) {
+          this.context.addDrawing({
+            id: `fib-fan-${Date.now()}`,
+            type: "fib_speed_resistance_fan",
+            points: [start, end],
+            paneIndex: start.paneIndex || 0,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 1
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp$e = Object.defineProperty;
+    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$e = (obj, key, value) => {
+      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.272, 1.618, 2, 2.618];
+    const COLORS$1 = [
+      "#787b86",
+      "#f44336",
+      "#ff9800",
+      "#4caf50",
+      "#2196f3",
+      "#00bcd4",
+      "#787b86",
+      "#e91e63",
+      "#9c27b0",
+      "#673ab7",
+      "#3f51b5"
+    ];
+    class FibTrendExtensionDrawingRenderer {
+      constructor() {
+        __publicField$e(this, "type", "fib_trend_extension");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, api } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 3)
+          return;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const [x3, y3] = pixelPoints[2];
+        const pts = drawing.points;
+        const trendMove = pts[1].value - pts[0].value;
+        const minX = Math.min(x1, x2, x3);
+        const maxX = Math.max(x1, x2, x3);
+        const extraWidth = (maxX - minX) * 0.5;
+        const lineLeft = minX;
+        const lineRight = maxX + extraWidth;
+        const children = [];
+        const levelData = [];
+        for (let i = 0; i < LEVELS$1.length; i++) {
+          const level = LEVELS$1[i];
+          const price = pts[2].value + trendMove * level;
+          api.coord([
+            pts[2].timeIndex + ctx.drawing.points[2].timeIndex - pts[2].timeIndex,
+            price
+          ]);
+          const py = y3 + (y2 - y1) * level;
+          levelData.push({ level, y: py, price, color: COLORS$1[i % COLORS$1.length] });
+        }
+        for (let i = 0; i < levelData.length - 1; i++) {
+          const curr = levelData[i];
+          const next = levelData[i + 1];
+          const rectY = Math.min(curr.y, next.y);
+          const rectH = Math.abs(next.y - curr.y);
+          children.push({
+            type: "rect",
+            name: "line",
+            shape: { x: lineLeft, y: rectY, width: lineRight - lineLeft, height: rectH },
+            style: { fill: next.color, opacity: 0.06 }
+          });
+        }
+        for (const ld of levelData) {
+          children.push({
+            type: "line",
+            shape: { x1: lineLeft, y1: ld.y, x2: lineRight, y2: ld.y },
+            style: { stroke: ld.color, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${ld.level} (${ld.price.toFixed(2)})`,
+              x: lineRight + 4,
+              y: ld.y - 6,
+              fill: ld.color,
+              fontSize: 9
+            },
+            silent: true
+          });
+        }
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#2196f3", lineWidth: 1.5, lineDash: [5, 4] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1: x2, y1: y2, x2: x3, y2: y3 },
+          style: { stroke: "#ff9800", lineWidth: 1.5, lineDash: [5, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-2",
+          shape: { cx: x3, cy: y3, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        const labels = ["1", "2", "3"];
+        const points = [pixelPoints[0], pixelPoints[1], pixelPoints[2]];
+        for (let i = 0; i < 3; i++) {
+          const [px, py] = points[i];
+          const isHigh = (i === 0 || py <= points[i - 1][1]) && (i === 2 || py <= points[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: labels[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$d = Object.defineProperty;
+    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$d = (obj, key, value) => {
+      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1, 1.272, 1.618, 2, 2.618];
+    const COLORS = [
+      "#787b86",
+      "#f44336",
+      "#ff9800",
+      "#4caf50",
+      "#2196f3",
+      "#00bcd4",
+      "#787b86",
+      "#e91e63",
+      "#9c27b0",
+      "#673ab7",
+      "#3f51b5"
+    ];
+    class FibTrendExtensionTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fib-trend-extension-tool",
+          name: options.name || "Fib Trend Extension",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Zm0-160v-80h720v80H120Z"/></svg>`
+        });
+        __publicField$d(this, "points", []);
+        __publicField$d(this, "state", "idle");
+        __publicField$d(this, "graphicGroup", null);
+        __publicField$d(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing-trend";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing-trend") {
+            this.state = "drawing-retracement";
+            this.points[1] = pt;
+            this.points.push([...pt]);
+            this.updateGraphic();
+          } else if (this.state === "drawing-retracement") {
+            this.state = "finished";
+            this.points[2] = pt;
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$d(this, "onMouseMove", (params) => {
+          if (this.state === "drawing-trend") {
+            this.points[1] = this.getPoint(params);
+            this.updateGraphic();
+          } else if (this.state === "drawing-retracement") {
+            this.points[2] = this.getPoint(params);
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibTrendExtensionDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const [x1, y1] = this.points[0];
+        const [x2, y2] = this.points[1];
+        this.graphicGroup.add(new echarts__namespace.graphic.Line({
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#2196f3", lineWidth: 1.5, lineDash: [5, 4] },
+          silent: true
+        }));
+        if (this.points.length >= 3) {
+          const [x3, y3] = this.points[2];
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({
+            shape: { x1: x2, y1: y2, x2: x3, y2: y3 },
+            style: { stroke: "#ff9800", lineWidth: 1.5, lineDash: [5, 4] },
+            silent: true
+          }));
+          const trendPixelDy = y2 - y1;
+          const minX = Math.min(x1, x2, x3);
+          const maxX = Math.max(x1, x2, x3);
+          const extraWidth = (maxX - minX) * 0.5;
+          const lineLeft = minX;
+          const lineRight = maxX + extraWidth;
+          for (let i = 0; i < LEVELS.length; i++) {
+            const level = LEVELS[i];
+            const ly = y3 + trendPixelDy * level;
+            const lColor = COLORS[i % COLORS.length];
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({
+              shape: { x1: lineLeft, y1: ly, x2: lineRight, y2: ly },
+              style: { stroke: lColor, lineWidth: 1 },
+              silent: true
+            }));
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({
+              style: { text: `${level}`, x: lineRight + 4, y: ly - 6, fill: lColor, fontSize: 9 },
+              silent: true
+            }));
+            if (i < LEVELS.length - 1) {
+              const nextLy = y3 + trendPixelDy * LEVELS[i + 1];
+              const rectY = Math.min(ly, nextLy);
+              const rectH = Math.abs(nextLy - ly);
+              this.graphicGroup.add(new echarts__namespace.graphic.Rect({
+                shape: { x: lineLeft, y: rectY, width: lineRight - lineLeft, height: rectH },
+                style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+                silent: true
+              }));
+            }
+          }
+        }
+        for (const pt of this.points) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({
+            shape: { cx: pt[0], cy: pt[1], r: 4 },
+            style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 },
+            z: 101,
+            silent: true
+          }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map(
+          (pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] })
+        );
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `fib-ext-${Date.now()}`,
+            type: "fib_trend_extension",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: { color: "#3b82f6", lineWidth: 1 }
+          });
+        }
+      }
+    }
+
+    var __defProp$c = Object.defineProperty;
+    var __defNormalProp$c = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$c = (obj, key, value) => {
+      __defNormalProp$c(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$b = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$7 = ["#2196f3", "#ff9800", "#4caf50", "#f44336"];
+    const FILL_COLOR_1 = "rgba(33, 150, 243, 0.08)";
+    const FILL_COLOR_2 = "rgba(244, 67, 54, 0.08)";
+    class XABCDPatternDrawingRenderer {
+      constructor() {
+        __publicField$c(this, "type", "xabcd_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y])
+            },
+            style: { fill: FILL_COLOR_1, opacity: 1 }
+          });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y])
+            },
+            style: { fill: FILL_COLOR_2, opacity: 1 }
+          });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          const legColor = LEG_COLORS$7[i % LEG_COLORS$7.length];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: legColor, lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        const connectors = [[0, 2], [1, 3], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            const [x1, y1] = pixelPoints[from];
+            const [x2, y2] = pixelPoints[to];
+            children.push({
+              type: "line",
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 3) {
+          const xa = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const ab = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          if (xa !== 0) {
+            const ratio = (ab / xa).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 4) {
+          const ab = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          const bc = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          if (ab !== 0) {
+            const ratio = (bc / ab).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#4caf50", fontSize: 10 },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 5) {
+          const bc = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          const cd = Math.abs(drawing.points[4].value - drawing.points[3].value);
+          if (bc !== 0) {
+            const ratio = (cd / bc).toFixed(3);
+            const mx = (pixelPoints[3][0] + pixelPoints[4][0]) / 2;
+            const my = (pixelPoints[3][1] + pixelPoints[4][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#f44336", fontSize: 10 },
+              silent: true
+            });
+          }
+          const xa = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const ad = Math.abs(drawing.points[4].value - drawing.points[1].value);
+          if (xa !== 0) {
+            const ratio = (ad / xa).toFixed(3);
+            const [dx, dy] = pixelPoints[4];
+            children.push({
+              type: "text",
+              style: { text: `AD/XA: ${ratio}`, x: dx + 10, y: dy + 14, fill: "#aaa", fontSize: 9 },
+              silent: true
+            });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$b.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isLocalHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          const labelY = isLocalHigh ? py - 14 : py + 16;
+          children.push({
+            type: "text",
+            style: {
+              text: LABELS$b[i],
+              x: px,
+              y: labelY,
+              fill: "#e2e8f0",
+              fontSize: 12,
+              fontWeight: "bold",
+              align: "center",
+              verticalAlign: "middle"
+            },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          const [px, py] = pixelPoints[i];
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: px, cy: py, r: 4 },
+            style: {
+              fill: "#fff",
+              stroke: color,
+              lineWidth: 1,
+              opacity: isSelected ? 1 : 0
+            },
+            z: 100
+          });
+        }
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$b = Object.defineProperty;
+    var __defNormalProp$b = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$b = (obj, key, value) => {
+      __defNormalProp$b(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$a = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$6 = ["#2196f3", "#ff9800", "#4caf50", "#f44336"];
+    const TOTAL_POINTS$5 = 5;
+    class XABCDPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "xabcd-pattern-tool",
+          name: options.name || "XABCD Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="2,18 6,6 11,14 16,4 21,16"/><circle cx="2" cy="18" r="1.5" fill="#e3e3e3"/><circle cx="6" cy="6" r="1.5" fill="#e3e3e3"/><circle cx="11" cy="14" r="1.5" fill="#e3e3e3"/><circle cx="16" cy="4" r="1.5" fill="#e3e3e3"/><circle cx="21" cy="16" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$b(this, "points", []);
+        __publicField$b(this, "state", "idle");
+        __publicField$b(this, "graphicGroup", null);
+        __publicField$b(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$5) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$b(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new XABCDPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3) {
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: pts.slice(0, 3) },
+              style: { fill: "rgba(33, 150, 243, 0.08)" },
+              silent: true
+            })
+          );
+        }
+        if (pts.length >= 5) {
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: pts.slice(2, 5) },
+              style: { fill: "rgba(244, 67, 54, 0.08)" },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < pts.length - 1; i++) {
+          const [x1, y1] = pts[i];
+          const [x2, y2] = pts[i + 1];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: LEG_COLORS$6[i % LEG_COLORS$6.length], lineWidth: 2 },
+              silent: true
+            })
+          );
+        }
+        const connectors = [[0, 2], [1, 3], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pts.length && to < pts.length) {
+            const [x1, y1] = pts[from];
+            const [x2, y2] = pts[to];
+            this.graphicGroup.add(
+              new echarts__namespace.graphic.Line({
+                shape: { x1, y1, x2, y2 },
+                style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              })
+            );
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS$a.length; i++) {
+          const [px, py] = pts[i];
+          const isLocalHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          const labelY = isLocalHigh ? py - 14 : py + 16;
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Text({
+              style: {
+                text: LABELS$a[i],
+                x: px,
+                y: labelY,
+                fill: "#e2e8f0",
+                fontSize: 12,
+                fontWeight: "bold",
+                align: "center",
+                verticalAlign: "middle"
+              },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < pts.length; i++) {
+          const [px, py] = pts[i];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Circle({
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 },
+              z: 101,
+              silent: true
+            })
+          );
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map(
+          (pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] })
+        );
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `xabcd-${Date.now()}`,
+            type: "xabcd_pattern",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 2
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp$a = Object.defineProperty;
+    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$a = (obj, key, value) => {
+      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$9 = ["A", "B", "C", "D"];
+    const LEG_COLORS$5 = ["#2196f3", "#ff9800", "#4caf50"];
+    class ABCDPatternDrawingRenderer {
+      constructor() {
+        __publicField$a(this, "type", "abcd_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(33, 150, 243, 0.08)" }
+          });
+        }
+        if (pixelPoints.length >= 4) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.slice(1, 4).map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(244, 67, 54, 0.08)" }
+          });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: LEG_COLORS$5[i % LEG_COLORS$5.length], lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[0][0], y1: pixelPoints[0][1], x2: pixelPoints[2][0], y2: pixelPoints[2][1] },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          });
+        }
+        if (pixelPoints.length >= 4) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[1][0], y1: pixelPoints[1][1], x2: pixelPoints[3][0], y2: pixelPoints[3][1] },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          });
+        }
+        if (drawing.points.length >= 3) {
+          const ab = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const bc = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          if (ab !== 0) {
+            const ratio = (bc / ab).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({ type: "text", style: { text: ratio, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 }, silent: true });
+          }
+        }
+        if (drawing.points.length >= 4) {
+          const bc = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          const cd = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          if (bc !== 0) {
+            const ratio = (cd / bc).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({ type: "text", style: { text: ratio, x: mx + 8, y: my, fill: "#4caf50", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$9.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: LABELS$9[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+            z: 100
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$9 = Object.defineProperty;
+    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$9 = (obj, key, value) => {
+      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$8 = ["A", "B", "C", "D"];
+    const LEG_COLORS$4 = ["#2196f3", "#ff9800", "#4caf50"];
+    const TOTAL_POINTS$4 = 4;
+    class ABCDPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "abcd-pattern-tool",
+          name: options.name || "ABCD Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="3,18 8,5 15,15 21,3"/><circle cx="3" cy="18" r="1.5" fill="#e3e3e3"/><circle cx="8" cy="5" r="1.5" fill="#e3e3e3"/><circle cx="15" cy="15" r="1.5" fill="#e3e3e3"/><circle cx="21" cy="3" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$9(this, "points", []);
+        __publicField$9(this, "state", "idle");
+        __publicField$9(this, "graphicGroup", null);
+        __publicField$9(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$4) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$9(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new ABCDPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.08)" }, silent: true }));
+        }
+        if (pts.length >= 4) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(1, 4) }, style: { fill: "rgba(244,67,54,0.08)" }, silent: true }));
+        }
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({
+            shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] },
+            style: { stroke: LEG_COLORS$4[i % LEG_COLORS$4.length], lineWidth: 2 },
+            silent: true
+          }));
+        }
+        if (pts.length >= 3) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[0][0], y1: pts[0][1], x2: pts[2][0], y2: pts[2][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+        }
+        if (pts.length >= 4) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[1][0], y1: pts[1][1], x2: pts[3][0], y2: pts[3][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$8.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$8[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `abcd-${Date.now()}`,
+            type: "abcd_pattern",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: { color: "#3b82f6", lineWidth: 2 }
+          });
+        }
+      }
+    }
+
+    var __defProp$8 = Object.defineProperty;
+    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$8 = (obj, key, value) => {
+      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$7 = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$3 = ["#00bcd4", "#e91e63", "#8bc34a", "#ff5722"];
+    class CypherPatternDrawingRenderer {
+      constructor() {
+        __publicField$8(this, "type", "cypher_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(0, 188, 212, 0.08)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(233, 30, 99, 0.08)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({ type: "line", name: "line", shape: { x1, y1, x2, y2 }, style: { stroke: LEG_COLORS$3[i % LEG_COLORS$3.length], lineWidth: drawing.style?.lineWidth || 2 } });
+        }
+        const connectors = [[0, 2], [0, 3], [1, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            children.push({ type: "line", shape: { x1: pixelPoints[from][0], y1: pixelPoints[from][1], x2: pixelPoints[to][0], y2: pixelPoints[to][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true });
+          }
+        }
+        const pts = drawing.points;
+        if (pts.length >= 3) {
+          const xa = Math.abs(pts[1].value - pts[0].value);
+          const ab = Math.abs(pts[2].value - pts[1].value);
+          if (xa !== 0) {
+            const r = (ab / xa).toFixed(3);
+            children.push({ type: "text", style: { text: r, x: (pixelPoints[1][0] + pixelPoints[2][0]) / 2 + 8, y: (pixelPoints[1][1] + pixelPoints[2][1]) / 2, fill: "#e91e63", fontSize: 10 }, silent: true });
+          }
+        }
+        if (pts.length >= 4) {
+          const xa = Math.abs(pts[1].value - pts[0].value);
+          const xc = Math.abs(pts[3].value - pts[0].value);
+          if (xa !== 0) {
+            const r = (xc / xa).toFixed(3);
+            children.push({ type: "text", style: { text: `XC/XA: ${r}`, x: (pixelPoints[0][0] + pixelPoints[3][0]) / 2 + 8, y: (pixelPoints[0][1] + pixelPoints[3][1]) / 2, fill: "#8bc34a", fontSize: 10 }, silent: true });
+          }
+        }
+        if (pts.length >= 5) {
+          const xc = Math.abs(pts[3].value - pts[0].value);
+          const cd = Math.abs(pts[4].value - pts[3].value);
+          if (xc !== 0) {
+            const r = (cd / xc).toFixed(3);
+            children.push({ type: "text", style: { text: r, x: (pixelPoints[3][0] + pixelPoints[4][0]) / 2 + 8, y: (pixelPoints[3][1] + pixelPoints[4][1]) / 2, fill: "#ff5722", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$7.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({ type: "text", style: { text: LABELS$7[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$7 = Object.defineProperty;
+    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$7 = (obj, key, value) => {
+      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$6 = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$2 = ["#00bcd4", "#e91e63", "#8bc34a", "#ff5722"];
+    const TOTAL_POINTS$3 = 5;
+    class CypherPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "cypher-pattern-tool",
+          name: options.name || "Cypher Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="2,16 7,4 11,12 17,2 22,14"/><circle cx="2" cy="16" r="1.5" fill="#e3e3e3"/><circle cx="7" cy="4" r="1.5" fill="#e3e3e3"/><circle cx="11" cy="12" r="1.5" fill="#e3e3e3"/><circle cx="17" cy="2" r="1.5" fill="#e3e3e3"/><circle cx="22" cy="14" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$7(this, "points", []);
+        __publicField$7(this, "state", "idle");
+        __publicField$7(this, "graphicGroup", null);
+        __publicField$7(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$3) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$7(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new CypherPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(0,188,212,0.08)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(233,30,99,0.08)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: LEG_COLORS$2[i % LEG_COLORS$2.length], lineWidth: 2 }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$6.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$6[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `cypher-${Date.now()}`, type: "cypher_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$6 = Object.defineProperty;
+    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$6 = (obj, key, value) => {
+      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$5 = ["", "LS", "", "H", "", "RS", ""];
+    class HeadAndShouldersDrawingRenderer {
+      constructor() {
+        __publicField$6(this, "type", "head_and_shoulders");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(244, 67, 54, 0.08)" } });
+        }
+        if (pixelPoints.length >= 7) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(4, 7).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#2196f3", lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        if (pixelPoints.length >= 5) {
+          const [nx1, ny1] = pixelPoints[2];
+          const [nx2, ny2] = pixelPoints[4];
+          const dx = nx2 - nx1;
+          const dy = ny2 - ny1;
+          const extL = 0.3;
+          const extR = 0.3;
+          const exlx = nx1 - dx * extL;
+          const exly = ny1 - dy * extL;
+          const exrx = nx2 + dx * extR;
+          const exry = ny2 + dy * extR;
+          children.push({
+            type: "line",
+            shape: { x1: exlx, y1: exly, x2: exrx, y2: exry },
+            style: { stroke: "#ff9800", lineWidth: 2, lineDash: [6, 4] },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: { text: "Neckline", x: (nx1 + nx2) / 2, y: (ny1 + ny2) / 2 + 14, fill: "#ff9800", fontSize: 10, align: "center" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$5.length; i++) {
+          if (!LABELS$5[i])
+            continue;
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: LABELS$5[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+            z: 100
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$5 = Object.defineProperty;
+    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$5 = (obj, key, value) => {
+      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$4 = ["", "LS", "", "H", "", "RS", ""];
+    const TOTAL_POINTS$2 = 7;
+    class HeadAndShouldersTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "head-and-shoulders-tool",
+          name: options.name || "Head & Shoulders",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="1,18 4,10 7,14 12,3 17,14 20,10 23,18"/></svg>`
+        });
+        __publicField$5(this, "points", []);
+        __publicField$5(this, "state", "idle");
+        __publicField$5(this, "graphicGroup", null);
+        __publicField$5(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$2) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$5(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new HeadAndShouldersDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(244,67,54,0.08)" }, silent: true }));
+        if (pts.length >= 7)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(4, 7) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: "#2196f3", lineWidth: 2 }, silent: true }));
+        }
+        if (pts.length >= 5) {
+          const [nx1, ny1] = pts[2];
+          const [nx2, ny2] = pts[4];
+          const dx = nx2 - nx1;
+          const dy = ny2 - ny1;
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: nx1 - dx * 0.3, y1: ny1 - dy * 0.3, x2: nx2 + dx * 0.3, y2: ny2 + dy * 0.3 }, style: { stroke: "#ff9800", lineWidth: 2, lineDash: [6, 4] }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$4.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          if (LABELS$4[i]) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$4[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          }
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `hs-${Date.now()}`, type: "head_and_shoulders", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$4 = Object.defineProperty;
+    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$4 = (obj, key, value) => {
+      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$3 = ["1", "2", "3", "4", "5"];
+    class TrianglePatternDrawingRenderer {
+      constructor() {
+        __publicField$4(this, "type", "triangle_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(156, 39, 176, 0.06)" }
+          });
+        }
+        const upperPts = pixelPoints.filter((_, i) => i % 2 === 0);
+        if (upperPts.length >= 2) {
+          for (let i = 0; i < upperPts.length - 1; i++) {
+            children.push({
+              type: "line",
+              name: "line",
+              shape: { x1: upperPts[i][0], y1: upperPts[i][1], x2: upperPts[i + 1][0], y2: upperPts[i + 1][1] },
+              style: { stroke: "#f44336", lineWidth: 2 }
+            });
+          }
+          if (upperPts.length >= 2) {
+            const last = upperPts[upperPts.length - 1];
+            const prev = upperPts[upperPts.length - 2];
+            const dx = last[0] - prev[0];
+            const dy = last[1] - prev[1];
+            if (dx !== 0) {
+              const extendX = last[0] + dx * 0.5;
+              const extendY = last[1] + dy * 0.5;
+              children.push({
+                type: "line",
+                shape: { x1: last[0], y1: last[1], x2: extendX, y2: extendY },
+                style: { stroke: "#f44336", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              });
+            }
+          }
+        }
+        const lowerPts = pixelPoints.filter((_, i) => i % 2 === 1);
+        if (lowerPts.length >= 2) {
+          for (let i = 0; i < lowerPts.length - 1; i++) {
+            children.push({
+              type: "line",
+              name: "line",
+              shape: { x1: lowerPts[i][0], y1: lowerPts[i][1], x2: lowerPts[i + 1][0], y2: lowerPts[i + 1][1] },
+              style: { stroke: "#4caf50", lineWidth: 2 }
+            });
+          }
+          if (lowerPts.length >= 2) {
+            const last = lowerPts[lowerPts.length - 1];
+            const prev = lowerPts[lowerPts.length - 2];
+            const dx = last[0] - prev[0];
+            const dy = last[1] - prev[1];
+            if (dx !== 0) {
+              const extendX = last[0] + dx * 0.5;
+              const extendY = last[1] + dy * 0.5;
+              children.push({
+                type: "line",
+                shape: { x1: last[0], y1: last[1], x2: extendX, y2: extendY },
+                style: { stroke: "#4caf50", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              });
+            }
+          }
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[i][0], y1: pixelPoints[i][1], x2: pixelPoints[i + 1][0], y2: pixelPoints[i + 1][1] },
+            style: { stroke: "#9c27b0", lineWidth: 1, lineDash: [2, 2] },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$3.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = i % 2 === 0;
+          children.push({ type: "text", style: { text: LABELS$3[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$3 = Object.defineProperty;
+    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$3 = (obj, key, value) => {
+      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$2 = ["1", "2", "3", "4", "5"];
+    const TOTAL_POINTS$1 = 5;
+    class TrianglePatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "triangle-pattern-tool",
+          name: options.name || "Triangle Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><path d="M2,4 L22,4 L12,20 Z"/></svg>`
+        });
+        __publicField$3(this, "points", []);
+        __publicField$3(this, "state", "idle");
+        __publicField$3(this, "graphicGroup", null);
+        __publicField$3(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$1) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$3(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new TrianglePatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts }, style: { fill: "rgba(156,39,176,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: "#9c27b0", lineWidth: 2 }, silent: true }));
+        }
+        const upper = pts.filter((_, i) => i % 2 === 0);
+        if (upper.length >= 2) {
+          for (let i = 0; i < upper.length - 1; i++) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: upper[i][0], y1: upper[i][1], x2: upper[i + 1][0], y2: upper[i + 1][1] }, style: { stroke: "#f44336", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        const lower = pts.filter((_, i) => i % 2 === 1);
+        if (lower.length >= 2) {
+          for (let i = 0; i < lower.length - 1; i++) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: lower[i][0], y1: lower[i][1], x2: lower[i + 1][0], y2: lower[i + 1][1] }, style: { stroke: "#4caf50", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS$2.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = i % 2 === 0;
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$2[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `triangle-${Date.now()}`, type: "triangle_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$2 = Object.defineProperty;
+    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$2 = (obj, key, value) => {
+      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$1 = ["0", "D1", "C1", "D2", "C2", "D3", ""];
+    const LEG_COLORS$1 = ["#2196f3", "#ff9800", "#4caf50", "#f44336", "#00bcd4", "#e91e63"];
+    class ThreeDrivesPatternDrawingRenderer {
+      constructor() {
+        __publicField$2(this, "type", "three_drives_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(76, 175, 80, 0.06)" } });
+        }
+        if (pixelPoints.length >= 7) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(4, 7).map(([x, y]) => [x, y]) }, style: { fill: "rgba(0, 188, 212, 0.06)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: LEG_COLORS$1[i % LEG_COLORS$1.length], lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        const connectors = [[1, 3], [3, 5], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            children.push({
+              type: "line",
+              shape: { x1: pixelPoints[from][0], y1: pixelPoints[from][1], x2: pixelPoints[to][0], y2: pixelPoints[to][1] },
+              style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+              silent: true
+            });
+          }
+        }
+        const pts = drawing.points;
+        if (pts.length >= 4) {
+          const d1 = Math.abs(pts[1].value - pts[0].value);
+          const d2 = Math.abs(pts[3].value - pts[2].value);
+          if (d1 !== 0) {
+            const r = (d2 / d1).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({ type: "text", style: { text: `D2/D1: ${r}`, x: mx + 10, y: my, fill: "#4caf50", fontSize: 9 }, silent: true });
+          }
+        }
+        if (pts.length >= 6) {
+          const d2 = Math.abs(pts[3].value - pts[2].value);
+          const d3 = Math.abs(pts[5].value - pts[4].value);
+          if (d2 !== 0) {
+            const r = (d3 / d2).toFixed(3);
+            const mx = (pixelPoints[4][0] + pixelPoints[5][0]) / 2;
+            const my = (pixelPoints[4][1] + pixelPoints[5][1]) / 2;
+            children.push({ type: "text", style: { text: `D3/D2: ${r}`, x: mx + 10, y: my, fill: "#00bcd4", fontSize: 9 }, silent: true });
+          }
+        }
+        if (pts.length >= 3) {
+          const d1 = Math.abs(pts[1].value - pts[0].value);
+          const c1 = Math.abs(pts[2].value - pts[1].value);
+          if (d1 !== 0) {
+            const r = (c1 / d1).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({ type: "text", style: { text: r, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$1.length; i++) {
+          if (!LABELS$1[i])
+            continue;
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({ type: "text", style: { text: LABELS$1[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 11, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$1 = Object.defineProperty;
+    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$1 = (obj, key, value) => {
+      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS = ["0", "D1", "C1", "D2", "C2", "D3", ""];
+    const LEG_COLORS = ["#2196f3", "#ff9800", "#4caf50", "#f44336", "#00bcd4", "#e91e63"];
+    const TOTAL_POINTS = 7;
+    class ThreeDrivesPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "three-drives-pattern-tool",
+          name: options.name || "Three Drives",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="1,20 4,8 7,14 11,5 15,12 19,2 23,10"/></svg>`
+        });
+        __publicField$1(this, "points", []);
+        __publicField$1(this, "state", "idle");
+        __publicField$1(this, "graphicGroup", null);
+        __publicField$1(this, "onClick", (params) => {
+          const pt = this.getPoint(params);
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$1(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new ThreeDrivesPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(76,175,80,0.06)" }, silent: true }));
+        if (pts.length >= 7)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(4, 7) }, style: { fill: "rgba(0,188,212,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: LEG_COLORS[i % LEG_COLORS.length], lineWidth: 2 }, silent: true }));
+        }
+        const conn = [[1, 3], [3, 5], [2, 4]];
+        for (const [f, t] of conn) {
+          if (f < pts.length && t < pts.length) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[f][0], y1: pts[f][1], x2: pts[t][0], y2: pts[t][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          if (LABELS[i]) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 11, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          }
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `3drives-${Date.now()}`, type: "three_drives_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp = Object.defineProperty;
+    var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField = (obj, key, value) => {
+      __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class ToolGroup extends AbstractPlugin {
+      constructor(config) {
+        const arrowSvg = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: -4px; top: 50%; transform: translateY(-50%); opacity: 0.6;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+        let enhancedIcon = "";
+        if (config.icon) {
+          enhancedIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    ${config.icon}
+                </div>
+                ${arrowSvg}
+            </div>`;
+        } else {
+          enhancedIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <span>${config.name.substring(0, 2).toUpperCase()}</span>
+                ${arrowSvg}
+            </div>`;
+        }
+        super({
+          id: config.id || `group-${config.name.toLowerCase().replace(/\s+/g, "-")}`,
+          name: config.name,
+          icon: enhancedIcon
+        });
+        __publicField(this, "plugins", []);
+        __publicField(this, "activeSubPlugin", null);
+        __publicField(this, "menuElement", null);
+        __publicField(this, "buttonElement", null);
+        __publicField(this, "originalIcon", "");
+        __publicField(this, "arrowSvg", "");
+        __publicField(this, "handleOutsideClick", (e) => {
+          if (this.menuElement && !this.menuElement.contains(e.target)) {
+            this.hideMenu();
+            if (!this.activeSubPlugin) {
+              this.buttonElement?.click();
+            }
+          }
+        });
+        this.originalIcon = enhancedIcon;
+        this.arrowSvg = arrowSvg;
+      }
+      add(plugin) {
+        this.plugins.push(plugin);
+      }
+      onInit() {
+        this.plugins.forEach((p) => p.init(this.context));
+      }
+      onActivate() {
+        this.showMenu();
+      }
+      onDeactivate() {
+        this.hideMenu();
+        if (this.activeSubPlugin) {
+          this.activeSubPlugin.deactivate?.();
+          this.activeSubPlugin = null;
+        }
+        if (this.buttonElement) {
+          this.buttonElement.innerHTML = this.originalIcon;
+        }
+      }
+      onDestroy() {
+        this.hideMenu();
+        this.plugins.forEach((p) => p.destroy?.());
+      }
+      showMenu() {
+        this.buttonElement = document.getElementById(`qfchart-plugin-btn-${this.id}`);
+        if (!this.buttonElement)
+          return;
+        if (this.menuElement) {
+          this.hideMenu();
+        }
+        this.menuElement = document.createElement("div");
+        Object.assign(this.menuElement.style, {
+          position: "fixed",
+          backgroundColor: "#1e293b",
+          border: "1px solid #334155",
+          borderRadius: "6px",
+          padding: "4px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2px",
+          zIndex: "10000",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+          minWidth: "150px"
+        });
+        this.plugins.forEach((plugin) => {
+          const item = document.createElement("div");
+          Object.assign(item.style, {
+            display: "flex",
+            alignItems: "center",
+            padding: "8px 12px",
+            cursor: "pointer",
+            color: "#cbd5e1",
+            borderRadius: "4px",
+            fontSize: "13px",
+            fontFamily: this.context.getOptions().fontFamily || "sans-serif",
+            transition: "background-color 0.2s"
+          });
+          item.addEventListener("mouseenter", () => {
+            item.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.backgroundColor = "transparent";
+          });
+          if (plugin.icon) {
+            const iconContainer = document.createElement("div");
+            iconContainer.innerHTML = plugin.icon;
+            Object.assign(iconContainer.style, {
+              width: "20px",
+              height: "20px",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            });
+            const svg = iconContainer.querySelector("svg");
+            if (svg) {
+              svg.style.width = "100%";
+              svg.style.height = "100%";
+            }
+            item.appendChild(iconContainer);
+          }
+          const nameSpan = document.createElement("span");
+          nameSpan.textContent = plugin.name || plugin.id;
+          item.appendChild(nameSpan);
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.activateSubPlugin(plugin);
+          });
+          this.menuElement.appendChild(item);
+        });
+        document.body.appendChild(this.menuElement);
+        const rect = this.buttonElement.getBoundingClientRect();
+        this.menuElement.style.top = `${rect.top}px`;
+        this.menuElement.style.left = `${rect.right + 5}px`;
+        setTimeout(() => {
+          document.addEventListener("click", this.handleOutsideClick);
+        }, 0);
+      }
+      hideMenu() {
+        if (this.menuElement && this.menuElement.parentNode) {
+          this.menuElement.parentNode.removeChild(this.menuElement);
+        }
+        this.menuElement = null;
+        document.removeEventListener("click", this.handleOutsideClick);
+      }
+      activateSubPlugin(plugin) {
+        this.hideMenu();
+        if (this.activeSubPlugin) {
+          this.activeSubPlugin.deactivate?.();
+        }
+        this.activeSubPlugin = plugin;
+        this.activeSubPlugin.activate?.();
+        if (this.buttonElement) {
+          let subIcon = "";
+          if (plugin.icon) {
+            subIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        ${plugin.icon}
+                    </div>
+                    ${this.arrowSvg}
+                </div>`;
+          } else {
+            subIcon = `<div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                    <span>${(plugin.name || plugin.id).substring(0, 2).toUpperCase()}</span>
+                    ${this.arrowSvg}
+                </div>`;
+          }
+          this.buttonElement.innerHTML = subIcon;
+        }
+      }
+    }
+
+    exports.ABCDPatternDrawingRenderer = ABCDPatternDrawingRenderer;
+    exports.ABCDPatternTool = ABCDPatternTool;
     exports.AbstractPlugin = AbstractPlugin;
+    exports.CypherPatternDrawingRenderer = CypherPatternDrawingRenderer;
+    exports.CypherPatternTool = CypherPatternTool;
+    exports.DrawingRendererRegistry = DrawingRendererRegistry;
+    exports.FibSpeedResistanceFanDrawingRenderer = FibSpeedResistanceFanDrawingRenderer;
+    exports.FibSpeedResistanceFanTool = FibSpeedResistanceFanTool;
+    exports.FibTrendExtensionDrawingRenderer = FibTrendExtensionDrawingRenderer;
+    exports.FibTrendExtensionTool = FibTrendExtensionTool;
+    exports.FibonacciChannelDrawingRenderer = FibonacciChannelDrawingRenderer;
+    exports.FibonacciChannelTool = FibonacciChannelTool;
+    exports.FibonacciDrawingRenderer = FibonacciDrawingRenderer;
     exports.FibonacciTool = FibonacciTool;
+    exports.HeadAndShouldersDrawingRenderer = HeadAndShouldersDrawingRenderer;
+    exports.HeadAndShouldersTool = HeadAndShouldersTool;
+    exports.LineDrawingRenderer = LineDrawingRenderer;
     exports.LineTool = LineTool;
     exports.MeasureTool = MeasureTool;
     exports.QFChart = QFChart;
+    exports.ThreeDrivesPatternDrawingRenderer = ThreeDrivesPatternDrawingRenderer;
+    exports.ThreeDrivesPatternTool = ThreeDrivesPatternTool;
+    exports.ToolGroup = ToolGroup;
+    exports.TrianglePatternDrawingRenderer = TrianglePatternDrawingRenderer;
+    exports.TrianglePatternTool = TrianglePatternTool;
+    exports.XABCDPatternDrawingRenderer = XABCDPatternDrawingRenderer;
+    exports.XABCDPatternTool = XABCDPatternTool;
 
 }));
 //# sourceMappingURL=qfchart.dev.browser.js.map

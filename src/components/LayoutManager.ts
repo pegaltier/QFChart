@@ -15,9 +15,9 @@ export interface PaneConfiguration {
 }
 
 export interface PaneBoundary {
-    yPercent: number;           // Y position in %, center of the gap between panes
-    aboveId: string | 'main';   // pane above (main chart or indicator id)
-    belowId: string;            // indicator id below
+    yPercent: number; // Y position in %, center of the gap between panes
+    aboveId: string | 'main'; // pane above (main chart or indicator id)
+    belowId: string; // indicator id below
 }
 
 export interface LayoutResult {
@@ -40,7 +40,7 @@ export class LayoutManager {
         isMainCollapsed: boolean = false,
         maximizedPaneId: string | null = null,
         marketData?: import('../types').OHLCV[],
-        mainHeightOverride?: number
+        mainHeightOverride?: number,
     ): LayoutResult & { overlayYAxisMap: Map<string, number>; separatePaneYAxisOffset: number } {
         // Calculate pixelToPercent early for maximized logic
         let pixelToPercent = 0;
@@ -52,11 +52,11 @@ export class LayoutManager {
         const yAxisPaddingPercent = options.yAxisPadding !== undefined ? options.yAxisPadding : 5;
 
         // Grid styling options
-        const gridShow = options.grid?.show === true;               // default false
+        const gridShow = options.grid?.show === true; // default false
         const gridLineColor = options.grid?.lineColor ?? '#334155';
         const gridLineOpacity = options.grid?.lineOpacity ?? 0.5;
         const gridBorderColor = options.grid?.borderColor ?? '#334155';
-        const gridBorderShow = options.grid?.borderShow === true;    // default false
+        const gridBorderShow = options.grid?.borderShow === true; // default false
 
         // Layout margin options
         const layoutLeft = options.layout?.left ?? '10%';
@@ -195,9 +195,10 @@ export class LayoutManager {
                             if (options.yAxisLabelFormatter) {
                                 return options.yAxisLabelFormatter(value);
                             }
-                            const decimals = options.yAxisDecimalPlaces !== undefined
-                                ? options.yAxisDecimalPlaces
-                                : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
+                            const decimals =
+                                options.yAxisDecimalPlaces !== undefined
+                                    ? options.yAxisDecimalPlaces
+                                    : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
                             return AxisUtils.formatValue(value, decimals);
                         },
                     },
@@ -407,9 +408,8 @@ export class LayoutManager {
                     if (options.yAxisLabelFormatter) {
                         return options.yAxisLabelFormatter(value);
                     }
-                    const decimals = options.yAxisDecimalPlaces !== undefined
-                        ? options.yAxisDecimalPlaces
-                        : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
+                    const decimals =
+                        options.yAxisDecimalPlaces !== undefined ? options.yAxisDecimalPlaces : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
                     return AxisUtils.formatValue(value, decimals);
                 },
             },
@@ -483,9 +483,8 @@ export class LayoutManager {
                     if (options.yAxisLabelFormatter) {
                         return options.yAxisLabelFormatter(value);
                     }
-                    const decimals = options.yAxisDecimalPlaces !== undefined
-                        ? options.yAxisDecimalPlaces
-                        : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
+                    const decimals =
+                        options.yAxisDecimalPlaces !== undefined ? options.yAxisDecimalPlaces : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
                     return AxisUtils.formatValue(value, decimals);
                 },
             },
@@ -521,7 +520,11 @@ export class LayoutManager {
 
                         // Check if this is a shape with price-relative positioning
                         const isShapeWithPriceLocation =
-                            plot.options.style === 'shape' && (plot.options.location === 'abovebar' || plot.options.location === 'AboveBar' || plot.options.location === 'belowbar' || plot.options.location === 'BelowBar');
+                            plot.options.style === 'shape' &&
+                            (plot.options.location === 'abovebar' ||
+                                plot.options.location === 'AboveBar' ||
+                                plot.options.location === 'belowbar' ||
+                                plot.options.location === 'BelowBar');
 
                         if (visualOnlyStyles.includes(plot.options.style)) {
                             // Assign these to a separate Y-axis so they don't affect price scale
@@ -582,7 +585,7 @@ export class LayoutManager {
         // Create Y-axes for incompatible plots
         // nextYAxisIndex already incremented in the loop above, so we know how many axes we need
         const numOverlayAxes = overlayYAxisMap.size > 0 ? nextYAxisIndex - 1 : 0;
-        
+
         // Track which overlay axes are for visual-only plots (background, barcolor, etc.)
         const visualOnlyAxes = new Set<number>();
         overlayYAxisMap.forEach((yAxisIdx, plotKey) => {
@@ -596,11 +599,11 @@ export class LayoutManager {
                 });
             });
         });
-        
+
         for (let i = 0; i < numOverlayAxes; i++) {
             const yAxisIndex = i + 1; // Y-axis indices start at 1 for overlays
             const isVisualOnly = visualOnlyAxes.has(yAxisIndex);
-            
+
             yAxis.push({
                 position: 'left',
                 scale: !isVisualOnly, // Disable scaling for visual-only plots
@@ -636,9 +639,10 @@ export class LayoutManager {
                         if (options.yAxisLabelFormatter) {
                             return options.yAxisLabelFormatter(value);
                         }
-                        const decimals = options.yAxisDecimalPlaces !== undefined
-                            ? options.yAxisDecimalPlaces
-                            : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
+                        const decimals =
+                            options.yAxisDecimalPlaces !== undefined
+                                ? options.yAxisDecimalPlaces
+                                : AxisUtils.autoDetectDecimals(marketData as OHLCV[]);
                         return AxisUtils.formatValue(value, decimals);
                     },
                 },
@@ -648,19 +652,21 @@ export class LayoutManager {
 
         // --- Generate DataZoom ---
         const dataZoom: any[] = [];
-        if (dzVisible) {
-            // Add 'inside' zoom (pan/drag) only if zoomOnTouch is enabled (default true)
-            const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
-            if (zoomOnTouch) {
-                dataZoom.push({
-                    type: 'inside',
-                    xAxisIndex: allXAxisIndices,
-                    start: dzStart,
-                    end: dzEnd,
-                    filterMode: 'weakFilter',
-                });
-            }
+        const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
+        const pannable = options.dataZoom?.pannable ?? true;
 
+        // 'inside' zoom provides pan/drag — enabled independently of slider visibility
+        if (zoomOnTouch && pannable) {
+            dataZoom.push({
+                type: 'inside',
+                xAxisIndex: allXAxisIndices,
+                start: dzStart,
+                end: dzEnd,
+                filterMode: 'weakFilter',
+            });
+        }
+
+        if (dzVisible) {
             if (dzPosition === 'top') {
                 dataZoom.push({
                     type: 'slider',
@@ -708,7 +714,7 @@ export class LayoutManager {
     private static calculateMaximized(
         containerHeight: number,
         options: QFChartOptions,
-        targetPaneIndex: number // 0 for main, 1+ for indicators
+        targetPaneIndex: number, // 0 for main, 1+ for indicators
     ): LayoutResult {
         return {
             grid: [],

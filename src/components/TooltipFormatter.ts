@@ -4,7 +4,7 @@ export class TooltipFormatter {
   public static format(params: any[], options: QFChartOptions): string {
     if (!params || params.length === 0) return "";
 
-    const marketName = options.title || "Market";
+    const marketName = options.title || "";
     const upColor = options.upColor || "#00da3c";
     const downColor = options.downColor || "#ec0000";
     const fontFamily = options.fontFamily || "sans-serif";
