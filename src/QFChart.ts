@@ -117,7 +117,7 @@ export class QFChart implements ChartContext {
     constructor(container: HTMLElement, options: QFChartOptions = {}) {
         this.rootContainer = container;
         this.options = {
-            title: 'Market',
+            title: undefined,
             height: '600px',
             backgroundColor: '#1e293b',
             upColor: '#00da3c',
@@ -1049,7 +1049,7 @@ export class QFChart implements ChartContext {
             this.chart.setOption({
                 series: [
                     {
-                        name: this.options.title || 'Market',
+                        id: '__candlestick__',
                         markLine: {
                             data: [
                                 {

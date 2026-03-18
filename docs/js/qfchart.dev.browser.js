@@ -178,12 +178,19 @@
     }
 
     class LayoutManager {
-      static calculate(containerHeight, indicators, options, isMainCollapsed = false, maximizedPaneId = null, marketData) {
+      static calculate(containerHeight, indicators, options, isMainCollapsed = false, maximizedPaneId = null, marketData, mainHeightOverride) {
         let pixelToPercent = 0;
         if (containerHeight > 0) {
           pixelToPercent = 1 / containerHeight * 100;
         }
         const yAxisPaddingPercent = options.yAxisPadding !== void 0 ? options.yAxisPadding : 5;
+        const gridShow = options.grid?.show === true;
+        const gridLineColor = options.grid?.lineColor ?? "#334155";
+        const gridLineOpacity = options.grid?.lineOpacity ?? 0.5;
+        const gridBorderColor = options.grid?.borderColor ?? "#334155";
+        const gridBorderShow = options.grid?.borderShow === true;
+        const layoutLeft = options.layout?.left ?? "10%";
+        const layoutRight = options.layout?.right ?? "10%";
         const separatePaneIndices = Array.from(indicators.values()).map((ind) => ind.paneIndex).filter((idx) => idx > 0).sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index);
         const hasSeparatePane = separatePaneIndices.length > 0;
         const dzVisible = options.dataZoom?.visible ?? true;
@@ -211,17 +218,17 @@
           const dataZoom2 = [];
           const dzStart2 = options.dataZoom?.start ?? 50;
           const dzEnd2 = options.dataZoom?.end ?? 100;
-          const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
-          if (zoomOnTouch) {
-            dataZoom2.push({ type: "inside", xAxisIndex: "all", start: dzStart2, end: dzEnd2 });
+          const zoomOnTouch2 = options.dataZoom?.zoomOnTouch ?? true;
+          if (zoomOnTouch2) {
+            dataZoom2.push({ type: "inside", xAxisIndex: "all", start: dzStart2, end: dzEnd2, filterMode: "weakFilter" });
           }
           const maxPaneIndex = hasSeparatePane ? Math.max(...separatePaneIndices) : 0;
           const paneConfigs2 = [];
           for (let i = 0; i <= maxPaneIndex; i++) {
             const isTarget = i === maximizeTargetIndex;
             grid2.push({
-              left: "10%",
-              right: "10%",
+              left: layoutLeft,
+              right: layoutRight,
               top: isTarget ? "5%" : "0%",
               height: isTarget ? "90%" : "0%",
               show: isTarget,
@@ -237,10 +244,10 @@
                 color: "#94a3b8",
                 fontFamily: options.fontFamily
               },
-              axisLine: { show: isTarget, lineStyle: { color: "#334155" } },
+              axisLine: { show: isTarget && gridBorderShow, lineStyle: { color: gridBorderColor } },
               splitLine: {
-                show: isTarget,
-                lineStyle: { color: "#334155", opacity: 0.5 }
+                show: isTarget && gridShow,
+                lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
               }
             });
             let yMin;
@@ -272,8 +279,8 @@
                 }
               },
               splitLine: {
-                show: isTarget,
-                lineStyle: { color: "#334155", opacity: 0.5 }
+                show: isTarget && gridShow,
+                lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
               }
             });
             if (i > 0) {
@@ -345,7 +352,9 @@
           const totalBottomSpace = totalIndicatorHeight + totalGaps;
           const totalAvailable = chartAreaBottom - mainPaneTop;
           mainHeightVal = totalAvailable - totalBottomSpace;
-          if (isMainCollapsed) {
+          if (mainHeightOverride !== void 0 && mainHeightOverride > 0 && !isMainCollapsed) {
+            mainHeightVal = mainHeightOverride;
+          } else if (isMainCollapsed) {
             mainHeightVal = 3;
           } else {
             if (mainHeightVal < 20) {
@@ -372,10 +381,25 @@
             mainHeightVal = 3;
           }
         }
+        const paneBoundaries = [];
+        if (paneConfigs.length > 0) {
+          paneBoundaries.push({
+            yPercent: mainPaneTop + mainHeightVal + gapPercent / 2,
+            aboveId: "main",
+            belowId: paneConfigs[0].indicatorId || ""
+          });
+          for (let i = 0; i < paneConfigs.length - 1; i++) {
+            paneBoundaries.push({
+              yPercent: paneConfigs[i].top + paneConfigs[i].height + gapPercent / 2,
+              aboveId: paneConfigs[i].indicatorId || "",
+              belowId: paneConfigs[i + 1].indicatorId || ""
+            });
+          }
+        }
         const grid = [];
         grid.push({
-          left: "10%",
-          right: "10%",
+          left: layoutLeft,
+          right: layoutRight,
           top: mainPaneTop + "%",
           height: mainHeightVal + "%",
           containLabel: false
@@ -383,8 +407,8 @@
         });
         paneConfigs.forEach((pane) => {
           grid.push({
-            left: "10%",
-            right: "10%",
+            left: layoutLeft,
+            right: layoutRight,
             top: pane.top + "%",
             height: pane.height + "%",
             containLabel: false
@@ -402,12 +426,12 @@
           // boundaryGap will be set in QFChart.ts based on padding option
           axisLine: {
             onZero: false,
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155" }
+            show: !isMainCollapsed && gridBorderShow,
+            lineStyle: { color: gridBorderColor }
           },
           splitLine: {
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155", opacity: 0.5 }
+            show: !isMainCollapsed && gridShow,
+            lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
           },
           axisLabel: {
             show: !isMainCollapsed,
@@ -440,7 +464,7 @@
             // Shared data
             axisLabel: { show: false },
             // Hide labels on indicator panes
-            axisLine: { show: !pane.isCollapsed, lineStyle: { color: "#334155" } },
+            axisLine: { show: !pane.isCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } },
             axisTick: { show: false },
             splitLine: { show: false },
             axisPointer: {
@@ -472,10 +496,10 @@
           max: mainYAxisMax,
           gridIndex: 0,
           splitLine: {
-            show: !isMainCollapsed,
-            lineStyle: { color: "#334155", opacity: 0.5 }
+            show: !isMainCollapsed && gridShow,
+            lineStyle: { color: gridLineColor, opacity: gridLineOpacity }
           },
-          axisLine: { show: !isMainCollapsed, lineStyle: { color: "#334155" } },
+          axisLine: { show: !isMainCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } },
           axisLabel: {
             show: !isMainCollapsed,
             color: "#94a3b8",
@@ -503,7 +527,7 @@
               Object.entries(indicator.plots).forEach(([plotName, plot]) => {
                 const plotKey = `${id}::${plotName}`;
                 const visualOnlyStyles = ["background", "barcolor", "char"];
-                const isShapeWithPriceLocation = plot.options.style === "shape" && (plot.options.location === "abovebar" || plot.options.location === "belowbar");
+                const isShapeWithPriceLocation = plot.options.style === "shape" && (plot.options.location === "abovebar" || plot.options.location === "AboveBar" || plot.options.location === "belowbar" || plot.options.location === "BelowBar");
                 if (visualOnlyStyles.includes(plot.options.style)) {
                   if (!overlayYAxisMap.has(plotKey)) {
                     overlayYAxisMap.set(plotKey, nextYAxisIndex);
@@ -585,8 +609,8 @@
             max: AxisUtils.createMaxFunction(yAxisPaddingPercent),
             gridIndex: i + 1,
             splitLine: {
-              show: !pane.isCollapsed,
-              lineStyle: { color: "#334155", opacity: 0.3 }
+              show: !pane.isCollapsed && gridShow,
+              lineStyle: { color: gridLineColor, opacity: gridLineOpacity * 0.6 }
             },
             axisLabel: {
               show: !pane.isCollapsed,
@@ -601,20 +625,22 @@
                 return AxisUtils.formatValue(value, decimals);
               }
             },
-            axisLine: { show: !pane.isCollapsed, lineStyle: { color: "#334155" } }
+            axisLine: { show: !pane.isCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } }
           });
         });
         const dataZoom = [];
+        const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
+        const pannable = options.dataZoom?.pannable ?? true;
+        if (zoomOnTouch && pannable) {
+          dataZoom.push({
+            type: "inside",
+            xAxisIndex: allXAxisIndices,
+            start: dzStart,
+            end: dzEnd,
+            filterMode: "weakFilter"
+          });
+        }
         if (dzVisible) {
-          const zoomOnTouch = options.dataZoom?.zoomOnTouch ?? true;
-          if (zoomOnTouch) {
-            dataZoom.push({
-              type: "inside",
-              xAxisIndex: allXAxisIndices,
-              start: dzStart,
-              end: dzEnd
-            });
-          }
           if (dzPosition === "top") {
             dataZoom.push({
               type: "slider",
@@ -625,7 +651,8 @@
               end: dzEnd,
               borderColor: "#334155",
               textStyle: { color: "#cbd5e1" },
-              brushSelect: false
+              brushSelect: false,
+              filterMode: "weakFilter"
             });
           } else {
             dataZoom.push({
@@ -637,7 +664,8 @@
               end: dzEnd,
               borderColor: "#334155",
               textStyle: { color: "#cbd5e1" },
-              brushSelect: false
+              brushSelect: false,
+              filterMode: "weakFilter"
             });
           }
         }
@@ -650,6 +678,7 @@
           mainPaneHeight: mainHeightVal,
           mainPaneTop,
           pixelToPercent,
+          paneBoundaries,
           overlayYAxisMap,
           separatePaneYAxisOffset
         };
@@ -663,7 +692,8 @@
           paneLayout: [],
           mainPaneHeight: 0,
           mainPaneTop: 0,
-          pixelToPercent: 0
+          pixelToPercent: 0,
+          paneBoundaries: []
         };
       }
     }
@@ -748,16 +778,55 @@
       render(context) {
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray, plotOptions } = context;
         const defaultColor = "#2962ff";
+        const histbase = plotOptions.histbase ?? 0;
+        const isColumns = plotOptions.style === "columns";
+        const linewidth = plotOptions.linewidth ?? 1;
+        const customData = dataArray.map((val, i) => {
+          if (val === null || val === void 0 || typeof val === "number" && isNaN(val))
+            return null;
+          return [i, val, colorArray[i] || plotOptions.color || defaultColor];
+        });
         return {
           name: seriesName,
-          type: "bar",
+          type: "custom",
           xAxisIndex,
           yAxisIndex,
-          data: dataArray.map((val, i) => ({
-            value: val,
-            itemStyle: colorArray[i] ? { color: colorArray[i] } : void 0
-          })),
-          itemStyle: { color: plotOptions.color || defaultColor }
+          renderItem: (params, api) => {
+            const idx = api.value(0);
+            const value = api.value(1);
+            const color = api.value(2);
+            if (value === null || value === void 0 || isNaN(value)) {
+              return null;
+            }
+            const basePos = api.coord([idx, histbase]);
+            const valuePos = api.coord([idx, value]);
+            const candleWidth = api.size([1, 0])[0];
+            let barWidth;
+            if (isColumns) {
+              barWidth = candleWidth * 0.6;
+            } else {
+              barWidth = Math.max(1, linewidth);
+            }
+            const x = basePos[0];
+            const yBase = basePos[1];
+            const yValue = valuePos[1];
+            const top = Math.min(yBase, yValue);
+            const height = Math.abs(yValue - yBase);
+            return {
+              type: "rect",
+              shape: {
+                x: x - barWidth / 2,
+                y: top,
+                width: barWidth,
+                height: height || 1
+                // Minimum 1px for zero-height bars
+              },
+              style: {
+                fill: color
+              }
+            };
+          },
+          data: customData.filter((d) => d !== null)
         };
       }
     }
@@ -840,6 +909,7 @@
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray, optionsArray, plotOptions } = context;
         const defaultColor = "#2962ff";
         const isCandle = plotOptions.style === "candle";
+        const colorLookup = [];
         const ohlcData = dataArray.map((val, i) => {
           if (val === null || !Array.isArray(val) || val.length !== 4)
             return null;
@@ -848,7 +918,8 @@
           const color = pointOpts.color || colorArray[i] || plotOptions.color || defaultColor;
           const wickColor = pointOpts.wickcolor || plotOptions.wickcolor || color;
           const borderColor = pointOpts.bordercolor || plotOptions.bordercolor || wickColor;
-          return [i, open, close, low, high, color, wickColor, borderColor];
+          colorLookup[i] = { color, wickColor, borderColor };
+          return [i, open, close, low, high];
         }).filter((item) => item !== null);
         return {
           name: seriesName,
@@ -861,12 +932,13 @@
             const closeValue = api.value(2);
             const lowValue = api.value(3);
             const highValue = api.value(4);
-            const color = api.value(5);
-            const wickColor = api.value(6);
-            const borderColor = api.value(7);
             if (isNaN(openValue) || isNaN(closeValue) || isNaN(lowValue) || isNaN(highValue)) {
               return null;
             }
+            const colors = colorLookup[xValue] || { color: defaultColor, wickColor: defaultColor, borderColor: defaultColor };
+            const color = colors.color;
+            const wickColor = colors.wickColor;
+            const borderColor = colors.borderColor;
             const xPos = api.coord([xValue, 0])[0];
             const openPos = api.coord([xValue, openValue])[1];
             const closePos = api.coord([xValue, closeValue])[1];
@@ -986,28 +1058,46 @@
       static getShapeSymbol(shape) {
         switch (shape) {
           case "arrowdown":
+          case "shape_arrow_down":
             return "path://M12 24l-12-12h8v-12h8v12h8z";
           case "arrowup":
+          case "shape_arrow_up":
             return "path://M12 0l12 12h-8v12h-8v-12h-8z";
           case "circle":
+          case "shape_circle":
             return "circle";
           case "cross":
+          case "shape_cross":
             return "path://M11 2h2v9h9v2h-9v9h-2v-9h-9v-2h9z";
           case "diamond":
+          case "shape_diamond":
             return "diamond";
           case "flag":
+          case "shape_flag":
             return "path://M6 2v20h2v-8h12l-2-6 2-6h-12z";
           case "labeldown":
-            return "path://M4 2h16a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-6l-2 4l-2 -4h-6a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2z";
+          case "shape_label_down":
+            return "path://M2 1h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-8l-2 3-2-3h-8a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1z";
+          case "labelleft":
+          case "shape_label_left":
+            return "path://M0 10l3-3v-5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-18a1 1 0 0 1-1-1v-5z";
+          case "labelright":
+          case "shape_label_right":
+            return "path://M24 10l-3-3v-5a1 1 0 0 0-1-1h-18a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-5z";
           case "labelup":
-            return "path://M12 2l2 4h6a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h6z";
+          case "shape_label_up":
+            return "path://M12 1l2 3h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-20a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1h8z";
           case "square":
+          case "shape_square":
             return "rect";
           case "triangledown":
+          case "shape_triangle_down":
             return "path://M12 21l-10-18h20z";
           case "triangleup":
+          case "shape_triangle_up":
             return "triangle";
           case "xcross":
+          case "shape_xcross":
             return "path://M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z";
           default:
             return "circle";
@@ -1053,16 +1143,21 @@
       static getLabelConfig(shape, location) {
         switch (location) {
           case "abovebar":
+          case "AboveBar":
             return { position: "top", distance: 5 };
           case "belowbar":
+          case "BelowBar":
             return { position: "bottom", distance: 5 };
           case "top":
+          case "Top":
             return { position: "bottom", distance: 5 };
           case "bottom":
+          case "Bottom":
             return { position: "top", distance: 5 };
           case "absolute":
+          case "Absolute":
           default:
-            if (shape === "labelup" || shape === "labeldown") {
+            if (shape === "labelup" || shape === "labeldown" || shape === "shape_label_up" || shape === "shape_label_down") {
               return { position: "inside", distance: 0 };
             }
             return { position: "top", distance: 5 };
@@ -1078,7 +1173,7 @@
           const pointOpts = optionsArray[i] || {};
           const globalOpts = plotOptions;
           const location = pointOpts.location || globalOpts.location || "absolute";
-          if (location !== "absolute" && !val) {
+          if (location !== "absolute" && location !== "Absolute" && !val) {
             return null;
           }
           if (val === null || val === void 0) {
@@ -1093,20 +1188,20 @@
           const height = pointOpts.height || globalOpts.height;
           let yValue = val;
           let symbolOffset = [0, 0];
-          if (location === "abovebar") {
+          if (location === "abovebar" || location === "AboveBar" || location === "ab") {
             if (candlestickData && candlestickData[i]) {
               yValue = candlestickData[i].high;
             }
             symbolOffset = [0, "-150%"];
-          } else if (location === "belowbar") {
+          } else if (location === "belowbar" || location === "BelowBar" || location === "bl") {
             if (candlestickData && candlestickData[i]) {
               yValue = candlestickData[i].low;
             }
             symbolOffset = [0, "150%"];
-          } else if (location === "top") {
+          } else if (location === "top" || location === "Top") {
             yValue = val;
             symbolOffset = [0, 0];
-          } else if (location === "bottom") {
+          } else if (location === "bottom" || location === "Bottom") {
             yValue = val;
             symbolOffset = [0, 0];
           }
@@ -1153,9 +1248,75 @@
       }
     }
 
+    class ColorUtils {
+      /**
+       * Parse color string and extract opacity
+       * Supports: hex (#RRGGBB, #RRGGBBAA), named colors (green, red), rgba(r,g,b,a), rgb(r,g,b)
+       */
+      static parseColor(colorStr) {
+        if (!colorStr || typeof colorStr !== "string") {
+          return { color: "#888888", opacity: 0.2 };
+        }
+        const rgbaMatch = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const r = rgbaMatch[1];
+          const g = rgbaMatch[2];
+          const b = rgbaMatch[3];
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return {
+            color: `rgb(${r},${g},${b})`,
+            opacity: a
+          };
+        }
+        const hex8Match = colorStr.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hex8Match) {
+          const r = parseInt(hex8Match[1], 16);
+          const g = parseInt(hex8Match[2], 16);
+          const b = parseInt(hex8Match[3], 16);
+          const a = parseInt(hex8Match[4], 16) / 255;
+          return {
+            color: `rgb(${r},${g},${b})`,
+            opacity: a
+          };
+        }
+        return {
+          color: colorStr,
+          opacity: 0.3
+        };
+      }
+      /**
+       * Convert a parsed color + opacity to an rgba string.
+       */
+      static toRgba(color, opacity) {
+        const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+          return `rgba(${rgbMatch[1]},${rgbMatch[2]},${rgbMatch[3]},${opacity})`;
+        }
+        const hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hexMatch) {
+          const r = parseInt(hexMatch[1], 16);
+          const g = parseInt(hexMatch[2], 16);
+          const b = parseInt(hexMatch[3], 16);
+          return `rgba(${r},${g},${b},${opacity})`;
+        }
+        const hex8Match = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+        if (hex8Match) {
+          const r = parseInt(hex8Match[1], 16);
+          const g = parseInt(hex8Match[2], 16);
+          const b = parseInt(hex8Match[3], 16);
+          return `rgba(${r},${g},${b},${opacity})`;
+        }
+        return color;
+      }
+    }
+
     class BackgroundRenderer {
       render(context) {
         const { seriesName, xAxisIndex, yAxisIndex, dataArray, colorArray } = context;
+        const parsedColors = [];
+        for (let i = 0; i < colorArray.length; i++) {
+          parsedColors[i] = colorArray[i] ? ColorUtils.parseColor(colorArray[i]) : { color: "", opacity: 0 };
+        }
         return {
           name: seriesName,
           type: "custom",
@@ -1175,6 +1336,9 @@
             const val = api.value(1);
             if (!barColor || val === null || val === void 0 || isNaN(val))
               return;
+            const parsed = parsedColors[params.dataIndex];
+            if (!parsed || parsed.opacity <= 0)
+              return;
             return {
               type: "rect",
               shape: {
@@ -1184,8 +1348,8 @@
                 height: sys.height
               },
               style: {
-                fill: barColor,
-                opacity: 0.3
+                fill: parsed.color,
+                opacity: parsed.opacity
               },
               silent: true
             };
@@ -1197,36 +1361,9 @@
       }
     }
 
-    class ColorUtils {
-      /**
-       * Parse color string and extract opacity
-       * Supports: hex (#RRGGBB), named colors (green, red), rgba(r,g,b,a), rgb(r,g,b)
-       */
-      static parseColor(colorStr) {
-        if (!colorStr) {
-          return { color: "#888888", opacity: 0.2 };
-        }
-        const rgbaMatch = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-        if (rgbaMatch) {
-          const r = rgbaMatch[1];
-          const g = rgbaMatch[2];
-          const b = rgbaMatch[3];
-          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
-          return {
-            color: `rgb(${r},${g},${b})`,
-            opacity: a
-          };
-        }
-        return {
-          color: colorStr,
-          opacity: 0.3
-        };
-      }
-    }
-
     class FillRenderer {
       render(context) {
-        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, plotOptions, plotDataArrays, indicatorId, plotName, optionsArray } = context;
         const totalDataLength = context.dataArray.length;
         const plot1Key = plotOptions.plot1 ? `${indicatorId}::${plotOptions.plot1}` : null;
         const plot2Key = plotOptions.plot2 ? `${indicatorId}::${plotOptions.plot2}` : null;
@@ -1240,7 +1377,33 @@
           console.warn(`Fill plot "${plotName}" references non-existent plots: ${plotOptions.plot1}, ${plotOptions.plot2}`);
           return null;
         }
-        const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(plotOptions.color || "rgba(128, 128, 128, 0.2)");
+        const isGradient = plotOptions.gradient === true;
+        if (isGradient) {
+          return this.renderGradientFill(
+            seriesName,
+            xAxisIndex,
+            yAxisIndex,
+            plot1Data,
+            plot2Data,
+            totalDataLength,
+            optionsArray,
+            plotOptions
+          );
+        }
+        const { color: defaultFillColor, opacity: defaultFillOpacity } = ColorUtils.parseColor(plotOptions.color || "rgba(128, 128, 128, 0.2)");
+        const hasPerBarColor = optionsArray?.some((o) => o && o.color !== void 0);
+        let barColors = null;
+        if (hasPerBarColor) {
+          barColors = [];
+          for (let i = 0; i < totalDataLength; i++) {
+            const opts = optionsArray?.[i];
+            if (opts && opts.color !== void 0) {
+              barColors[i] = ColorUtils.parseColor(opts.color);
+            } else {
+              barColors[i] = { color: defaultFillColor, opacity: defaultFillOpacity };
+            }
+          }
+        }
         const fillDataWithPrev = [];
         for (let i = 0; i < totalDataLength; i++) {
           const y1 = plot1Data[i];
@@ -1254,8 +1417,142 @@
           type: "custom",
           xAxisIndex,
           yAxisIndex,
-          z: -5,
-          // Render behind lines but above background
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
+          renderItem: (params, api) => {
+            const index = params.dataIndex;
+            if (index === 0)
+              return null;
+            const y1 = api.value(1);
+            const y2 = api.value(2);
+            const prevY1 = api.value(3);
+            const prevY2 = api.value(4);
+            if (y1 === null || y2 === null || prevY1 === null || prevY2 === null || isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)) {
+              return null;
+            }
+            const fc = barColors ? barColors[index] : null;
+            const fillOpacity = fc ? fc.opacity : defaultFillOpacity;
+            if (fillOpacity < 0.01)
+              return null;
+            const p1Prev = api.coord([index - 1, prevY1]);
+            const p1Curr = api.coord([index, y1]);
+            const p2Curr = api.coord([index, y2]);
+            const p2Prev = api.coord([index - 1, prevY2]);
+            return {
+              type: "polygon",
+              shape: {
+                points: [p1Prev, p1Curr, p2Curr, p2Prev]
+              },
+              style: {
+                fill: fc ? fc.color : defaultFillColor,
+                opacity: fillOpacity
+              },
+              silent: true
+            };
+          },
+          data: fillDataWithPrev,
+          silent: true
+        };
+      }
+      /**
+       * Batch-render multiple fill bands as a single ECharts custom series.
+       * Instead of N separate series (one per fill), this creates ONE series
+       * where each renderItem call draws all fill bands as a group of children.
+       *
+       * Performance: reduces series count from N to 1, eliminates per-series
+       * ECharts overhead, and enables viewport culling via clip + encode.
+       */
+      renderBatched(seriesName, xAxisIndex, yAxisIndex, totalDataLength, fills) {
+        const data = Array.from({ length: totalDataLength }, (_, i) => [i]);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
+          renderItem: (params, api) => {
+            const index = params.dataIndex;
+            if (index === 0)
+              return null;
+            const children = [];
+            for (let f = 0; f < fills.length; f++) {
+              const fill = fills[f];
+              const y1 = fill.plot1Data[index];
+              const y2 = fill.plot2Data[index];
+              const prevY1 = fill.plot1Data[index - 1];
+              const prevY2 = fill.plot2Data[index - 1];
+              if (y1 == null || y2 == null || prevY1 == null || prevY2 == null || isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)) {
+                continue;
+              }
+              const fc = fill.barColors[index];
+              if (!fc || fc.opacity < 0.01)
+                continue;
+              const p1Prev = api.coord([index - 1, prevY1]);
+              const p1Curr = api.coord([index, y1]);
+              const p2Curr = api.coord([index, y2]);
+              const p2Prev = api.coord([index - 1, prevY2]);
+              children.push({
+                type: "polygon",
+                shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
+                style: { fill: fc.color, opacity: fc.opacity },
+                silent: true
+              });
+            }
+            return children.length > 0 ? { type: "group", children, silent: true } : null;
+          },
+          data,
+          silent: true
+        };
+      }
+      /**
+       * Render a gradient fill between two plots.
+       * Uses a vertical linear gradient from top_color (at the upper boundary)
+       * to bottom_color (at the lower boundary) for each polygon segment.
+       */
+      renderGradientFill(seriesName, xAxisIndex, yAxisIndex, plot1Data, plot2Data, totalDataLength, optionsArray, plotOptions) {
+        const gradientColors = [];
+        for (let i = 0; i < totalDataLength; i++) {
+          const opts = optionsArray?.[i];
+          if (opts && opts.top_color !== void 0) {
+            const top = ColorUtils.parseColor(opts.top_color);
+            const bottom = ColorUtils.parseColor(opts.bottom_color);
+            gradientColors[i] = {
+              topColor: top.color,
+              topOpacity: top.opacity,
+              bottomColor: bottom.color,
+              bottomOpacity: bottom.opacity
+            };
+          } else {
+            gradientColors[i] = {
+              topColor: "rgba(128,128,128,0.2)",
+              topOpacity: 0.2,
+              bottomColor: "rgba(128,128,128,0.2)",
+              bottomOpacity: 0.2
+            };
+          }
+        }
+        const fillDataWithPrev = [];
+        for (let i = 0; i < totalDataLength; i++) {
+          const y1 = plot1Data[i];
+          const y2 = plot2Data[i];
+          const prevY1 = i > 0 ? plot1Data[i - 1] : null;
+          const prevY2 = i > 0 ? plot2Data[i - 1] : null;
+          fillDataWithPrev.push([i, y1, y2, prevY1, prevY2]);
+        }
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          z: 1,
+          clip: true,
+          encode: { x: 0 },
+          animation: false,
           renderItem: (params, api) => {
             const index = params.dataIndex;
             if (index === 0)
@@ -1271,29 +1568,948 @@
             const p1Curr = api.coord([index, y1]);
             const p2Curr = api.coord([index, y2]);
             const p2Prev = api.coord([index - 1, prevY2]);
+            const gc = gradientColors[index] || gradientColors[index - 1];
+            if (!gc)
+              return null;
+            if (gc.topOpacity < 0.01 && gc.bottomOpacity < 0.01)
+              return null;
+            const topRgba = ColorUtils.toRgba(gc.topColor, gc.topOpacity);
+            const bottomRgba = ColorUtils.toRgba(gc.bottomColor, gc.bottomOpacity);
+            const plot1IsAbove = y1 >= y2;
             return {
               type: "polygon",
               shape: {
-                points: [
-                  p1Prev,
-                  // Top-left
-                  p1Curr,
-                  // Top-right
-                  p2Curr,
-                  // Bottom-right
-                  p2Prev
-                  // Bottom-left
-                ]
+                points: [p1Prev, p1Curr, p2Curr, p2Prev]
               },
               style: {
-                fill: fillColor,
-                opacity: fillOpacity
+                fill: {
+                  type: "linear",
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  // vertical gradient
+                  colorStops: [
+                    { offset: 0, color: plot1IsAbove ? topRgba : bottomRgba },
+                    { offset: 1, color: plot1IsAbove ? bottomRgba : topRgba }
+                  ]
+                }
               },
               silent: true
             };
           },
-          data: fillDataWithPrev
+          data: fillDataWithPrev,
+          silent: true
         };
+      }
+    }
+
+    class LabelRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, candlestickData, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const labelObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const lbl of items) {
+            if (lbl && typeof lbl === "object" && !lbl._deleted) {
+              labelObjects.push(lbl);
+            }
+          }
+        }
+        const labelData = labelObjects.map((lbl) => {
+          const resolve = (v) => typeof v === "function" ? v() : v;
+          const text = resolve(lbl.text) || "";
+          const rawColor = resolve(lbl.color);
+          const color = rawColor != null && rawColor !== "" ? rawColor : "transparent";
+          const textcolor = resolve(lbl.textcolor) || "#ffffff";
+          const yloc = resolve(lbl.yloc) || "price";
+          const styleRaw = resolve(lbl.style) || "style_label_down";
+          const size = resolve(lbl.size) || "normal";
+          const textalign = resolve(lbl.textalign) || "align_center";
+          const tooltip = resolve(lbl.tooltip) || "";
+          const shape = this.styleToShape(styleRaw);
+          const xPos = lbl.xloc === "bar_index" || lbl.xloc === "bi" ? lbl.x + offset : lbl.x;
+          let yValue = lbl.y;
+          let symbolOffset = [0, 0];
+          if (yloc === "abovebar" || yloc === "AboveBar" || yloc === "ab") {
+            if (candlestickData && candlestickData[xPos]) {
+              yValue = candlestickData[xPos].high;
+            }
+            symbolOffset = [0, "-150%"];
+          } else if (yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl") {
+            if (candlestickData && candlestickData[xPos]) {
+              yValue = candlestickData[xPos].low;
+            }
+            symbolOffset = [0, "150%"];
+          }
+          const symbol = ShapeUtils.getShapeSymbol(shape);
+          const symbolSize = ShapeUtils.getShapeSize(size);
+          const fontSize = this.getSizePx(size);
+          let finalSize;
+          const isBubble = shape === "labeldown" || shape === "shape_label_down" || shape === "labelup" || shape === "shape_label_up" || shape === "labelleft" || shape === "labelright";
+          let labelTextOffset = [0, 0];
+          if (isBubble) {
+            const textWidth = text.length * fontSize * 0.65;
+            const minWidth = fontSize * 2.5;
+            const bubbleWidth = Math.max(minWidth, textWidth + fontSize * 1.6);
+            const bubbleHeight = fontSize * 2.8;
+            const pointerRatio = 3 / 24;
+            if (shape === "labelleft" || shape === "labelright") {
+              const totalWidth = bubbleWidth / (1 - pointerRatio);
+              finalSize = [totalWidth, bubbleHeight];
+              const xOff = typeof symbolOffset[0] === "string" ? 0 : symbolOffset[0];
+              if (shape === "labelleft") {
+                symbolOffset = [xOff + totalWidth * 0.42, symbolOffset[1]];
+                labelTextOffset = [totalWidth * pointerRatio * 0.5, 0];
+              } else {
+                symbolOffset = [xOff - totalWidth * 0.42, symbolOffset[1]];
+                labelTextOffset = [-totalWidth * pointerRatio * 0.5, 0];
+              }
+            } else {
+              const totalHeight = bubbleHeight / (1 - pointerRatio);
+              finalSize = [bubbleWidth, totalHeight];
+              if (shape === "labeldown") {
+                symbolOffset = [symbolOffset[0], typeof symbolOffset[1] === "string" ? symbolOffset[1] : symbolOffset[1] - totalHeight * 0.42];
+                labelTextOffset = [0, -totalHeight * pointerRatio * 0.5];
+              } else {
+                symbolOffset = [symbolOffset[0], typeof symbolOffset[1] === "string" ? symbolOffset[1] : symbolOffset[1] + totalHeight * 0.42];
+                labelTextOffset = [0, totalHeight * pointerRatio * 0.5];
+              }
+            }
+          } else if (shape === "none") {
+            finalSize = 0;
+          } else {
+            if (Array.isArray(symbolSize)) {
+              finalSize = [symbolSize[0] * 1.5, symbolSize[1] * 1.5];
+            } else {
+              finalSize = symbolSize * 1.5;
+            }
+          }
+          const labelPosition = this.getLabelPosition(styleRaw, yloc);
+          const isInsideLabel = labelPosition === "inside" || labelPosition.startsWith("inside");
+          const item = {
+            value: [xPos, yValue],
+            symbol,
+            symbolSize: finalSize,
+            symbolOffset,
+            itemStyle: {
+              color
+            },
+            label: {
+              show: !!text,
+              position: labelPosition,
+              distance: isInsideLabel ? 0 : 5,
+              offset: labelTextOffset,
+              formatter: text,
+              color: textcolor,
+              fontSize,
+              fontWeight: "bold",
+              align: isInsideLabel ? "center" : textalign === "align_left" || textalign === "left" ? "left" : textalign === "align_right" || textalign === "right" ? "right" : "center",
+              verticalAlign: "middle",
+              padding: [2, 6]
+            }
+          };
+          if (tooltip) {
+            item._tooltipText = tooltip;
+            item.emphasis = {
+              scale: false,
+              itemStyle: { color },
+              label: {
+                show: item.label.show,
+                color: textcolor,
+                fontSize,
+                fontWeight: "bold"
+              }
+            };
+          } else {
+            item.emphasis = { disabled: true };
+          }
+          return item;
+        }).filter((item) => item !== null);
+        return {
+          name: seriesName,
+          type: "scatter",
+          xAxisIndex,
+          yAxisIndex,
+          data: labelData,
+          z: 20,
+          // Per-item emphasis: disabled for labels without tooltips,
+          // scale:false for labels with tooltips (allows hover for custom tooltip).
+          animation: false,
+          // Prevent labels disappearing on zoom
+          clip: false
+          // Keep labels visible when partially outside viewport
+        };
+      }
+      styleToShape(style) {
+        const s = style.startsWith("style_") ? style.substring(6) : style;
+        switch (s) {
+          case "label_down":
+            return "labeldown";
+          case "label_up":
+            return "labelup";
+          case "label_left":
+            return "labelleft";
+          case "label_right":
+            return "labelright";
+          case "label_lower_left":
+            return "labeldown";
+          case "label_lower_right":
+            return "labeldown";
+          case "label_upper_left":
+            return "labelup";
+          case "label_upper_right":
+            return "labelup";
+          case "label_center":
+            return "labeldown";
+          case "circle":
+            return "circle";
+          case "square":
+            return "square";
+          case "diamond":
+            return "diamond";
+          case "flag":
+            return "flag";
+          case "arrowup":
+            return "arrowup";
+          case "arrowdown":
+            return "arrowdown";
+          case "cross":
+            return "cross";
+          case "xcross":
+            return "xcross";
+          case "triangleup":
+            return "triangleup";
+          case "triangledown":
+            return "triangledown";
+          case "text_outline":
+            return "none";
+          case "none":
+            return "none";
+          default:
+            return "labeldown";
+        }
+      }
+      getLabelPosition(style, yloc) {
+        const s = style.startsWith("style_") ? style.substring(6) : style;
+        switch (s) {
+          case "label_down":
+          case "label_up":
+          case "label_left":
+          case "label_right":
+          case "label_lower_left":
+          case "label_lower_right":
+          case "label_upper_left":
+          case "label_upper_right":
+          case "label_center":
+            return "inside";
+          case "text_outline":
+          case "none":
+            return yloc === "abovebar" || yloc === "AboveBar" || yloc === "ab" ? "top" : yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl" ? "bottom" : "top";
+          default:
+            return yloc === "belowbar" || yloc === "BelowBar" || yloc === "bl" ? "bottom" : "top";
+        }
+      }
+      getSizePx(size) {
+        switch (size) {
+          case "tiny":
+            return 8;
+          case "small":
+            return 9;
+          case "normal":
+          case "auto":
+            return 10;
+          case "large":
+            return 12;
+          case "huge":
+            return 14;
+          default:
+            return 10;
+        }
+      }
+    }
+
+    class DrawingLineRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const defaultColor = "#2962ff";
+        const lineObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const ln of items) {
+            if (ln && typeof ln === "object" && !ln._deleted) {
+              lineObjects.push(ln);
+            }
+          }
+        }
+        if (lineObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const ln of lineObjects) {
+              if (ln._deleted)
+                continue;
+              const xOff = ln.xloc === "bar_index" || ln.xloc === "bi" ? offset : 0;
+              let p1 = api.coord([ln.x1 + xOff, ln.y1]);
+              let p2 = api.coord([ln.x2 + xOff, ln.y2]);
+              const extend = ln.extend || "none";
+              if (extend !== "none" && extend !== "n") {
+                const cs = params.coordSys;
+                [p1, p2] = this.extendLine(p1, p2, extend, cs.x, cs.x + cs.width, cs.y, cs.y + cs.height);
+              }
+              const color = ln.color || defaultColor;
+              const lineWidth = ln.width || 1;
+              children.push({
+                type: "line",
+                shape: { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] },
+                style: {
+                  fill: "none",
+                  stroke: color,
+                  lineWidth,
+                  lineDash: this.getDashPattern(ln.style)
+                }
+              });
+              const style = ln.style || "style_solid";
+              if (style === "style_arrow_left" || style === "style_arrow_both") {
+                const arrow = this.arrowHead(p2, p1, lineWidth, color);
+                if (arrow)
+                  children.push(arrow);
+              }
+              if (style === "style_arrow_right" || style === "style_arrow_both") {
+                const arrow = this.arrowHead(p1, p2, lineWidth, color);
+                if (arrow)
+                  children.push(arrow);
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 15,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+      extendLine(p1, p2, extend, left, right, top, bottom) {
+        const dx = p2[0] - p1[0];
+        const dy = p2[1] - p1[1];
+        if (dx === 0 && dy === 0)
+          return [p1, p2];
+        const extendPoint = (origin, dir) => {
+          let tMax = Infinity;
+          if (dir[0] !== 0) {
+            const tx = dir[0] > 0 ? (right - origin[0]) / dir[0] : (left - origin[0]) / dir[0];
+            tMax = Math.min(tMax, tx);
+          }
+          if (dir[1] !== 0) {
+            const ty = dir[1] > 0 ? (bottom - origin[1]) / dir[1] : (top - origin[1]) / dir[1];
+            tMax = Math.min(tMax, ty);
+          }
+          if (!isFinite(tMax))
+            tMax = 0;
+          return [origin[0] + tMax * dir[0], origin[1] + tMax * dir[1]];
+        };
+        let newP1 = p1;
+        let newP2 = p2;
+        if (extend === "right" || extend === "r" || extend === "both" || extend === "b") {
+          newP2 = extendPoint(p1, [dx, dy]);
+        }
+        if (extend === "left" || extend === "l" || extend === "both" || extend === "b") {
+          newP1 = extendPoint(p2, [-dx, -dy]);
+        }
+        return [newP1, newP2];
+      }
+      arrowHead(from, to, lineWidth, color) {
+        const dx = to[0] - from[0];
+        const dy = to[1] - from[1];
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len < 1)
+          return null;
+        const size = Math.max(8, lineWidth * 4);
+        const nx = dx / len;
+        const ny = dy / len;
+        const bx = to[0] - nx * size;
+        const by = to[1] - ny * size;
+        const px = -ny * size * 0.4;
+        const py = nx * size * 0.4;
+        return {
+          type: "polygon",
+          shape: {
+            points: [
+              [to[0], to[1]],
+              [bx + px, by + py],
+              [bx - px, by - py]
+            ]
+          },
+          style: { fill: color }
+        };
+      }
+    }
+
+    class LinefillRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const fillObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const lf of items) {
+            if (!lf || typeof lf !== "object" || lf._deleted)
+              continue;
+            const line1 = lf.line1;
+            const line2 = lf.line2;
+            if (!line1 || !line2 || line1._deleted || line2._deleted)
+              continue;
+            fillObjects.push(lf);
+          }
+        }
+        if (fillObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const lf of fillObjects) {
+              if (lf._deleted)
+                continue;
+              const line1 = lf.line1;
+              const line2 = lf.line2;
+              if (!line1 || !line2 || line1._deleted || line2._deleted)
+                continue;
+              const xOff1 = line1.xloc === "bar_index" || line1.xloc === "bi" ? offset : 0;
+              const xOff2 = line2.xloc === "bar_index" || line2.xloc === "bi" ? offset : 0;
+              let p1Start = api.coord([line1.x1 + xOff1, line1.y1]);
+              let p1End = api.coord([line1.x2 + xOff1, line1.y2]);
+              let p2Start = api.coord([line2.x1 + xOff2, line2.y1]);
+              let p2End = api.coord([line2.x2 + xOff2, line2.y2]);
+              const extend1 = line1.extend || "none";
+              const extend2 = line2.extend || "none";
+              if (extend1 !== "none" || extend2 !== "none") {
+                const cs = params.coordSys;
+                const csLeft = cs.x, csRight = cs.x + cs.width;
+                const csTop = cs.y, csBottom = cs.y + cs.height;
+                if (extend1 !== "none") {
+                  [p1Start, p1End] = this.extendLine(p1Start, p1End, extend1, csLeft, csRight, csTop, csBottom);
+                }
+                if (extend2 !== "none") {
+                  [p2Start, p2End] = this.extendLine(p2Start, p2End, extend2, csLeft, csRight, csTop, csBottom);
+                }
+              }
+              const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(lf.color || "rgba(128, 128, 128, 0.2)");
+              children.push({
+                type: "polygon",
+                shape: { points: [p1Start, p1End, p2End, p2Start] },
+                style: { fill: fillColor, opacity: fillOpacity },
+                silent: true
+              });
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          z: 10,
+          // Behind lines (z=15) but above other elements
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      extendLine(p1, p2, extend, left, right, top, bottom) {
+        const dx = p2[0] - p1[0];
+        const dy = p2[1] - p1[1];
+        if (dx === 0 && dy === 0)
+          return [p1, p2];
+        const extendPoint = (origin, dir) => {
+          let tMax = Infinity;
+          if (dir[0] !== 0) {
+            const tx = dir[0] > 0 ? (right - origin[0]) / dir[0] : (left - origin[0]) / dir[0];
+            tMax = Math.min(tMax, tx);
+          }
+          if (dir[1] !== 0) {
+            const ty = dir[1] > 0 ? (bottom - origin[1]) / dir[1] : (top - origin[1]) / dir[1];
+            tMax = Math.min(tMax, ty);
+          }
+          if (!isFinite(tMax))
+            tMax = 0;
+          return [origin[0] + tMax * dir[0], origin[1] + tMax * dir[1]];
+        };
+        let newP1 = p1;
+        let newP2 = p2;
+        if (extend === "right" || extend === "both") {
+          newP2 = extendPoint(p1, [dx, dy]);
+        }
+        if (extend === "left" || extend === "both") {
+          newP1 = extendPoint(p2, [-dx, -dy]);
+        }
+        return [newP1, newP2];
+      }
+    }
+
+    class PolylineRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const polyObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const pl of items) {
+            if (pl && typeof pl === "object" && !pl._deleted && pl.points && pl.points.length >= 2) {
+              polyObjects.push(pl);
+            }
+          }
+        }
+        if (polyObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const pl of polyObjects) {
+              if (pl._deleted)
+                continue;
+              const points = pl.points;
+              if (!points || points.length < 2)
+                continue;
+              const useBi = pl.xloc === "bi" || pl.xloc === "bar_index";
+              const xOff = useBi ? offset : 0;
+              const pixelPoints = [];
+              for (const pt of points) {
+                const x = useBi ? (pt.index ?? 0) + xOff : pt.time ?? 0;
+                const y = pt.price ?? 0;
+                pixelPoints.push(api.coord([x, y]));
+              }
+              if (pixelPoints.length < 2)
+                continue;
+              const rawLineColor = pl.line_color;
+              const isNaLineColor = rawLineColor === null || rawLineColor === void 0 || typeof rawLineColor === "number" && isNaN(rawLineColor) || rawLineColor === "na" || rawLineColor === "NaN";
+              const lineColor = isNaLineColor ? null : rawLineColor || "#2962ff";
+              const lineWidth = pl.line_width || 1;
+              const dashPattern = this.getDashPattern(pl.line_style);
+              if (pl.fill_color && pl.fill_color !== "" && pl.fill_color !== "na") {
+                const { color: fillColor, opacity: fillOpacity } = ColorUtils.parseColor(pl.fill_color);
+                if (pl.curved) {
+                  const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
+                  children.push({
+                    type: "path",
+                    shape: { pathData: pathData + " Z" },
+                    style: { fill: fillColor, opacity: fillOpacity, stroke: "none" },
+                    silent: true
+                  });
+                } else {
+                  children.push({
+                    type: "polygon",
+                    shape: { points: pixelPoints },
+                    style: { fill: fillColor, opacity: fillOpacity, stroke: "none" },
+                    silent: true
+                  });
+                }
+              }
+              if (lineColor && lineWidth > 0) {
+                if (pl.curved) {
+                  const pathData = this.buildCurvedPath(pixelPoints, pl.closed);
+                  children.push({
+                    type: "path",
+                    shape: { pathData },
+                    style: { fill: "none", stroke: lineColor, lineWidth, lineDash: dashPattern },
+                    silent: true
+                  });
+                } else {
+                  const allPoints = pl.closed ? [...pixelPoints, pixelPoints[0]] : pixelPoints;
+                  children.push({
+                    type: "polyline",
+                    shape: { points: allPoints },
+                    style: { fill: "none", stroke: lineColor, lineWidth, lineDash: dashPattern },
+                    silent: true
+                  });
+                }
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 15,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      /**
+       * Build an SVG path string for a smooth curve through all points
+       * using Catmull-Rom → cubic bezier conversion.
+       */
+      buildCurvedPath(points, closed) {
+        const n = points.length;
+        if (n < 2)
+          return "";
+        if (n === 2) {
+          return `M ${points[0][0]} ${points[0][1]} L ${points[1][0]} ${points[1][1]}`;
+        }
+        const tension = 0.5;
+        let path = `M ${points[0][0]} ${points[0][1]}`;
+        const getPoint = (i) => {
+          if (closed) {
+            return points[(i % n + n) % n];
+          }
+          if (i < 0)
+            return points[0];
+          if (i >= n)
+            return points[n - 1];
+          return points[i];
+        };
+        const segmentCount = closed ? n : n - 1;
+        for (let i = 0; i < segmentCount; i++) {
+          const p0 = getPoint(i - 1);
+          const p1 = getPoint(i);
+          const p2 = getPoint(i + 1);
+          const p3 = getPoint(i + 2);
+          const cp1x = p1[0] + (p2[0] - p0[0]) * tension / 3;
+          const cp1y = p1[1] + (p2[1] - p0[1]) * tension / 3;
+          const cp2x = p2[0] - (p3[0] - p1[0]) * tension / 3;
+          const cp2y = p2[1] - (p3[1] - p1[1]) * tension / 3;
+          path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2[0]} ${p2[1]}`;
+        }
+        if (closed) {
+          path += " Z";
+        }
+        return path;
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+    }
+
+    function normalizeColor(color) {
+      if (!color || typeof color !== "string")
+        return color;
+      if (color.startsWith("#")) {
+        const hex = color.slice(1);
+        if (hex.length === 8) {
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          const a = parseInt(hex.slice(6, 8), 16) / 255;
+          return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+        }
+      }
+      return color;
+    }
+    function parseRGB(color) {
+      if (!color || typeof color !== "string")
+        return null;
+      if (color.startsWith("#")) {
+        const hex = color.slice(1);
+        if (hex.length >= 6) {
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          if (!isNaN(r) && !isNaN(g) && !isNaN(b))
+            return { r, g, b };
+        }
+        if (hex.length === 3) {
+          const r = parseInt(hex[0] + hex[0], 16);
+          const g = parseInt(hex[1] + hex[1], 16);
+          const b = parseInt(hex[2] + hex[2], 16);
+          if (!isNaN(r) && !isNaN(g) && !isNaN(b))
+            return { r, g, b };
+        }
+        return null;
+      }
+      const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+      if (m)
+        return { r: +m[1], g: +m[2], b: +m[3] };
+      return null;
+    }
+    function luminance(r, g, b) {
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+    class BoxRenderer {
+      render(context) {
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const offset = dataIndexOffset || 0;
+        const boxObjects = [];
+        for (let i = 0; i < dataArray.length; i++) {
+          const val = dataArray[i];
+          if (!val)
+            continue;
+          const items = Array.isArray(val) ? val : [val];
+          for (const bx of items) {
+            if (bx && typeof bx === "object" && !bx._deleted) {
+              boxObjects.push(bx);
+            }
+          }
+        }
+        if (boxObjects.length === 0) {
+          return { name: seriesName, type: "custom", xAxisIndex, yAxisIndex, data: [], silent: true };
+        }
+        const totalBars = (context.candlestickData?.length || 0) + offset;
+        const lastBarIndex = Math.max(0, totalBars - 1);
+        return {
+          name: seriesName,
+          type: "custom",
+          xAxisIndex,
+          yAxisIndex,
+          renderItem: (params, api) => {
+            const children = [];
+            for (const bx of boxObjects) {
+              if (bx._deleted)
+                continue;
+              const xOff = bx.xloc === "bar_index" || bx.xloc === "bi" ? offset : 0;
+              const pTopLeft = api.coord([bx.left + xOff, bx.top]);
+              const pBottomRight = api.coord([bx.right + xOff, bx.bottom]);
+              let x = pTopLeft[0];
+              let y = pTopLeft[1];
+              let w = pBottomRight[0] - pTopLeft[0];
+              let h = pBottomRight[1] - pTopLeft[1];
+              const extend = bx.extend || "none";
+              if (extend !== "none" && extend !== "n") {
+                const cs = params.coordSys;
+                if (extend === "left" || extend === "l" || extend === "both" || extend === "b") {
+                  x = cs.x;
+                  w = extend === "both" || extend === "b" ? cs.width : pBottomRight[0] - cs.x;
+                }
+                if (extend === "right" || extend === "r" || extend === "both" || extend === "b") {
+                  if (extend === "right" || extend === "r") {
+                    w = cs.x + cs.width - pTopLeft[0];
+                  }
+                }
+              }
+              const rawBgColor = bx.bgcolor;
+              const isNaBgColor = rawBgColor === null || rawBgColor === void 0 || typeof rawBgColor === "number" && isNaN(rawBgColor) || rawBgColor === "na" || rawBgColor === "NaN" || rawBgColor === "";
+              const bgColor = isNaBgColor ? null : normalizeColor(rawBgColor) || "#2962ff";
+              if (bgColor) {
+                children.push({
+                  type: "rect",
+                  shape: { x, y, width: w, height: h },
+                  style: { fill: bgColor, stroke: "none" }
+                });
+              }
+              const rawBorderColor = bx.border_color;
+              const isNaBorder = rawBorderColor === null || rawBorderColor === void 0 || typeof rawBorderColor === "number" && isNaN(rawBorderColor) || rawBorderColor === "na" || rawBorderColor === "NaN";
+              const borderColor = isNaBorder ? null : normalizeColor(rawBorderColor) || "#2962ff";
+              const borderWidth = bx.border_width ?? 1;
+              if (borderWidth > 0 && borderColor) {
+                children.push({
+                  type: "rect",
+                  shape: { x, y, width: w, height: h },
+                  style: {
+                    fill: "none",
+                    stroke: borderColor,
+                    lineWidth: borderWidth,
+                    lineDash: this.getDashPattern(bx.border_style)
+                  }
+                });
+              }
+              if (bx.text) {
+                const textX = this.getTextX(x, w, bx.text_halign);
+                const textY = this.getTextY(y, h, bx.text_valign);
+                let textFill = normalizeColor(bx.text_color) || "#000000";
+                const isDefaultTextColor = !bx.text_color || bx.text_color === "#000000" || bx.text_color === "black" || bx.text_color === "color.black";
+                if (isDefaultTextColor && bgColor) {
+                  const rgb = parseRGB(bgColor);
+                  if (rgb && luminance(rgb.r, rgb.g, rgb.b) < 0.5) {
+                    textFill = "#FFFFFF";
+                  }
+                }
+                const isBold = !bx.text_formatting || bx.text_formatting === "format_none" || bx.text_formatting === "format_bold";
+                const fontSize = this.computeFontSize(bx.text_size, bx.text, Math.abs(w), Math.abs(h), isBold);
+                children.push({
+                  type: "text",
+                  style: {
+                    x: textX,
+                    y: textY,
+                    text: bx.text,
+                    fill: textFill,
+                    fontSize,
+                    fontFamily: bx.text_font_family === "monospace" ? "monospace" : "sans-serif",
+                    fontWeight: isBold ? "bold" : "normal",
+                    fontStyle: bx.text_formatting === "format_italic" ? "italic" : "normal",
+                    textAlign: this.mapHAlign(bx.text_halign),
+                    textVerticalAlign: this.mapVAlign(bx.text_valign)
+                  }
+                });
+              }
+            }
+            return { type: "group", children };
+          },
+          data: [[0, lastBarIndex]],
+          clip: true,
+          encode: { x: [0, 1] },
+          // Prevent ECharts visual system from overriding element colors with palette
+          itemStyle: { color: "transparent", borderColor: "transparent" },
+          z: 14,
+          silent: true,
+          emphasis: { disabled: true }
+        };
+      }
+      getDashPattern(style) {
+        switch (style) {
+          case "style_dotted":
+            return [2, 2];
+          case "style_dashed":
+            return [6, 4];
+          default:
+            return void 0;
+        }
+      }
+      /**
+       * Compute font size for box text.
+       * For 'auto'/'size.auto' (the default), dynamically scale text to fit within
+       * the box dimensions with a small gap — matching TradingView behavior.
+       * For explicit named sizes, return fixed pixel values.
+       */
+      computeFontSize(size, text, boxW, boxH, bold) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 14;
+          case "large":
+          case "size.large":
+            return 20;
+          case "huge":
+          case "size.huge":
+            return 36;
+        }
+        if (!text || boxW <= 0 || boxH <= 0)
+          return 12;
+        const padding = 6;
+        const availW = boxW - padding * 2;
+        const availH = boxH - padding * 2;
+        if (availW <= 0 || availH <= 0)
+          return 6;
+        const lines = text.split("\n");
+        const numLines = lines.length;
+        let maxChars = 1;
+        for (const line of lines) {
+          if (line.length > maxChars)
+            maxChars = line.length;
+        }
+        const charWidthRatio = bold ? 0.62 : 0.55;
+        const maxByWidth = availW / (maxChars * charWidthRatio);
+        const lineHeight = 1.3;
+        const maxByHeight = availH / (numLines * lineHeight);
+        const computed = Math.min(maxByWidth, maxByHeight);
+        return Math.max(6, Math.min(computed, 48));
+      }
+      mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          case "center":
+          case "text.align_center":
+          default:
+            return "center";
+        }
+      }
+      mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          case "center":
+          case "text.align_center":
+          default:
+            return "middle";
+        }
+      }
+      getTextX(x, w, halign) {
+        switch (halign) {
+          case "left":
+          case "text.align_left":
+            return x + 4;
+          case "right":
+          case "text.align_right":
+            return x + w - 4;
+          case "center":
+          case "text.align_center":
+          default:
+            return x + w / 2;
+        }
+      }
+      getTextY(y, h, valign) {
+        switch (valign) {
+          case "top":
+          case "text.align_top":
+            return y + 4;
+          case "bottom":
+          case "text.align_bottom":
+            return y + h - 4;
+          case "center":
+          case "text.align_center":
+          default:
+            return y + h / 2;
+        }
       }
     }
 
@@ -1324,6 +2540,11 @@
     _SeriesRendererFactory.register("shape", new ShapeRenderer());
     _SeriesRendererFactory.register("background", new BackgroundRenderer());
     _SeriesRendererFactory.register("fill", new FillRenderer());
+    _SeriesRendererFactory.register("label", new LabelRenderer());
+    _SeriesRendererFactory.register("drawing_line", new DrawingLineRenderer());
+    _SeriesRendererFactory.register("linefill", new LinefillRenderer());
+    _SeriesRendererFactory.register("drawing_polyline", new PolylineRenderer());
+    _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
     var __defProp$8 = Object.defineProperty;
@@ -1393,7 +2614,8 @@
         }
         return {
           type: "candlestick",
-          name: options.title || "Market",
+          id: "__candlestick__",
+          name: options.title,
           data,
           itemStyle: {
             color: upColor,
@@ -1425,12 +2647,25 @@
               return -1;
             return 0;
           });
+          const pendingFills = /* @__PURE__ */ new Map();
           sortedPlots.forEach((plotName) => {
             const plot = indicator.plots[plotName];
+            const isDisplayNone = plot.options.display === "none";
             const seriesName = `${id}::${plotName}`;
             let xAxisIndex = 0;
             let yAxisIndex = 0;
-            const plotOverlay = plot.options.overlay;
+            let plotOverlay = plot.options.overlay;
+            if (plot.options.style === "fill" && plotOverlay === void 0) {
+              const p1Name = plot.options.plot1;
+              const p2Name = plot.options.plot2;
+              if (p1Name && p2Name) {
+                const p1 = indicator.plots[p1Name];
+                const p2 = indicator.plots[p2Name];
+                if (p1?.options?.overlay === true && p2?.options?.overlay === true) {
+                  plotOverlay = true;
+                }
+              }
+            }
             const isPlotOverlay = indicator.paneIndex === 0 || plotOverlay === true;
             if (isPlotOverlay) {
               xAxisIndex = 0;
@@ -1447,6 +2682,7 @@
               }
             }
             const dataArray = new Array(totalDataLength).fill(null);
+            const rawDataArray = new Array(totalDataLength).fill(null);
             const colorArray = new Array(totalDataLength).fill(null);
             const optionsArray = new Array(totalDataLength).fill(null);
             plot.data?.forEach((point) => {
@@ -1457,17 +2693,21 @@
                 if (offsetIndex >= 0 && offsetIndex < totalDataLength) {
                   let value = point.value;
                   const pointColor = point.options?.color;
-                  const isNaColor = pointColor === null || pointColor === "na" || pointColor === "NaN" || typeof pointColor === "number" && isNaN(pointColor);
+                  rawDataArray[offsetIndex] = value;
+                  const hasExplicitColorKey = point.options != null && "color" in point.options;
+                  const isNaColor = pointColor === null || pointColor === "na" || pointColor === "NaN" || typeof pointColor === "number" && isNaN(pointColor) || hasExplicitColorKey && pointColor === void 0;
                   if (isNaColor) {
                     value = null;
                   }
                   dataArray[offsetIndex] = value;
-                  colorArray[offsetIndex] = pointColor || plot.options.color || _SeriesBuilder.DEFAULT_COLOR;
+                  colorArray[offsetIndex] = isNaColor ? null : pointColor || plot.options.color || _SeriesBuilder.DEFAULT_COLOR;
                   optionsArray[offsetIndex] = point.options || {};
                 }
               }
             });
-            plotDataArrays.set(`${id}::${plotName}`, dataArray);
+            plotDataArrays.set(`${id}::${plotName}`, rawDataArray);
+            if (isDisplayNone)
+              return;
             if (plot.options?.style?.startsWith("style_")) {
               plot.options.style = plot.options.style.replace("style_", "");
             }
@@ -1488,6 +2728,56 @@
               });
               return;
             }
+            if (plot.options.style === "table") {
+              return;
+            }
+            if (plot.options.style === "fill" && plot.options.gradient !== true) {
+              const plot1Key = plot.options.plot1 ? `${id}::${plot.options.plot1}` : null;
+              const plot2Key = plot.options.plot2 ? `${id}::${plot.options.plot2}` : null;
+              if (plot1Key && plot2Key) {
+                const plot1Data = plotDataArrays.get(plot1Key);
+                const plot2Data = plotDataArrays.get(plot2Key);
+                if (plot1Data && plot2Data) {
+                  const { color: defaultColor, opacity: defaultOpacity } = ColorUtils.parseColor(
+                    plot.options.color || "rgba(128, 128, 128, 0.2)"
+                  );
+                  const hasPerBarColor = optionsArray.some((o) => o && o.color !== void 0);
+                  const fillBarColors = [];
+                  for (let i = 0; i < totalDataLength; i++) {
+                    const opts = optionsArray[i];
+                    if (hasPerBarColor && opts && opts.color !== void 0) {
+                      fillBarColors[i] = ColorUtils.parseColor(opts.color);
+                    } else {
+                      fillBarColors[i] = { color: defaultColor, opacity: defaultOpacity };
+                    }
+                  }
+                  const axisKey = `${xAxisIndex}:${yAxisIndex}`;
+                  if (!pendingFills.has(axisKey)) {
+                    pendingFills.set(axisKey, { entries: [], xAxisIndex, yAxisIndex });
+                  }
+                  pendingFills.get(axisKey).entries.push({
+                    plot1Data,
+                    plot2Data,
+                    barColors: fillBarColors
+                  });
+                  return;
+                }
+              }
+            }
+            if (plot.options.color && typeof plot.options.color === "string") {
+              const parsed = ColorUtils.parseColor(plot.options.color);
+              if (parsed.opacity < 0.01) {
+                const hasVisibleBarColor = colorArray.some((c) => {
+                  if (c == null)
+                    return false;
+                  const pc = ColorUtils.parseColor(c);
+                  return pc.opacity >= 0.01;
+                });
+                if (!hasVisibleBarColor) {
+                  return;
+                }
+              }
+            }
             const renderer = SeriesRendererFactory.get(plot.options.style);
             const seriesConfig = renderer.render({
               seriesName,
@@ -1500,12 +2790,41 @@
               candlestickData,
               plotDataArrays,
               indicatorId: id,
-              plotName
+              plotName,
+              dataIndexOffset
             });
             if (seriesConfig) {
               series.push(seriesConfig);
             }
           });
+          if (pendingFills.size > 0) {
+            const fillRenderer = new FillRenderer();
+            pendingFills.forEach(({ entries, xAxisIndex, yAxisIndex }, axisKey) => {
+              if (entries.length >= 2) {
+                const batchedConfig = fillRenderer.renderBatched(
+                  `${id}::fills_batch_${axisKey}`,
+                  xAxisIndex,
+                  yAxisIndex,
+                  totalDataLength,
+                  entries
+                );
+                if (batchedConfig) {
+                  series.push(batchedConfig);
+                }
+              } else if (entries.length === 1) {
+                const batchedConfig = fillRenderer.renderBatched(
+                  `${id}::fills_batch_${axisKey}`,
+                  xAxisIndex,
+                  yAxisIndex,
+                  totalDataLength,
+                  entries
+                );
+                if (batchedConfig) {
+                  series.push(batchedConfig);
+                }
+              }
+            });
+          }
         });
         return { series, barColors };
       }
@@ -1514,7 +2833,7 @@
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
-      static build(layout, options, onToggle, isMainCollapsed = false, maximizedPaneId = null) {
+      static build(layout, options, onToggle, isMainCollapsed = false, maximizedPaneId = null, overlayIndicators = []) {
         const graphic = [];
         const pixelToPercent = layout.pixelToPercent;
         const mainPaneTop = layout.mainPaneTop;
@@ -1527,12 +2846,30 @@
             top: mainPaneTop + titleTopMargin + "%",
             z: 10,
             style: {
-              text: options.title || "Market",
+              text: options.title || "",
               fill: options.titleColor || "#fff",
               font: `bold 16px ${options.fontFamily || "sans-serif"}`,
               textVerticalAlign: "top"
             }
           });
+          if (overlayIndicators.length > 0) {
+            const mainTitleHeight = 20 * pixelToPercent;
+            const overlayLineHeight = 16 * pixelToPercent;
+            overlayIndicators.forEach((overlay, i) => {
+              graphic.push({
+                type: "text",
+                left: "8.5%",
+                top: mainPaneTop + titleTopMargin + mainTitleHeight + i * overlayLineHeight + "%",
+                z: 10,
+                style: {
+                  text: overlay.id,
+                  fill: overlay.titleColor || "#9e9e9e",
+                  font: `bold 12px ${options.fontFamily || "sans-serif"}`,
+                  textVerticalAlign: "top"
+                }
+              });
+            });
+          }
           if (options.watermark !== false) {
             const bottomY = layout.mainPaneTop + layout.mainPaneHeight;
             graphic.push({
@@ -1740,7 +3077,7 @@
       static format(params, options) {
         if (!params || params.length === 0)
           return "";
-        const marketName = options.title || "Market";
+        const marketName = options.title || "";
         const upColor = options.upColor || "#00da3c";
         const downColor = options.downColor || "#ec0000";
         const fontFamily = options.fontFamily || "sans-serif";
@@ -2232,6 +3569,733 @@
       }
     }
 
+    class TableOverlayRenderer {
+      /**
+       * Parse a color value for table rendering.
+       * Unlike ColorUtils.parseColor (which defaults to 0.3 opacity for fills),
+       * tables treat hex/named colors as fully opaque — only rgba provides opacity.
+       */
+      static safeParseColor(val) {
+        if (!val || typeof val !== "string") {
+          return { color: "#888888", opacity: 1 };
+        }
+        const rgbaMatch = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return { color: `rgb(${rgbaMatch[1]},${rgbaMatch[2]},${rgbaMatch[3]})`, opacity: a };
+        }
+        return { color: val, opacity: 1 };
+      }
+      /**
+       * Clear all existing table overlays and render new ones.
+       * @param getGridRect Function that returns the ECharts grid rect for a given pane index.
+       */
+      static render(container, tables, getGridRect) {
+        TableOverlayRenderer.clearAll(container);
+        const byPosition = /* @__PURE__ */ new Map();
+        for (const tbl of tables) {
+          if (tbl && !tbl._deleted) {
+            byPosition.set(tbl.position, tbl);
+          }
+        }
+        byPosition.forEach((tbl) => {
+          const paneIndex = tbl._paneIndex ?? 0;
+          const gridRect = getGridRect ? getGridRect(paneIndex) : void 0;
+          const el = TableOverlayRenderer.buildTable(tbl, gridRect);
+          TableOverlayRenderer.positionTable(el, tbl.position, gridRect);
+          container.appendChild(el);
+        });
+      }
+      static clearAll(container) {
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+      }
+      static buildTable(tbl, gridRect) {
+        const table = document.createElement("table");
+        const borderWidth = tbl.border_width ?? 0;
+        const frameWidth = tbl.frame_width ?? 0;
+        const hasVisibleBorders = borderWidth > 0 && !!tbl.border_color || frameWidth > 0 && !!tbl.frame_color;
+        if (hasVisibleBorders) {
+          table.style.borderCollapse = "separate";
+          table.style.borderSpacing = "0";
+        } else {
+          table.style.borderCollapse = "collapse";
+        }
+        table.style.pointerEvents = "none";
+        table.style.fontSize = "14px";
+        table.style.lineHeight = "1.4";
+        table.style.fontFamily = "sans-serif";
+        table.style.margin = "4px";
+        if (gridRect) {
+          table.style.maxHeight = gridRect.height + "px";
+          table.style.maxWidth = gridRect.width + "px";
+          table.style.overflow = "hidden";
+        }
+        if (tbl.bgcolor) {
+          const { color, opacity } = TableOverlayRenderer.safeParseColor(tbl.bgcolor);
+          table.style.backgroundColor = color;
+          if (opacity < 1)
+            table.style.opacity = String(opacity);
+        }
+        if (frameWidth > 0 && tbl.frame_color) {
+          const { color: fc } = TableOverlayRenderer.safeParseColor(tbl.frame_color);
+          table.style.border = `${frameWidth}px solid ${fc}`;
+        } else {
+          table.style.border = "none";
+        }
+        const mergeMap = /* @__PURE__ */ new Map();
+        const mergedCells = /* @__PURE__ */ new Set();
+        if (tbl.merges) {
+          for (const m of tbl.merges) {
+            const key = `${m.startCol},${m.startRow}`;
+            mergeMap.set(key, {
+              colspan: m.endCol - m.startCol + 1,
+              rowspan: m.endRow - m.startRow + 1
+            });
+            for (let r = m.startRow; r <= m.endRow; r++) {
+              for (let c = m.startCol; c <= m.endCol; c++) {
+                if (r === m.startRow && c === m.startCol)
+                  continue;
+                mergedCells.add(`${c},${r}`);
+              }
+            }
+          }
+        }
+        const hasCellBorders = borderWidth > 0 && !!tbl.border_color;
+        const borderColorStr = hasCellBorders ? TableOverlayRenderer.safeParseColor(tbl.border_color).color : "";
+        const rows = tbl.rows || 0;
+        const cols = tbl.columns || 0;
+        for (let r = 0; r < rows; r++) {
+          const tr = document.createElement("tr");
+          for (let c = 0; c < cols; c++) {
+            const cellKey = `${c},${r}`;
+            if (mergedCells.has(cellKey))
+              continue;
+            const td = document.createElement("td");
+            const merge = mergeMap.get(cellKey);
+            if (merge) {
+              if (merge.colspan > 1)
+                td.colSpan = merge.colspan;
+              if (merge.rowspan > 1)
+                td.rowSpan = merge.rowspan;
+            }
+            if (hasCellBorders) {
+              td.style.border = `${borderWidth}px solid ${borderColorStr}`;
+            } else {
+              td.style.border = "none";
+            }
+            const cellData = tbl.cells?.[r]?.[c];
+            if (cellData && !cellData._merged) {
+              td.textContent = cellData.text || "";
+              if (cellData.bgcolor && typeof cellData.bgcolor === "string" && cellData.bgcolor.length > 0) {
+                const { color: bg, opacity: bgOp } = TableOverlayRenderer.safeParseColor(cellData.bgcolor);
+                td.style.backgroundColor = bg;
+                if (bgOp < 1) {
+                  td.style.backgroundColor = cellData.bgcolor;
+                }
+              }
+              if (cellData.text_color) {
+                const { color: tc } = TableOverlayRenderer.safeParseColor(cellData.text_color);
+                td.style.color = tc;
+              }
+              td.style.fontSize = TableOverlayRenderer.getSizePixels(cellData.text_size) + "px";
+              td.style.textAlign = TableOverlayRenderer.mapHAlign(cellData.text_halign);
+              td.style.verticalAlign = TableOverlayRenderer.mapVAlign(cellData.text_valign);
+              if (cellData.text_font_family === "monospace") {
+                td.style.fontFamily = "monospace";
+              }
+              if (cellData.width > 0) {
+                if (gridRect) {
+                  const px = Math.max(1, cellData.width * gridRect.width / 100);
+                  td.style.width = px + "px";
+                } else {
+                  td.style.width = cellData.width + "%";
+                }
+              }
+              if (cellData.height > 0) {
+                if (gridRect) {
+                  const px = Math.max(1, cellData.height * gridRect.height / 100);
+                  td.style.height = px + "px";
+                } else {
+                  td.style.height = cellData.height + "%";
+                }
+              }
+              if (cellData.tooltip) {
+                td.title = cellData.tooltip;
+              }
+            }
+            const cellHeight = cellData?.height ?? 0;
+            if (cellHeight > 0 && gridRect && cellHeight * gridRect.height / 100 < 4) {
+              td.style.padding = "0";
+            } else {
+              td.style.padding = "4px 6px";
+            }
+            td.style.whiteSpace = "nowrap";
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        return table;
+      }
+      static positionTable(el, position, gridRect) {
+        el.style.position = "absolute";
+        const PAD = 8;
+        const top = gridRect ? gridRect.y + "px" : "0";
+        const left = gridRect ? gridRect.x + "px" : "0";
+        const bottom = gridRect ? gridRect.y + gridRect.height - PAD + "px" : "0";
+        const right = gridRect ? gridRect.x + gridRect.width - PAD + "px" : "0";
+        const centerX = gridRect ? gridRect.x + gridRect.width / 2 + "px" : "50%";
+        const centerY = gridRect ? gridRect.y + gridRect.height / 2 + "px" : "50%";
+        switch (position) {
+          case "top_left":
+            el.style.top = top;
+            el.style.left = left;
+            break;
+          case "top_center":
+            el.style.top = top;
+            el.style.left = centerX;
+            el.style.transform = "translateX(-50%)";
+            break;
+          case "top_right":
+            el.style.top = top;
+            el.style.left = right;
+            el.style.transform = "translateX(-100%)";
+            break;
+          case "middle_left":
+            el.style.top = centerY;
+            el.style.left = left;
+            el.style.transform = "translateY(-50%)";
+            break;
+          case "middle_center":
+            el.style.top = centerY;
+            el.style.left = centerX;
+            el.style.transform = "translate(-50%, -50%)";
+            break;
+          case "middle_right":
+            el.style.top = centerY;
+            el.style.left = right;
+            el.style.transform = "translate(-100%, -50%)";
+            break;
+          case "bottom_left":
+            el.style.top = bottom;
+            el.style.left = left;
+            el.style.transform = "translateY(-100%)";
+            break;
+          case "bottom_center":
+            el.style.top = bottom;
+            el.style.left = centerX;
+            el.style.transform = "translate(-50%, -100%)";
+            break;
+          case "bottom_right":
+            el.style.top = bottom;
+            el.style.left = right;
+            el.style.transform = "translate(-100%, -100%)";
+            break;
+          default:
+            el.style.top = top;
+            el.style.left = right;
+            el.style.transform = "translateX(-100%)";
+            break;
+        }
+      }
+      static getSizePixels(size) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "auto":
+          case "size.auto":
+            return 12;
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 14;
+          case "large":
+          case "size.large":
+            return 20;
+          case "huge":
+          case "size.huge":
+            return 36;
+          default:
+            return 14;
+        }
+      }
+      static mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          case "center":
+          case "text.align_center":
+          default:
+            return "center";
+        }
+      }
+      static mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          case "center":
+          case "text.align_center":
+          default:
+            return "middle";
+        }
+      }
+    }
+
+    class TableCanvasRenderer {
+      // ── Color Parsing ──────────────────────────────────────────
+      static parseColor(val) {
+        if (!val || typeof val !== "string" || val.length === 0) {
+          return { color: "", opacity: 0 };
+        }
+        const rgbaMatch = val.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (rgbaMatch) {
+          const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+          return { color: `rgb(${rgbaMatch[1]},${rgbaMatch[2]},${rgbaMatch[3]})`, opacity: a };
+        }
+        if (/^#[0-9a-fA-F]{8}$/.test(val)) {
+          const r = parseInt(val.slice(1, 3), 16);
+          const g = parseInt(val.slice(3, 5), 16);
+          const b = parseInt(val.slice(5, 7), 16);
+          const a = parseInt(val.slice(7, 9), 16) / 255;
+          return { color: `rgb(${r},${g},${b})`, opacity: a };
+        }
+        return { color: val, opacity: 1 };
+      }
+      // ── Size / Alignment Mapping ───────────────────────────────
+      // TradingView reference sizes (approximate px at 1× DPR)
+      static getSizePixels(size) {
+        if (typeof size === "number" && size > 0)
+          return size;
+        switch (size) {
+          case "auto":
+          case "size.auto":
+            return 11;
+          case "tiny":
+          case "size.tiny":
+            return 8;
+          case "small":
+          case "size.small":
+            return 10;
+          case "normal":
+          case "size.normal":
+            return 12;
+          case "large":
+          case "size.large":
+            return 16;
+          case "huge":
+          case "size.huge":
+            return 24;
+          default:
+            return 12;
+        }
+      }
+      static mapHAlign(align) {
+        switch (align) {
+          case "left":
+          case "text.align_left":
+            return "left";
+          case "right":
+          case "text.align_right":
+            return "right";
+          default:
+            return "center";
+        }
+      }
+      static mapVAlign(align) {
+        switch (align) {
+          case "top":
+          case "text.align_top":
+            return "top";
+          case "bottom":
+          case "text.align_bottom":
+            return "bottom";
+          default:
+            return "middle";
+        }
+      }
+      // ── Main Entry Point ──────────────────────────────────────
+      /**
+       * Build flat ECharts graphic elements for all tables.
+       * Returns an array of rect/text elements with absolute positions.
+       */
+      static buildGraphicElements(tables, getGridRect) {
+        if (!tables || tables.length === 0)
+          return [];
+        const byPosition = /* @__PURE__ */ new Map();
+        for (const tbl of tables) {
+          if (tbl && !tbl._deleted) {
+            byPosition.set(tbl.position, tbl);
+          }
+        }
+        const elements = [];
+        byPosition.forEach((tbl) => {
+          const paneIndex = tbl._paneIndex ?? 0;
+          const gridRect = getGridRect(paneIndex);
+          if (!gridRect)
+            return;
+          const tableElements = TableCanvasRenderer.buildTableElements(tbl, gridRect);
+          elements.push(...tableElements);
+        });
+        return elements;
+      }
+      // ── Table Layout Engine ──────────────────────────────────
+      /**
+       * Measure and layout a table, producing flat absolute-positioned elements.
+       * Returns an array of ECharts graphic rect/text elements.
+       */
+      static buildTableElements(tbl, gridRect) {
+        const rows = tbl.rows || 0;
+        const cols = tbl.columns || 0;
+        if (rows === 0 || cols === 0)
+          return [];
+        const borderWidth = tbl.border_width ?? 0;
+        const frameWidth = tbl.frame_width ?? 0;
+        const hasCellBorders = borderWidth > 0 && !!tbl.border_color;
+        const hasFrame = frameWidth > 0 && !!tbl.frame_color;
+        const mergeMap = /* @__PURE__ */ new Map();
+        const mergedCells = /* @__PURE__ */ new Set();
+        if (tbl.merges) {
+          for (const m of tbl.merges) {
+            mergeMap.set(`${m.startCol},${m.startRow}`, {
+              colspan: m.endCol - m.startCol + 1,
+              rowspan: m.endRow - m.startRow + 1
+            });
+            for (let r = m.startRow; r <= m.endRow; r++) {
+              for (let c = m.startCol; c <= m.endCol; c++) {
+                if (r === m.startRow && c === m.startCol)
+                  continue;
+                mergedCells.add(`${c},${r}`);
+              }
+            }
+          }
+        }
+        const PAD_X = 4;
+        const PAD_Y = 2;
+        const LINE_HEIGHT = 1.25;
+        const cellInfos = [];
+        for (let r = 0; r < rows; r++) {
+          cellInfos[r] = [];
+          for (let c = 0; c < cols; c++) {
+            if (mergedCells.has(`${c},${r}`)) {
+              cellInfos[r][c] = {
+                text: "",
+                lines: [],
+                fontSize: 12,
+                fontFamily: "sans-serif",
+                textColor: { color: "", opacity: 0 },
+                bgColor: { color: "", opacity: 0 },
+                halign: "center",
+                valign: "middle",
+                explicitWidth: 0,
+                explicitHeight: 0,
+                colspan: 1,
+                rowspan: 1,
+                skip: true,
+                padX: 0,
+                padY: 0
+              };
+              continue;
+            }
+            const cellData = tbl.cells?.[r]?.[c];
+            const merge = mergeMap.get(`${c},${r}`);
+            const colspan = merge?.colspan ?? 1;
+            const rowspan = merge?.rowspan ?? 1;
+            const text = cellData && !cellData._merged ? cellData.text || "" : "";
+            const lines = text ? text.split("\n") : [];
+            const fontSize = cellData ? TableCanvasRenderer.getSizePixels(cellData.text_size) : 12;
+            const fontFamily = cellData?.text_font_family === "monospace" ? "monospace" : "sans-serif";
+            let explicitWidth = 0;
+            let explicitHeight = 0;
+            if (cellData?.width > 0)
+              explicitWidth = Math.max(1, cellData.width * gridRect.width / 100);
+            if (cellData?.height > 0)
+              explicitHeight = Math.max(1, cellData.height * gridRect.height / 100);
+            const isTiny = explicitHeight > 0 && explicitHeight < 4;
+            const padX = isTiny ? 0 : PAD_X;
+            const padY = isTiny ? 0 : PAD_Y;
+            const bgRaw = cellData && !cellData._merged && cellData.bgcolor && typeof cellData.bgcolor === "string" && cellData.bgcolor.length > 0 ? cellData.bgcolor : "";
+            const textColorRaw = cellData?.text_color || "";
+            cellInfos[r][c] = {
+              text,
+              lines,
+              fontSize,
+              fontFamily,
+              textColor: textColorRaw ? TableCanvasRenderer.parseColor(textColorRaw) : { color: "#e0e0e0", opacity: 1 },
+              bgColor: bgRaw ? TableCanvasRenderer.parseColor(bgRaw) : { color: "", opacity: 0 },
+              halign: cellData ? TableCanvasRenderer.mapHAlign(cellData.text_halign) : "center",
+              valign: cellData ? TableCanvasRenderer.mapVAlign(cellData.text_valign) : "middle",
+              explicitWidth,
+              explicitHeight,
+              colspan,
+              rowspan,
+              skip: false,
+              padX,
+              padY
+            };
+          }
+        }
+        const colWidths = new Array(cols).fill(0);
+        const rowHeights = new Array(rows).fill(0);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip || info.colspan > 1 || info.rowspan > 1)
+              continue;
+            const textW = TableCanvasRenderer.measureMultiLineWidth(info.lines, info.fontSize, info.fontFamily);
+            const numLines = Math.max(info.lines.length, 1);
+            const cellW = info.explicitWidth > 0 ? info.explicitWidth : textW + info.padX * 2;
+            const cellH = info.explicitHeight > 0 ? info.explicitHeight : numLines * info.fontSize * LINE_HEIGHT + info.padY * 2;
+            colWidths[c] = Math.max(colWidths[c], cellW);
+            rowHeights[r] = Math.max(rowHeights[r], cellH);
+          }
+        }
+        for (let c = 0; c < cols; c++) {
+          if (colWidths[c] === 0)
+            colWidths[c] = 20;
+        }
+        for (let r = 0; r < rows; r++) {
+          if (rowHeights[r] === 0)
+            rowHeights[r] = 4;
+        }
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip)
+              continue;
+            const numLines = Math.max(info.lines.length, 1);
+            const neededH = info.explicitHeight > 0 ? info.explicitHeight : numLines * info.fontSize * LINE_HEIGHT + info.padY * 2;
+            if (info.colspan > 1) {
+              const spanned = TableCanvasRenderer.sumRange(colWidths, c, info.colspan);
+              const textW = TableCanvasRenderer.measureMultiLineWidth(info.lines, info.fontSize, info.fontFamily);
+              const neededW = info.explicitWidth > 0 ? info.explicitWidth : textW + info.padX * 2;
+              if (neededW > spanned) {
+                const perCol = (neededW - spanned) / info.colspan;
+                for (let i = 0; i < info.colspan; i++)
+                  colWidths[c + i] += perCol;
+              }
+              if (info.rowspan === 1) {
+                rowHeights[r] = Math.max(rowHeights[r], neededH);
+              }
+            }
+            if (info.rowspan > 1) {
+              const spanned = TableCanvasRenderer.sumRange(rowHeights, r, info.rowspan);
+              if (neededH > spanned) {
+                const perRow = (neededH - spanned) / info.rowspan;
+                for (let i = 0; i < info.rowspan; i++)
+                  rowHeights[r + i] += perRow;
+              }
+            }
+          }
+        }
+        for (let c = 0; c < cols; c++)
+          colWidths[c] = Math.round(colWidths[c]);
+        for (let r = 0; r < rows; r++)
+          rowHeights[r] = Math.round(rowHeights[r]);
+        const colX = new Array(cols + 1).fill(0);
+        for (let c = 0; c < cols; c++)
+          colX[c + 1] = colX[c] + colWidths[c];
+        const rowY = new Array(rows + 1).fill(0);
+        for (let r = 0; r < rows; r++)
+          rowY[r + 1] = rowY[r] + rowHeights[r];
+        const frameOffset = hasFrame ? frameWidth : 0;
+        const totalWidth = colX[cols] + frameOffset * 2;
+        const totalHeight = rowY[rows] + frameOffset * 2;
+        const clampedWidth = Math.min(totalWidth, gridRect.width);
+        const clampedHeight = Math.min(totalHeight, gridRect.height);
+        const pos = TableCanvasRenderer.computePosition(
+          tbl.position,
+          gridRect,
+          clampedWidth,
+          clampedHeight
+        );
+        const tableX = Math.round(pos.x);
+        const tableY = Math.round(pos.y);
+        const elements = [];
+        const ox = tableX + frameOffset;
+        const oy = tableY + frameOffset;
+        if (tbl.bgcolor) {
+          const { color, opacity } = TableCanvasRenderer.parseColor(tbl.bgcolor);
+          if (opacity > 0) {
+            elements.push({
+              type: "rect",
+              shape: { x: tableX, y: tableY, width: clampedWidth, height: clampedHeight },
+              style: { fill: color, opacity },
+              silent: true,
+              z: 0,
+              z2: 0
+            });
+          }
+        }
+        if (hasFrame) {
+          const { color: fc } = TableCanvasRenderer.parseColor(tbl.frame_color);
+          const half = frameWidth / 2;
+          elements.push({
+            type: "rect",
+            shape: {
+              x: tableX + half,
+              y: tableY + half,
+              width: clampedWidth - frameWidth,
+              height: clampedHeight - frameWidth
+            },
+            style: { fill: "none", stroke: fc, lineWidth: frameWidth },
+            silent: true,
+            z: 0,
+            z2: 1
+          });
+        }
+        const bdrColor = hasCellBorders ? TableCanvasRenderer.parseColor(tbl.border_color).color : "";
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const info = cellInfos[r][c];
+            if (info.skip)
+              continue;
+            const cx = ox + colX[c];
+            const cy = oy + rowY[r];
+            const cw = TableCanvasRenderer.sumRange(colWidths, c, info.colspan);
+            const ch = TableCanvasRenderer.sumRange(rowHeights, r, info.rowspan);
+            if (cx - tableX >= clampedWidth || cy - tableY >= clampedHeight)
+              continue;
+            const drawW = Math.min(cw, clampedWidth - (cx - tableX));
+            const drawH = Math.min(ch, clampedHeight - (cy - tableY));
+            if (info.bgColor.opacity > 0) {
+              elements.push({
+                type: "rect",
+                shape: { x: cx, y: cy, width: drawW, height: drawH },
+                style: { fill: info.bgColor.color, opacity: info.bgColor.opacity },
+                silent: true,
+                z: 0,
+                z2: 2
+              });
+            }
+            if (hasCellBorders) {
+              elements.push({
+                type: "rect",
+                shape: { x: cx, y: cy, width: drawW, height: drawH },
+                style: { fill: "none", stroke: bdrColor, lineWidth: borderWidth },
+                silent: true,
+                z: 0,
+                z2: 3
+              });
+            }
+            if (info.text) {
+              let textX, textAlign;
+              switch (info.halign) {
+                case "left":
+                  textX = cx + info.padX;
+                  textAlign = "left";
+                  break;
+                case "right":
+                  textX = cx + drawW - info.padX;
+                  textAlign = "right";
+                  break;
+                default:
+                  textX = cx + drawW / 2;
+                  textAlign = "center";
+                  break;
+              }
+              let textY, textVAlign;
+              switch (info.valign) {
+                case "top":
+                  textY = cy + info.padY;
+                  textVAlign = "top";
+                  break;
+                case "bottom":
+                  textY = cy + drawH - info.padY;
+                  textVAlign = "bottom";
+                  break;
+                default:
+                  textY = cy + drawH / 2;
+                  textVAlign = "middle";
+                  break;
+              }
+              elements.push({
+                type: "text",
+                x: textX,
+                y: textY,
+                style: {
+                  text: info.text,
+                  fill: info.textColor.color,
+                  opacity: info.textColor.opacity,
+                  font: `${info.fontSize}px ${info.fontFamily}`,
+                  textAlign,
+                  textVerticalAlign: textVAlign,
+                  lineHeight: Math.round(info.fontSize * LINE_HEIGHT)
+                },
+                silent: true,
+                z: 0,
+                z2: 4
+              });
+            }
+          }
+        }
+        return elements;
+      }
+      // ── Position Computation ─────────────────────────────────
+      static computePosition(position, gridRect, tableWidth, tableHeight) {
+        const PAD = 4;
+        const gx = gridRect.x;
+        const gy = gridRect.y;
+        const gw = gridRect.width;
+        const gh = gridRect.height;
+        switch (position) {
+          case "top_left":
+            return { x: gx + PAD, y: gy + PAD };
+          case "top_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + PAD };
+          case "top_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + PAD };
+          case "middle_left":
+            return { x: gx + PAD, y: gy + (gh - tableHeight) / 2 };
+          case "middle_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + (gh - tableHeight) / 2 };
+          case "middle_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + (gh - tableHeight) / 2 };
+          case "bottom_left":
+            return { x: gx + PAD, y: gy + gh - tableHeight - PAD };
+          case "bottom_center":
+            return { x: gx + (gw - tableWidth) / 2, y: gy + gh - tableHeight - PAD };
+          case "bottom_right":
+            return { x: gx + gw - tableWidth - PAD, y: gy + gh - tableHeight - PAD };
+          default:
+            return { x: gx + gw - tableWidth - PAD, y: gy + PAD };
+        }
+      }
+      // ── Utilities ────────────────────────────────────────────
+      /**
+       * Measure the max width across all lines of a multi-line text string.
+       */
+      static measureMultiLineWidth(lines, fontSize, fontFamily) {
+        if (!lines || lines.length === 0)
+          return 0;
+        const ratio = fontFamily === "monospace" ? 0.6 : 0.55;
+        let maxW = 0;
+        for (const line of lines) {
+          maxW = Math.max(maxW, line.length * fontSize * ratio);
+        }
+        return maxW;
+      }
+      static sumRange(arr, start, count) {
+        let sum = 0;
+        for (let i = start; i < start + count && i < arr.length; i++)
+          sum += arr[i];
+        return sum;
+      }
+    }
+
     var __defProp$4 = Object.defineProperty;
     var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
     var __publicField$4 = (obj, key, value) => {
@@ -2266,7 +4330,7 @@
                 this.chart.convertFromPixel({ seriesIndex: i }, [point.x, point.y]);
                 const pGrid = this.chart.convertFromPixel({ gridIndex: i }, [point.x, point.y]);
                 if (pGrid) {
-                  return { timeIndex: Math.round(pGrid[0]), value: pGrid[1], paneIndex: i };
+                  return { timeIndex: Math.round(pGrid[0]) - this.dataIndexOffset, value: pGrid[1], paneIndex: i };
                 }
               }
             }
@@ -2274,7 +4338,7 @@
           },
           dataToPixel: (point) => {
             const paneIdx = point.paneIndex || 0;
-            const p = this.chart.convertToPixel({ gridIndex: paneIdx }, [point.timeIndex, point.value]);
+            const p = this.chart.convertToPixel({ gridIndex: paneIdx }, [point.timeIndex + this.dataIndexOffset, point.value]);
             if (p) {
               return { x: p[0], y: p[1] };
             }
@@ -2288,6 +4352,18 @@
         __publicField$4(this, "padding");
         __publicField$4(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
+        __publicField$4(this, "_paddingPoints", 0);
+        // Current symmetric padding (empty bars per side)
+        __publicField$4(this, "LAZY_MIN_PADDING", 5);
+        // Always have a tiny buffer so edge scroll triggers
+        __publicField$4(this, "LAZY_MAX_PADDING", 500);
+        // Hard cap per side
+        __publicField$4(this, "LAZY_CHUNK_SIZE", 50);
+        // Bars added per expansion
+        __publicField$4(this, "LAZY_EDGE_THRESHOLD", 10);
+        // Bars from edge to trigger
+        __publicField$4(this, "_expandScheduled", false);
+        // Debounce flag
         // DOM Elements for Layout
         __publicField$4(this, "rootContainer");
         __publicField$4(this, "layoutContainer");
@@ -2296,6 +4372,19 @@
         __publicField$4(this, "leftSidebar");
         __publicField$4(this, "rightSidebar");
         __publicField$4(this, "chartContainer");
+        __publicField$4(this, "overlayContainer");
+        __publicField$4(this, "_lastTables", []);
+        __publicField$4(this, "_tableGraphicIds", []);
+        // Track canvas table graphic IDs for cleanup
+        __publicField$4(this, "_baseGraphics", []);
+        // Non-table graphic elements (title, watermark, pane labels)
+        __publicField$4(this, "_labelTooltipEl", null);
+        // Floating tooltip for label.set_tooltip()
+        // Pane drag-resize state
+        __publicField$4(this, "_lastLayout", null);
+        __publicField$4(this, "_mainHeightOverride", null);
+        __publicField$4(this, "_paneDragState", null);
+        __publicField$4(this, "_paneResizeRafId", null);
         __publicField$4(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
@@ -2311,7 +4400,7 @@
         __publicField$4(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
-          title: "Market",
+          title: void 0,
           height: "600px",
           backgroundColor: "#1e293b",
           upColor: "#00da3c",
@@ -2384,6 +4473,10 @@
         this.rightSidebar.style.fontFamily = this.options.fontFamily || "sans-serif";
         this.layoutContainer.appendChild(this.rightSidebar);
         this.chart = echarts__namespace.init(this.chartContainer);
+        this.chartContainer.style.position = "relative";
+        this.overlayContainer = document.createElement("div");
+        this.overlayContainer.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100;overflow:hidden;";
+        this.chartContainer.appendChild(this.overlayContainer);
         this.pluginManager = new PluginManager(this, this.toolbarContainer);
         this.drawingEditor = new DrawingEditor(this);
         this.chart.on("dataZoom", (params) => {
@@ -2391,28 +4484,150 @@
           const triggerOn = this.options.databox?.triggerOn;
           const position = this.options.databox?.position;
           if (triggerOn === "click" && position === "floating") {
-            this.chart.dispatchAction({
-              type: "hideTip"
-            });
+            this.chart.dispatchAction({ type: "hideTip" });
           }
+          this._checkEdgeAndExpand();
         });
         this.chart.on("finished", (params) => this.events.emit("chart:updated", params));
-        this.chart.getZr().on("mousedown", (params) => this.events.emit("mouse:down", params));
-        this.chart.getZr().on("mousemove", (params) => this.events.emit("mouse:move", params));
+        this.chart.getZr().on("mousedown", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:down", params);
+        });
+        this.chart.getZr().on("mousemove", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:move", params);
+        });
         this.chart.getZr().on("mouseup", (params) => this.events.emit("mouse:up", params));
-        this.chart.getZr().on("click", (params) => this.events.emit("mouse:click", params));
+        this.chart.getZr().on("click", (params) => {
+          if (!this._paneDragState)
+            this.events.emit("mouse:click", params);
+        });
         const zr = this.chart.getZr();
         const originalSetCursorStyle = zr.setCursorStyle;
+        const self = this;
         zr.setCursorStyle = function(cursorStyle) {
+          if (self._paneDragState) {
+            originalSetCursorStyle.call(this, "row-resize");
+            return;
+          }
           if (cursorStyle === "grab") {
             cursorStyle = "crosshair";
           }
           originalSetCursorStyle.call(this, cursorStyle);
         };
         this.bindDrawingEvents();
+        this.bindPaneResizeEvents();
         window.addEventListener("resize", this.resize.bind(this));
         document.addEventListener("fullscreenchange", this.onFullscreenChange);
         document.addEventListener("keydown", this.onKeyDown);
+      }
+      // ── Pane border drag-resize ────────────────────────────────
+      bindPaneResizeEvents() {
+        const MIN_MAIN = 10;
+        const MIN_INDICATOR = 5;
+        const HIT_ZONE = 6;
+        const zr = this.chart.getZr();
+        const findBoundary = (mouseY) => {
+          if (!this._lastLayout || this._lastLayout.paneBoundaries.length === 0)
+            return null;
+          if (this.maximizedPaneId)
+            return null;
+          const containerH = this.chart.getHeight();
+          if (containerH <= 0)
+            return null;
+          for (const b of this._lastLayout.paneBoundaries) {
+            const bY = b.yPercent / 100 * containerH;
+            if (Math.abs(mouseY - bY) <= HIT_ZONE) {
+              if (b.aboveId === "main" && this.isMainCollapsed)
+                continue;
+              const belowInd = this.indicators.get(b.belowId);
+              if (belowInd?.collapsed)
+                continue;
+              if (b.aboveId !== "main") {
+                const aboveInd = this.indicators.get(b.aboveId);
+                if (aboveInd?.collapsed)
+                  continue;
+              }
+              return b;
+            }
+          }
+          return null;
+        };
+        const getPaneHeight = (id) => {
+          if (id === "main") {
+            return this._lastLayout?.mainPaneHeight ?? 50;
+          }
+          const ind = this.indicators.get(id);
+          return ind?.height ?? 15;
+        };
+        zr.on("mousemove", (e) => {
+          if (this._paneDragState) {
+            const deltaY = e.offsetY - this._paneDragState.startY;
+            const containerH = this.chart.getHeight();
+            if (containerH <= 0)
+              return;
+            const deltaPct = deltaY / containerH * 100;
+            const minAbove = this._paneDragState.aboveId === "main" ? MIN_MAIN : MIN_INDICATOR;
+            const minBelow = MIN_INDICATOR;
+            let newAbove = this._paneDragState.startAboveHeight + deltaPct;
+            let newBelow = this._paneDragState.startBelowHeight - deltaPct;
+            if (newAbove < minAbove) {
+              newAbove = minAbove;
+              newBelow = this._paneDragState.startAboveHeight + this._paneDragState.startBelowHeight - minAbove;
+            }
+            if (newBelow < minBelow) {
+              newBelow = minBelow;
+              newAbove = this._paneDragState.startAboveHeight + this._paneDragState.startBelowHeight - minBelow;
+            }
+            if (this._paneDragState.aboveId === "main") {
+              this._mainHeightOverride = newAbove;
+            } else {
+              const aboveInd = this.indicators.get(this._paneDragState.aboveId);
+              if (aboveInd)
+                aboveInd.height = newAbove;
+            }
+            const belowInd = this.indicators.get(this._paneDragState.belowId);
+            if (belowInd)
+              belowInd.height = newBelow;
+            if (!this._paneResizeRafId) {
+              this._paneResizeRafId = requestAnimationFrame(() => {
+                this._paneResizeRafId = null;
+                this.render();
+              });
+            }
+            zr.setCursorStyle("row-resize");
+            e.stop?.();
+            return;
+          }
+          const boundary = findBoundary(e.offsetY);
+          if (boundary) {
+            zr.setCursorStyle("row-resize");
+          }
+        });
+        zr.on("mousedown", (e) => {
+          const boundary = findBoundary(e.offsetY);
+          if (!boundary)
+            return;
+          this._paneDragState = {
+            startY: e.offsetY,
+            aboveId: boundary.aboveId,
+            belowId: boundary.belowId,
+            startAboveHeight: getPaneHeight(boundary.aboveId),
+            startBelowHeight: getPaneHeight(boundary.belowId)
+          };
+          zr.setCursorStyle("row-resize");
+          e.stop?.();
+        });
+        zr.on("mouseup", () => {
+          if (this._paneDragState) {
+            this._paneDragState = null;
+            if (this._paneResizeRafId) {
+              cancelAnimationFrame(this._paneResizeRafId);
+              this._paneResizeRafId = null;
+            }
+            this.render();
+          }
+        });
       }
       bindDrawingEvents() {
         let hideTimeout = null;
@@ -2545,6 +4760,31 @@
               this.selectedDrawingId = null;
               this.render();
             }
+          }
+        });
+        this._labelTooltipEl = document.createElement("div");
+        this._labelTooltipEl.style.cssText = "position:absolute;display:none;pointer-events:none;z-index:200;background:rgba(30,41,59,0.95);color:#fff;border:1px solid #475569;border-radius:4px;padding:6px 10px;font-size:12px;line-height:1.5;white-space:pre-wrap;max-width:350px;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-family:" + (this.options.fontFamily || "sans-serif") + ";";
+        this.chartContainer.appendChild(this._labelTooltipEl);
+        this.chart.on("mouseover", { seriesType: "scatter" }, (params) => {
+          const tooltipText = params.data?._tooltipText;
+          if (!tooltipText || !this._labelTooltipEl)
+            return;
+          this._labelTooltipEl.textContent = tooltipText;
+          this._labelTooltipEl.style.display = "block";
+          const chartRect = this.chartContainer.getBoundingClientRect();
+          const event = params.event?.event;
+          if (event) {
+            const x = event.clientX - chartRect.left;
+            const y = event.clientY - chartRect.top;
+            const tipWidth = this._labelTooltipEl.offsetWidth;
+            const left = Math.min(x - tipWidth / 2, chartRect.width - tipWidth - 8);
+            this._labelTooltipEl.style.left = Math.max(4, left) + "px";
+            this._labelTooltipEl.style.top = y + 18 + "px";
+          }
+        });
+        this.chart.on("mouseout", { seriesType: "scatter" }, () => {
+          if (this._labelTooltipEl) {
+            this._labelTooltipEl.style.display = "none";
           }
         });
       }
@@ -2708,8 +4948,10 @@
           this.options,
           this.isMainCollapsed,
           this.maximizedPaneId,
-          this.marketData
+          this.marketData,
+          this._mainHeightOverride ?? void 0
         );
+        this._lastLayout = layout;
         const paddedOHLCVForShapes = [...Array(paddingPoints).fill(null), ...this.marketData, ...Array(paddingPoints).fill(null)];
         const { series: indicatorSeries, barColors } = SeriesBuilder.buildIndicatorSeries(
           this.indicators,
@@ -2726,13 +4968,15 @@
         );
         const coloredCandlestickData = paddedCandlestickData.map((candle, i) => {
           if (barColors[i]) {
+            const vals = candle.value || candle;
             return {
-              value: candle.value || candle,
+              value: vals,
               itemStyle: {
                 color: barColors[i],
-                color0: barColors[i],
-                borderColor: barColors[i],
-                borderColor0: barColors[i]
+                // up-candle body fill
+                color0: barColors[i]
+                // down-candle body fill
+                // borderColor/borderColor0 intentionally omitted → inherits series default (green/red)
               }
             };
           }
@@ -2748,28 +4992,48 @@
               markLine: candlestickSeries.markLine
               // Ensure markLine is updated
             },
-            ...indicatorSeries.map((s) => {
-              const update = { data: s.data };
-              if (s.renderItem) {
-                update.renderItem = s.renderItem;
-              }
-              return update;
-            })
+            ...indicatorSeries
           ]
         };
         this.chart.setOption(updateOption, { notMerge: false });
+        const allTables = [];
+        this.indicators.forEach((indicator) => {
+          Object.values(indicator.plots).forEach((plot) => {
+            if (plot.options?.style === "table") {
+              plot.data?.forEach((entry) => {
+                const tables = Array.isArray(entry.value) ? entry.value : [entry.value];
+                tables.forEach((t) => {
+                  if (t && !t._deleted) {
+                    t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
+                    allTables.push(t);
+                  }
+                });
+              });
+            }
+          });
+        });
+        this._lastTables = allTables;
+        this._renderTableOverlays();
         this.startCountdown();
       }
       startCountdown() {
         this.stopCountdown();
-        if (!this.options.lastPriceLine?.showCountdown || !this.options.interval || this.marketData.length === 0) {
+        if (!this.options.lastPriceLine?.showCountdown || this.marketData.length === 0) {
           return;
         }
+        let interval = this.options.interval;
+        if (!interval && this.marketData.length >= 2) {
+          const last = this.marketData[this.marketData.length - 1];
+          const prev = this.marketData[this.marketData.length - 2];
+          interval = last.time - prev.time;
+        }
+        if (!interval)
+          return;
         const updateLabel = () => {
           if (this.marketData.length === 0)
             return;
           const lastBar = this.marketData[this.marketData.length - 1];
-          const nextCloseTime = lastBar.time + (this.options.interval || 0);
+          const nextCloseTime = lastBar.time + interval;
           const now = Date.now();
           const diff = nextCloseTime - now;
           if (diff <= 0) {
@@ -2804,7 +5068,7 @@ ${timeString}`;
           this.chart.setOption({
             series: [
               {
-                name: this.options.title || "Market",
+                id: "__candlestick__",
                 markLine: {
                   data: [
                     {
@@ -2893,6 +5157,35 @@ ${timeString}`;
       }
       resize() {
         this.chart.resize();
+        this._renderTableOverlays();
+      }
+      /**
+       * Build table canvas graphic elements from the current _lastTables.
+       * Must be called AFTER setOption so grid rects are available from ECharts.
+       * Returns an array of ECharts graphic elements.
+       */
+      _buildTableGraphics() {
+        const model = this.chart.getModel();
+        const getGridRect = (paneIndex) => model.getComponent("grid", paneIndex)?.coordinateSystem?.getRect();
+        const elements = TableCanvasRenderer.buildGraphicElements(this._lastTables, getGridRect);
+        this._tableGraphicIds = [];
+        for (let i = 0; i < elements.length; i++) {
+          const id = `__qf_table_${i}`;
+          elements[i].id = id;
+          this._tableGraphicIds.push(id);
+        }
+        return elements;
+      }
+      /**
+       * Render table overlays after a non-replacing setOption (updateData, resize).
+       * Uses replaceMerge to cleanly replace all graphic elements without disrupting
+       * other interactive components (dataZoom, tooltip, etc.).
+       */
+      _renderTableOverlays() {
+        const tableGraphics = this._buildTableGraphics();
+        const allGraphics = [...this._baseGraphics, ...tableGraphics];
+        this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ["graphic"] });
+        TableOverlayRenderer.clearAll(this.overlayContainer);
       }
       destroy() {
         this.stopCountdown();
@@ -2909,8 +5202,167 @@ ${timeString}`;
           this.timeToIndex.set(k.time, index);
         });
         const dataLength = this.marketData.length;
-        const paddingPoints = Math.ceil(dataLength * this.padding);
-        this.dataIndexOffset = paddingPoints;
+        const initialPadding = Math.ceil(dataLength * this.padding);
+        this._paddingPoints = Math.max(this._paddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        this.dataIndexOffset = this._paddingPoints;
+      }
+      /**
+       * Expand symmetric padding to the given number of points per side.
+       * No-op if newPaddingPoints <= current. Performs a full render() and
+       * restores the viewport position so there is no visual jump.
+       */
+      expandPadding(newPaddingPoints) {
+        this._resizePadding(newPaddingPoints);
+      }
+      /**
+       * Resize symmetric padding to the given number of points per side.
+       * Works for both growing and shrinking. Clamps to [min, max].
+       * Uses merge-mode setOption to preserve drag/interaction state.
+       */
+      _resizePadding(newPaddingPoints) {
+        const initialPadding = Math.ceil(this.marketData.length * this.padding);
+        newPaddingPoints = Math.max(newPaddingPoints, initialPadding, this.LAZY_MIN_PADDING);
+        newPaddingPoints = Math.min(newPaddingPoints, this.LAZY_MAX_PADDING);
+        if (newPaddingPoints === this._paddingPoints)
+          return;
+        const oldPadding = this._paddingPoints;
+        const oldTotal = this.marketData.length + 2 * oldPadding;
+        const currentOption = this.chart.getOption();
+        const zoomComp = currentOption?.dataZoom?.find((dz) => dz.type === "slider" || dz.type === "inside");
+        const oldStartIdx = zoomComp ? zoomComp.start / 100 * oldTotal : 0;
+        const oldEndIdx = zoomComp ? zoomComp.end / 100 * oldTotal : oldTotal;
+        const delta = newPaddingPoints - oldPadding;
+        this._paddingPoints = newPaddingPoints;
+        this.dataIndexOffset = this._paddingPoints;
+        const paddingPoints = this._paddingPoints;
+        const emptyCandle = { value: [NaN, NaN, NaN, NaN], itemStyle: { opacity: 0 } };
+        const candlestickSeries = SeriesBuilder.buildCandlestickSeries(this.marketData, this.options);
+        const paddedCandlestickData = [
+          ...Array(paddingPoints).fill(emptyCandle),
+          ...candlestickSeries.data,
+          ...Array(paddingPoints).fill(emptyCandle)
+        ];
+        const categoryData = [
+          ...Array(paddingPoints).fill(""),
+          ...this.marketData.map((k) => new Date(k.time).toLocaleString()),
+          ...Array(paddingPoints).fill("")
+        ];
+        const paddedOHLCVForShapes = [...Array(paddingPoints).fill(null), ...this.marketData, ...Array(paddingPoints).fill(null)];
+        const layout = LayoutManager.calculate(
+          this.chart.getHeight(),
+          this.indicators,
+          this.options,
+          this.isMainCollapsed,
+          this.maximizedPaneId,
+          this.marketData,
+          this._mainHeightOverride ?? void 0
+        );
+        const { series: indicatorSeries, barColors } = SeriesBuilder.buildIndicatorSeries(
+          this.indicators,
+          this.timeToIndex,
+          layout.paneLayout,
+          categoryData.length,
+          paddingPoints,
+          paddedOHLCVForShapes,
+          layout.overlayYAxisMap,
+          layout.separatePaneYAxisOffset
+        );
+        const coloredCandlestickData = paddedCandlestickData.map((candle, i) => {
+          if (barColors[i]) {
+            const vals = candle.value || candle;
+            return {
+              value: vals,
+              itemStyle: {
+                color: barColors[i],
+                color0: barColors[i]
+              }
+            };
+          }
+          return candle;
+        });
+        const newTotal = this.marketData.length + 2 * newPaddingPoints;
+        const newStart = Math.max(0, (oldStartIdx + delta) / newTotal * 100);
+        const newEnd = Math.min(100, (oldEndIdx + delta) / newTotal * 100);
+        const drawingSeriesUpdates = [];
+        const drawingsByPane = /* @__PURE__ */ new Map();
+        this.drawings.forEach((d) => {
+          const paneIdx = d.paneIndex || 0;
+          if (!drawingsByPane.has(paneIdx))
+            drawingsByPane.set(paneIdx, []);
+          drawingsByPane.get(paneIdx).push(d);
+        });
+        drawingsByPane.forEach((paneDrawings) => {
+          drawingSeriesUpdates.push({
+            data: paneDrawings.map((d) => [
+              d.points[0].timeIndex + this.dataIndexOffset,
+              d.points[0].value,
+              d.points[1].timeIndex + this.dataIndexOffset,
+              d.points[1].value
+            ])
+          });
+        });
+        const updateOption = {
+          xAxis: currentOption.xAxis.map(() => ({ data: categoryData })),
+          dataZoom: [
+            { start: newStart, end: newEnd },
+            { start: newStart, end: newEnd }
+          ],
+          series: [
+            { data: coloredCandlestickData, markLine: candlestickSeries.markLine },
+            ...indicatorSeries.map((s) => {
+              const update = { data: s.data };
+              if (s.renderItem)
+                update.renderItem = s.renderItem;
+              return update;
+            }),
+            ...drawingSeriesUpdates
+          ]
+        };
+        this.chart.setOption(updateOption, { notMerge: false });
+      }
+      /**
+       * Check if user scrolled near an edge (expand) or away from edges (contract).
+       * Uses requestAnimationFrame to avoid cascading re-renders inside
+       * the ECharts dataZoom event callback.
+       */
+      _checkEdgeAndExpand() {
+        if (this._expandScheduled)
+          return;
+        const zoomComp = this.chart.getOption()?.dataZoom?.find((dz) => dz.type === "slider" || dz.type === "inside");
+        if (!zoomComp)
+          return;
+        const paddingPoints = this._paddingPoints;
+        const dataLength = this.marketData.length;
+        const totalLength = dataLength + 2 * paddingPoints;
+        const startIdx = Math.round(zoomComp.start / 100 * totalLength);
+        const endIdx = Math.round(zoomComp.end / 100 * totalLength);
+        const dataStart = paddingPoints;
+        const dataEnd = paddingPoints + dataLength - 1;
+        const visibleCandles = Math.max(0, Math.min(endIdx, dataEnd) - Math.max(startIdx, dataStart) + 1);
+        const nearLeftEdge = startIdx < this.LAZY_EDGE_THRESHOLD;
+        const nearRightEdge = endIdx > totalLength - this.LAZY_EDGE_THRESHOLD;
+        if ((nearLeftEdge || nearRightEdge) && paddingPoints < this.LAZY_MAX_PADDING && visibleCandles >= 3) {
+          this._expandScheduled = true;
+          requestAnimationFrame(() => {
+            this._expandScheduled = false;
+            this._resizePadding(paddingPoints + this.LAZY_CHUNK_SIZE);
+          });
+          return;
+        }
+        const leftPadUsed = Math.max(0, paddingPoints - startIdx);
+        const rightPadUsed = Math.max(0, endIdx - (paddingPoints + dataLength - 1));
+        const neededPadding = Math.max(
+          leftPadUsed + this.LAZY_CHUNK_SIZE,
+          // keep one chunk of buffer
+          rightPadUsed + this.LAZY_CHUNK_SIZE
+        );
+        if (paddingPoints > neededPadding + this.LAZY_CHUNK_SIZE) {
+          this._expandScheduled = true;
+          requestAnimationFrame(() => {
+            this._expandScheduled = false;
+            this._resizePadding(neededPadding);
+          });
+        }
       }
       render() {
         if (this.marketData.length === 0)
@@ -2953,8 +5405,10 @@ ${timeString}`;
           this.options,
           this.isMainCollapsed,
           this.maximizedPaneId,
-          this.marketData
+          this.marketData,
+          this._mainHeightOverride ?? void 0
         );
+        this._lastLayout = layout;
         if (!currentZoomState && layout.dataZoom && this.marketData.length > 0) {
           const realDataLength = this.marketData.length;
           const totalLength = categoryData.length;
@@ -3002,19 +5456,31 @@ ${timeString}`;
         );
         candlestickSeries.data = candlestickSeries.data.map((candle, i) => {
           if (barColors[i]) {
+            const vals = candle.value || candle;
             return {
-              value: candle.value || candle,
+              value: vals,
               itemStyle: {
                 color: barColors[i],
-                color0: barColors[i],
-                borderColor: barColors[i],
-                borderColor0: barColors[i]
+                color0: barColors[i]
               }
             };
           }
           return candle;
         });
-        const graphic = GraphicBuilder.build(layout, this.options, this.toggleIndicator.bind(this), this.isMainCollapsed, this.maximizedPaneId);
+        const overlayIndicators = [];
+        this.indicators.forEach((ind, id) => {
+          if (ind.paneIndex === 0) {
+            overlayIndicators.push({ id, titleColor: ind.titleColor });
+          }
+        });
+        const graphic = GraphicBuilder.build(
+          layout,
+          this.options,
+          this.toggleIndicator.bind(this),
+          this.isMainCollapsed,
+          this.maximizedPaneId,
+          overlayIndicators
+        );
         const drawingsByPane = /* @__PURE__ */ new Map();
         this.drawings.forEach((d) => {
           const paneIdx = d.paneIndex || 0;
@@ -3039,8 +5505,9 @@ ${timeString}`;
               const end = drawing.points[1];
               if (!start || !end)
                 return;
-              const p1 = api.coord([start.timeIndex, start.value]);
-              const p2 = api.coord([end.timeIndex, end.value]);
+              const drawingOffset = this.dataIndexOffset;
+              const p1 = api.coord([start.timeIndex + drawingOffset, start.value]);
+              const p2 = api.coord([end.timeIndex + drawingOffset, end.value]);
               const isSelected = drawing.id === this.selectedDrawingId;
               if (drawing.type === "line") {
                 return {
@@ -3261,7 +5728,13 @@ ${timeString}`;
                 };
               }
             },
-            data: drawings.map((d) => [d.points[0].timeIndex, d.points[0].value, d.points[1].timeIndex, d.points[1].value]),
+            data: drawings.map((d) => [
+              d.points[0].timeIndex + this.dataIndexOffset,
+              d.points[0].value,
+              d.points[1].timeIndex + this.dataIndexOffset,
+              d.points[1].value
+            ]),
+            encode: { x: [0, 2], y: [1, 3] },
             z: 100,
             silent: false
           });
@@ -3282,6 +5755,22 @@ ${timeString}`;
           }
           return `<div style="min-width: 200px;">${html}</div>`;
         };
+        const allTables = [];
+        this.indicators.forEach((indicator) => {
+          Object.values(indicator.plots).forEach((plot) => {
+            if (plot.options?.style === "table") {
+              plot.data?.forEach((entry) => {
+                const tables = Array.isArray(entry.value) ? entry.value : [entry.value];
+                tables.forEach((t) => {
+                  if (t && !t._deleted) {
+                    t._paneIndex = t.force_overlay ? 0 : indicator.paneIndex;
+                    allTables.push(t);
+                  }
+                });
+              });
+            }
+          });
+        });
         const option = {
           backgroundColor: this.options.backgroundColor,
           animation: false,
@@ -3329,6 +5818,18 @@ ${timeString}`;
           series: [candlestickSeries, ...indicatorSeries, ...drawingSeriesList]
         };
         this.chart.setOption(option, true);
+        this._baseGraphics = graphic;
+        this._lastTables = allTables;
+        if (allTables.length > 0) {
+          const tableGraphics = this._buildTableGraphics();
+          if (tableGraphics.length > 0) {
+            const allGraphics = [...graphic, ...tableGraphics];
+            this.chart.setOption({ graphic: allGraphics }, { replaceMerge: ["graphic"] });
+          }
+        } else {
+          this._tableGraphicIds = [];
+        }
+        TableOverlayRenderer.clearAll(this.overlayContainer);
       }
     }
 

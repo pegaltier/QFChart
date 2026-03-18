@@ -106,6 +106,7 @@ export interface QFChartOptions {
     };
     dataZoom?: {
         visible?: boolean;
+        pannable?: boolean; // Keep pan/drag when visible=false (default true)
         position?: 'top' | 'bottom';
         height?: number; // height in %, default 6
         start?: number; // 0-100, default 50
