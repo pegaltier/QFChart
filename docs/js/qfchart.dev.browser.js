@@ -39,21 +39,21 @@
 
     var echarts__namespace = /*#__PURE__*/_interopNamespaceDefault(echarts);
 
-    var __defProp$g = Object.defineProperty;
-    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$g = (obj, key, value) => {
-      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$u = Object.defineProperty;
+    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$u = (obj, key, value) => {
+      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class Indicator {
       constructor(id, plots, paneIndex, options = {}) {
-        __publicField$g(this, "id");
-        __publicField$g(this, "plots");
-        __publicField$g(this, "paneIndex");
-        __publicField$g(this, "height");
-        __publicField$g(this, "collapsed");
-        __publicField$g(this, "titleColor");
-        __publicField$g(this, "controls");
+        __publicField$u(this, "id");
+        __publicField$u(this, "plots");
+        __publicField$u(this, "paneIndex");
+        __publicField$u(this, "height");
+        __publicField$u(this, "collapsed");
+        __publicField$u(this, "titleColor");
+        __publicField$u(this, "controls");
         this.id = id;
         this.plots = plots;
         this.paneIndex = paneIndex;
@@ -2513,10 +2513,10 @@
       }
     }
 
-    var __defProp$f = Object.defineProperty;
-    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$f = (obj, key, value) => {
-      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$t = Object.defineProperty;
+    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$t = (obj, key, value) => {
+      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesRendererFactory = class _SeriesRendererFactory {
@@ -2527,7 +2527,7 @@
         return this.renderers.get(style) || this.renderers.get("line");
       }
     };
-    __publicField$f(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
+    __publicField$t(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
     _SeriesRendererFactory.register("line", new LineRenderer());
     _SeriesRendererFactory.register("step", new StepRenderer());
     _SeriesRendererFactory.register("histogram", new HistogramRenderer());
@@ -2547,10 +2547,10 @@
     _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
-    var __defProp$e = Object.defineProperty;
-    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$e = (obj, key, value) => {
-      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$s = Object.defineProperty;
+    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$s = (obj, key, value) => {
+      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesBuilder = class _SeriesBuilder {
@@ -2829,7 +2829,7 @@
         return { series, barColors };
       }
     };
-    __publicField$e(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
+    __publicField$s(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
@@ -3143,20 +3143,20 @@
       }
     }
 
-    var __defProp$d = Object.defineProperty;
-    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$d = (obj, key, value) => {
-      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$r = Object.defineProperty;
+    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$r = (obj, key, value) => {
+      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class PluginManager {
       constructor(context, toolbarContainer) {
-        __publicField$d(this, "plugins", /* @__PURE__ */ new Map());
-        __publicField$d(this, "activePluginId", null);
-        __publicField$d(this, "context");
-        __publicField$d(this, "toolbarContainer");
-        __publicField$d(this, "tooltipElement", null);
-        __publicField$d(this, "hideTimeout", null);
+        __publicField$r(this, "plugins", /* @__PURE__ */ new Map());
+        __publicField$r(this, "activePluginId", null);
+        __publicField$r(this, "context");
+        __publicField$r(this, "toolbarContainer");
+        __publicField$r(this, "tooltipElement", null);
+        __publicField$r(this, "hideTimeout", null);
         this.context = context;
         this.toolbarContainer = toolbarContainer;
         this.createTooltip();
@@ -3340,27 +3340,27 @@
       }
     }
 
-    var __defProp$c = Object.defineProperty;
-    var __defNormalProp$c = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$c = (obj, key, value) => {
-      __defNormalProp$c(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$q = Object.defineProperty;
+    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$q = (obj, key, value) => {
+      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingEditor {
       constructor(context) {
-        __publicField$c(this, "context");
-        __publicField$c(this, "isEditing", false);
-        __publicField$c(this, "currentDrawing", null);
-        __publicField$c(this, "editingPointIndex", null);
-        __publicField$c(this, "zr");
+        __publicField$q(this, "context");
+        __publicField$q(this, "isEditing", false);
+        __publicField$q(this, "currentDrawing", null);
+        __publicField$q(this, "editingPointIndex", null);
+        __publicField$q(this, "zr");
         // Temporary ZRender elements for visual feedback during drag
-        __publicField$c(this, "editGroup", null);
-        __publicField$c(this, "editLines", []);
-        __publicField$c(this, "editPoints", []);
-        __publicField$c(this, "isMovingShape", false);
-        __publicField$c(this, "dragStart", null);
-        __publicField$c(this, "initialPixelPoints", []);
-        __publicField$c(this, "onDrawingMouseDown", (payload) => {
+        __publicField$q(this, "editGroup", null);
+        __publicField$q(this, "editLines", []);
+        __publicField$q(this, "editPoints", []);
+        __publicField$q(this, "isMovingShape", false);
+        __publicField$q(this, "dragStart", null);
+        __publicField$q(this, "initialPixelPoints", []);
+        __publicField$q(this, "onDrawingMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3379,7 +3379,7 @@
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
         });
-        __publicField$c(this, "onPointMouseDown", (payload) => {
+        __publicField$q(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3397,7 +3397,7 @@
           this.zr.on("mousemove", this.onMouseMove);
           this.zr.on("mouseup", this.onMouseUp);
         });
-        __publicField$c(this, "onMouseMove", (e) => {
+        __publicField$q(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
             return;
           const x = e.offsetX;
@@ -3434,7 +3434,7 @@
             this.editPoints[this.editingPointIndex].setShape({ cx: x, cy: y });
           }
         });
-        __publicField$c(this, "onMouseUp", (e) => {
+        __publicField$q(this, "onMouseUp", (e) => {
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
@@ -3533,15 +3533,15 @@
       }
     }
 
-    var __defProp$b = Object.defineProperty;
-    var __defNormalProp$b = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$b = (obj, key, value) => {
-      __defNormalProp$b(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$p = Object.defineProperty;
+    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$p = (obj, key, value) => {
+      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingRendererRegistry {
       constructor() {
-        __publicField$b(this, "renderers", /* @__PURE__ */ new Map());
+        __publicField$p(this, "renderers", /* @__PURE__ */ new Map());
       }
       register(renderer) {
         this.renderers.set(renderer.type, renderer);
@@ -3551,15 +3551,15 @@
       }
     }
 
-    var __defProp$a = Object.defineProperty;
-    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$a = (obj, key, value) => {
-      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$o = Object.defineProperty;
+    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$o = (obj, key, value) => {
+      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class EventBus {
       constructor() {
-        __publicField$a(this, "handlers", /* @__PURE__ */ new Map());
+        __publicField$o(this, "handlers", /* @__PURE__ */ new Map());
       }
       on(event, handler) {
         if (!this.handlers.has(event)) {
@@ -4317,31 +4317,31 @@
       }
     }
 
-    var __defProp$9 = Object.defineProperty;
-    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$9 = (obj, key, value) => {
-      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$n = Object.defineProperty;
+    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$n = (obj, key, value) => {
+      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class QFChart {
       constructor(container, options = {}) {
-        __publicField$9(this, "chart");
-        __publicField$9(this, "options");
-        __publicField$9(this, "marketData", []);
-        __publicField$9(this, "indicators", /* @__PURE__ */ new Map());
-        __publicField$9(this, "timeToIndex", /* @__PURE__ */ new Map());
-        __publicField$9(this, "pluginManager");
-        __publicField$9(this, "drawingEditor");
-        __publicField$9(this, "events", new EventBus());
-        __publicField$9(this, "isMainCollapsed", false);
-        __publicField$9(this, "maximizedPaneId", null);
-        __publicField$9(this, "countdownInterval", null);
-        __publicField$9(this, "selectedDrawingId", null);
+        __publicField$n(this, "chart");
+        __publicField$n(this, "options");
+        __publicField$n(this, "marketData", []);
+        __publicField$n(this, "indicators", /* @__PURE__ */ new Map());
+        __publicField$n(this, "timeToIndex", /* @__PURE__ */ new Map());
+        __publicField$n(this, "pluginManager");
+        __publicField$n(this, "drawingEditor");
+        __publicField$n(this, "events", new EventBus());
+        __publicField$n(this, "isMainCollapsed", false);
+        __publicField$n(this, "maximizedPaneId", null);
+        __publicField$n(this, "countdownInterval", null);
+        __publicField$n(this, "selectedDrawingId", null);
         // Track selected drawing
         // Drawing System
-        __publicField$9(this, "drawings", []);
-        __publicField$9(this, "drawingRenderers", new DrawingRendererRegistry());
-        __publicField$9(this, "coordinateConversion", {
+        __publicField$n(this, "drawings", []);
+        __publicField$n(this, "drawingRenderers", new DrawingRendererRegistry());
+        __publicField$n(this, "coordinateConversion", {
           pixelToData: (point) => {
             const option = this.chart.getOption();
             if (!option || !option.grid)
@@ -4368,58 +4368,58 @@
           }
         });
         // Default colors and constants
-        __publicField$9(this, "upColor", "#00da3c");
-        __publicField$9(this, "downColor", "#ec0000");
-        __publicField$9(this, "defaultPadding", 0);
-        __publicField$9(this, "padding");
-        __publicField$9(this, "dataIndexOffset", 0);
+        __publicField$n(this, "upColor", "#00da3c");
+        __publicField$n(this, "downColor", "#ec0000");
+        __publicField$n(this, "defaultPadding", 0);
+        __publicField$n(this, "padding");
+        __publicField$n(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
-        __publicField$9(this, "_paddingPoints", 0);
+        __publicField$n(this, "_paddingPoints", 0);
         // Current symmetric padding (empty bars per side)
-        __publicField$9(this, "LAZY_MIN_PADDING", 5);
+        __publicField$n(this, "LAZY_MIN_PADDING", 5);
         // Always have a tiny buffer so edge scroll triggers
-        __publicField$9(this, "LAZY_MAX_PADDING", 500);
+        __publicField$n(this, "LAZY_MAX_PADDING", 500);
         // Hard cap per side
-        __publicField$9(this, "LAZY_CHUNK_SIZE", 50);
+        __publicField$n(this, "LAZY_CHUNK_SIZE", 50);
         // Bars added per expansion
-        __publicField$9(this, "LAZY_EDGE_THRESHOLD", 10);
+        __publicField$n(this, "LAZY_EDGE_THRESHOLD", 10);
         // Bars from edge to trigger
-        __publicField$9(this, "_expandScheduled", false);
+        __publicField$n(this, "_expandScheduled", false);
         // Debounce flag
         // DOM Elements for Layout
-        __publicField$9(this, "rootContainer");
-        __publicField$9(this, "layoutContainer");
-        __publicField$9(this, "toolbarContainer");
+        __publicField$n(this, "rootContainer");
+        __publicField$n(this, "layoutContainer");
+        __publicField$n(this, "toolbarContainer");
         // New Toolbar
-        __publicField$9(this, "leftSidebar");
-        __publicField$9(this, "rightSidebar");
-        __publicField$9(this, "chartContainer");
-        __publicField$9(this, "overlayContainer");
-        __publicField$9(this, "_lastTables", []);
-        __publicField$9(this, "_tableGraphicIds", []);
+        __publicField$n(this, "leftSidebar");
+        __publicField$n(this, "rightSidebar");
+        __publicField$n(this, "chartContainer");
+        __publicField$n(this, "overlayContainer");
+        __publicField$n(this, "_lastTables", []);
+        __publicField$n(this, "_tableGraphicIds", []);
         // Track canvas table graphic IDs for cleanup
-        __publicField$9(this, "_baseGraphics", []);
+        __publicField$n(this, "_baseGraphics", []);
         // Non-table graphic elements (title, watermark, pane labels)
-        __publicField$9(this, "_labelTooltipEl", null);
+        __publicField$n(this, "_labelTooltipEl", null);
         // Floating tooltip for label.set_tooltip()
         // Pane drag-resize state
-        __publicField$9(this, "_lastLayout", null);
-        __publicField$9(this, "_mainHeightOverride", null);
-        __publicField$9(this, "_paneDragState", null);
-        __publicField$9(this, "_paneResizeRafId", null);
-        __publicField$9(this, "onKeyDown", (e) => {
+        __publicField$n(this, "_lastLayout", null);
+        __publicField$n(this, "_mainHeightOverride", null);
+        __publicField$n(this, "_paneDragState", null);
+        __publicField$n(this, "_paneResizeRafId", null);
+        __publicField$n(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
             this.selectedDrawingId = null;
             this.render();
           }
         });
-        __publicField$9(this, "onFullscreenChange", () => {
+        __publicField$n(this, "onFullscreenChange", () => {
           this.render();
         });
         // --- Interaction Locking ---
-        __publicField$9(this, "isLocked", false);
-        __publicField$9(this, "lockedState", null);
+        __publicField$n(this, "isLocked", false);
+        __publicField$n(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
           title: void 0,
@@ -5651,19 +5651,19 @@ ${timeString}`;
       }
     }
 
-    var __defProp$8 = Object.defineProperty;
-    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$8 = (obj, key, value) => {
-      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$m = Object.defineProperty;
+    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$m = (obj, key, value) => {
+      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class AbstractPlugin {
       constructor(config) {
-        __publicField$8(this, "id");
-        __publicField$8(this, "name");
-        __publicField$8(this, "icon");
-        __publicField$8(this, "context");
-        __publicField$8(this, "eventListeners", []);
+        __publicField$m(this, "id");
+        __publicField$m(this, "name");
+        __publicField$m(this, "icon");
+        __publicField$m(this, "context");
+        __publicField$m(this, "eventListeners", []);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -5745,10 +5745,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$7 = Object.defineProperty;
-    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$7 = (obj, key, value) => {
-      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$l = Object.defineProperty;
+    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$l = (obj, key, value) => {
+      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class MeasureTool extends AbstractPlugin {
@@ -5758,31 +5758,31 @@ ${timeString}`;
           name: options?.name || "Measure",
           icon: options?.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></svg>`
         });
-        __publicField$7(this, "zr");
-        __publicField$7(this, "state", "idle");
-        __publicField$7(this, "startPoint", null);
-        __publicField$7(this, "endPoint", null);
+        __publicField$l(this, "zr");
+        __publicField$l(this, "state", "idle");
+        __publicField$l(this, "startPoint", null);
+        __publicField$l(this, "endPoint", null);
         // ZRender Elements
-        __publicField$7(this, "group", null);
-        __publicField$7(this, "rect", null);
-        __publicField$7(this, "labelRect", null);
-        __publicField$7(this, "labelText", null);
-        __publicField$7(this, "lineV", null);
-        __publicField$7(this, "lineH", null);
-        __publicField$7(this, "arrowStart", null);
-        __publicField$7(this, "arrowEnd", null);
+        __publicField$l(this, "group", null);
+        __publicField$l(this, "rect", null);
+        __publicField$l(this, "labelRect", null);
+        __publicField$l(this, "labelText", null);
+        __publicField$l(this, "lineV", null);
+        __publicField$l(this, "lineH", null);
+        __publicField$l(this, "arrowStart", null);
+        __publicField$l(this, "arrowEnd", null);
         // --- Interaction Handlers ---
-        __publicField$7(this, "onMouseDown", () => {
+        __publicField$l(this, "onMouseDown", () => {
           if (this.state === "finished") {
             this.removeGraphic();
           }
         });
-        __publicField$7(this, "onChartInteraction", () => {
+        __publicField$l(this, "onChartInteraction", () => {
           if (this.group) {
             this.removeGraphic();
           }
         });
-        __publicField$7(this, "onClick", (params) => {
+        __publicField$l(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -5797,8 +5797,8 @@ ${timeString}`;
             this.enableClearListeners();
           }
         });
-        __publicField$7(this, "clearHandlers", {});
-        __publicField$7(this, "onMouseMove", (params) => {
+        __publicField$l(this, "clearHandlers", {});
+        __publicField$l(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6020,15 +6020,15 @@ ${timeString}`;
       }
     }
 
-    var __defProp$6 = Object.defineProperty;
-    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$6 = (obj, key, value) => {
-      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$k = Object.defineProperty;
+    var __defNormalProp$k = (obj, key, value) => key in obj ? __defProp$k(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$k = (obj, key, value) => {
+      __defNormalProp$k(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineDrawingRenderer {
       constructor() {
-        __publicField$6(this, "type", "line");
+        __publicField$k(this, "type", "line");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6074,10 +6074,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$5 = Object.defineProperty;
-    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$5 = (obj, key, value) => {
-      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$j = Object.defineProperty;
+    var __defNormalProp$j = (obj, key, value) => key in obj ? __defProp$j(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$j = (obj, key, value) => {
+      __defNormalProp$j(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineTool extends AbstractPlugin {
@@ -6087,17 +6087,17 @@ ${timeString}`;
           name: options?.name || "Trend Line",
           icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2" /></svg>`
         });
-        __publicField$5(this, "zr");
-        __publicField$5(this, "state", "idle");
-        __publicField$5(this, "startPoint", null);
-        __publicField$5(this, "endPoint", null);
+        __publicField$j(this, "zr");
+        __publicField$j(this, "state", "idle");
+        __publicField$j(this, "startPoint", null);
+        __publicField$j(this, "endPoint", null);
         // ZRender Elements
-        __publicField$5(this, "group", null);
-        __publicField$5(this, "line", null);
-        __publicField$5(this, "startCircle", null);
-        __publicField$5(this, "endCircle", null);
+        __publicField$j(this, "group", null);
+        __publicField$j(this, "line", null);
+        __publicField$j(this, "startCircle", null);
+        __publicField$j(this, "endCircle", null);
         // --- Interaction Handlers ---
-        __publicField$5(this, "onClick", (params) => {
+        __publicField$j(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6135,7 +6135,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$5(this, "onMouseMove", (params) => {
+        __publicField$j(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = [params.offsetX, params.offsetY];
@@ -6206,17 +6206,17 @@ ${timeString}`;
       }
     }
 
-    var __defProp$4 = Object.defineProperty;
-    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$4 = (obj, key, value) => {
-      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$i = Object.defineProperty;
+    var __defNormalProp$i = (obj, key, value) => key in obj ? __defProp$i(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$i = (obj, key, value) => {
+      __defNormalProp$i(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS$1 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$3 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$3 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibonacciDrawingRenderer {
       constructor() {
-        __publicField$4(this, "type", "fibonacci");
+        __publicField$i(this, "type", "fibonacci");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6232,9 +6232,9 @@ ${timeString}`;
         const valDiff = endVal - startVal;
         const backgrounds = [];
         const linesAndText = [];
-        LEVELS$1.forEach((level, index) => {
+        LEVELS$3.forEach((level, index) => {
           const levelY = y2 - diffY * level;
-          const levelColor = COLORS$1[index % COLORS$1.length];
+          const levelColor = COLORS$3[index % COLORS$3.length];
           linesAndText.push({
             type: "line",
             shape: { x1: startX, y1: levelY, x2: endX, y2: levelY },
@@ -6253,8 +6253,8 @@ ${timeString}`;
             },
             silent: true
           });
-          if (index < LEVELS$1.length - 1) {
-            const nextLevel = LEVELS$1[index + 1];
+          if (index < LEVELS$3.length - 1) {
+            const nextLevel = LEVELS$3[index + 1];
             const nextY = y2 - diffY * nextLevel;
             const rectH = Math.abs(nextY - levelY);
             const rectY = Math.min(levelY, nextY);
@@ -6264,7 +6264,7 @@ ${timeString}`;
               // Enable dragging by clicking background
               shape: { x: startX, y: rectY, width, height: rectH },
               style: {
-                fill: COLORS$1[(index + 1) % COLORS$1.length],
+                fill: COLORS$3[(index + 1) % COLORS$3.length],
                 opacity: 0.1
               }
             });
@@ -6310,10 +6310,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$3 = Object.defineProperty;
-    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$3 = (obj, key, value) => {
-      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$h = Object.defineProperty;
+    var __defNormalProp$h = (obj, key, value) => key in obj ? __defProp$h(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$h = (obj, key, value) => {
+      __defNormalProp$h(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciTool extends AbstractPlugin {
@@ -6323,14 +6323,14 @@ ${timeString}`;
           name: options.name || "Fibonacci Retracement",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-80v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Zm0-240v-80h720v80H120Z"/></svg>`
         });
-        __publicField$3(this, "startPoint", null);
-        __publicField$3(this, "endPoint", null);
-        __publicField$3(this, "state", "idle");
+        __publicField$h(this, "startPoint", null);
+        __publicField$h(this, "endPoint", null);
+        __publicField$h(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField$3(this, "graphicGroup", null);
+        __publicField$h(this, "graphicGroup", null);
         // Fib levels config
-        __publicField$3(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField$3(this, "colors", [
+        __publicField$h(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$h(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -6346,7 +6346,7 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField$3(this, "onClick", (params) => {
+        __publicField$h(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6362,7 +6362,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$3(this, "onMouseMove", (params) => {
+        __publicField$h(this, "onMouseMove", (params) => {
           if (this.state === "drawing") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
@@ -6485,17 +6485,17 @@ ${timeString}`;
       }
     }
 
-    var __defProp$2 = Object.defineProperty;
-    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$2 = (obj, key, value) => {
-      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$g = Object.defineProperty;
+    var __defNormalProp$g = (obj, key, value) => key in obj ? __defProp$g(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$g = (obj, key, value) => {
+      __defNormalProp$g(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
-    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
-    const COLORS = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    const LEVELS$2 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$2 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
     class FibonacciChannelDrawingRenderer {
       constructor() {
-        __publicField$2(this, "type", "fibonacci_channel");
+        __publicField$g(this, "type", "fibonacci_channel");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
@@ -6513,7 +6513,7 @@ ${timeString}`;
         const dist = (wx - x1) * nx + (wy - y1) * ny;
         const children = [];
         const levelCoords = [];
-        LEVELS.forEach((level, index) => {
+        LEVELS$2.forEach((level, index) => {
           const ox = nx * dist * level;
           const oy = ny * dist * level;
           const lx1 = x1 + ox;
@@ -6521,8 +6521,8 @@ ${timeString}`;
           const lx2 = x2 + ox;
           const ly2 = y2 + oy;
           levelCoords.push({ lx1, ly1, lx2, ly2 });
-          if (index < LEVELS.length - 1) {
-            const nextLevel = LEVELS[index + 1];
+          if (index < LEVELS$2.length - 1) {
+            const nextLevel = LEVELS$2[index + 1];
             const nox = nx * dist * nextLevel;
             const noy = ny * dist * nextLevel;
             children.push({
@@ -6538,14 +6538,14 @@ ${timeString}`;
                 ]
               },
               style: {
-                fill: COLORS[(index + 1) % COLORS.length],
+                fill: COLORS$2[(index + 1) % COLORS$2.length],
                 opacity: 0.1
               }
             });
           }
         });
         levelCoords.forEach((coords, index) => {
-          const levelColor = COLORS[index % COLORS.length];
+          const levelColor = COLORS$2[index % COLORS$2.length];
           children.push({
             type: "line",
             shape: { x1: coords.lx1, y1: coords.ly1, x2: coords.lx2, y2: coords.ly2 },
@@ -6555,7 +6555,7 @@ ${timeString}`;
           children.push({
             type: "text",
             style: {
-              text: `${LEVELS[index]}`,
+              text: `${LEVELS$2[index]}`,
               x: coords.lx2 + 5,
               y: coords.ly2 - 5,
               fill: levelColor,
@@ -6598,10 +6598,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$1 = Object.defineProperty;
-    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$1 = (obj, key, value) => {
-      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$f = Object.defineProperty;
+    var __defNormalProp$f = (obj, key, value) => key in obj ? __defProp$f(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$f = (obj, key, value) => {
+      __defNormalProp$f(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class FibonacciChannelTool extends AbstractPlugin {
@@ -6611,15 +6611,15 @@ ${timeString}`;
           name: options.name || "Fibonacci Channel",
           icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-200v-80l80-80H120v-80h160l120-120H120v-80h360l120-120H120v-80h720v80H520l-120 120h440v80H320L200-440h640v80H280l-80 80h640v80H120Z"/></svg>`
         });
-        __publicField$1(this, "startPoint", null);
-        __publicField$1(this, "endPoint", null);
-        __publicField$1(this, "widthPoint", null);
-        __publicField$1(this, "state", "idle");
+        __publicField$f(this, "startPoint", null);
+        __publicField$f(this, "endPoint", null);
+        __publicField$f(this, "widthPoint", null);
+        __publicField$f(this, "state", "idle");
         // Temporary ZRender elements
-        __publicField$1(this, "graphicGroup", null);
+        __publicField$f(this, "graphicGroup", null);
         // Fib levels config
-        __publicField$1(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
-        __publicField$1(this, "colors", [
+        __publicField$f(this, "levels", [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]);
+        __publicField$f(this, "colors", [
           "#787b86",
           // 0
           "#f44336",
@@ -6635,7 +6635,7 @@ ${timeString}`;
           "#787b86"
           // 1
         ]);
-        __publicField$1(this, "onClick", (params) => {
+        __publicField$f(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing-baseline";
             this.startPoint = [params.offsetX, params.offsetY];
@@ -6656,7 +6656,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$1(this, "onMouseMove", (params) => {
+        __publicField$f(this, "onMouseMove", (params) => {
           if (this.state === "drawing-baseline") {
             this.endPoint = [params.offsetX, params.offsetY];
             this.updateGraphic();
@@ -6802,6 +6802,1681 @@ ${timeString}`;
               lineWidth: 1
             }
           });
+        }
+      }
+    }
+
+    var __defProp$e = Object.defineProperty;
+    var __defNormalProp$e = (obj, key, value) => key in obj ? __defProp$e(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$e = (obj, key, value) => {
+      __defNormalProp$e(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS$1 = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS$1 = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibSpeedResistanceFanDrawingRenderer {
+      constructor() {
+        __publicField$e(this, "type", "fib_speed_resistance_fan");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#3b82f6";
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const children = [];
+        const priceRays = [];
+        const timeRays = [];
+        for (const level of LEVELS$1) {
+          priceRays.push([x1 + dx, y1 + dy * level]);
+          timeRays.push([x1 + dx * level, y1 + dy]);
+        }
+        for (let i = 0; i < priceRays.length - 1; i++) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: [
+                [x1, y1],
+                priceRays[i],
+                priceRays[i + 1]
+              ]
+            },
+            style: {
+              fill: COLORS$1[(i + 1) % COLORS$1.length],
+              opacity: 0.06
+            }
+          });
+        }
+        for (let i = 0; i < timeRays.length - 1; i++) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: [
+                [x1, y1],
+                timeRays[i],
+                timeRays[i + 1]
+              ]
+            },
+            style: {
+              fill: COLORS$1[(i + 1) % COLORS$1.length],
+              opacity: 0.06
+            }
+          });
+        }
+        LEVELS$1.forEach((level, index) => {
+          const [ex, ey] = priceRays[index];
+          const levelColor = COLORS$1[index % COLORS$1.length];
+          children.push({
+            type: "line",
+            shape: { x1, y1, x2: ex, y2: ey },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${level}`,
+              x: ex + 3,
+              y: ey - 2,
+              fill: levelColor,
+              fontSize: 9
+            },
+            silent: true
+          });
+        });
+        LEVELS$1.forEach((level, index) => {
+          const [ex, ey] = timeRays[index];
+          const levelColor = COLORS$1[index % COLORS$1.length];
+          children.push({
+            type: "line",
+            shape: { x1, y1, x2: ex, y2: ey },
+            style: { stroke: levelColor, lineWidth: 1 },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: {
+              text: `${level}`,
+              x: ex - 2,
+              y: ey + 8,
+              fill: levelColor,
+              fontSize: 9
+            },
+            silent: true
+          });
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1: x2, y1, x2, y2 },
+          style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1: y2, x2, y2 },
+          style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] }
+        });
+        children.push({
+          type: "line",
+          name: "line",
+          shape: { x1, y1, x2, y2 },
+          style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] }
+        });
+        children.push({
+          type: "circle",
+          name: "point-0",
+          shape: { cx: x1, cy: y1, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        children.push({
+          type: "circle",
+          name: "point-1",
+          shape: { cx: x2, cy: y2, r: 4 },
+          style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+          z: 100
+        });
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$d = Object.defineProperty;
+    var __defNormalProp$d = (obj, key, value) => key in obj ? __defProp$d(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$d = (obj, key, value) => {
+      __defNormalProp$d(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LEVELS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const COLORS = ["#787b86", "#f44336", "#ff9800", "#4caf50", "#2196f3", "#00bcd4", "#787b86"];
+    class FibSpeedResistanceFanTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "fib-speed-resistance-fan-tool",
+          name: options.name || "Fib Speed Resistance Fan",
+          icon: options.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#e3e3e3"><path d="M2 21L22 3M2 21l20-6M2 21l20-9M2 21l20-12M2 21l20-15M2 21l6-18M2 21l9-18M2 21l12-18M2 21l15-18" stroke="#e3e3e3" stroke-width="1" fill="none"/></svg>`
+        });
+        __publicField$d(this, "startPoint", null);
+        __publicField$d(this, "endPoint", null);
+        __publicField$d(this, "state", "idle");
+        // Temporary ZRender elements
+        __publicField$d(this, "graphicGroup", null);
+        __publicField$d(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = [params.offsetX, params.offsetY];
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+            this.saveDrawing();
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$d(this, "onMouseMove", (params) => {
+          if (this.state === "drawing") {
+            this.endPoint = [params.offsetX, params.offsetY];
+            this.updateGraphic();
+          }
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new FibSpeedResistanceFanDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.startPoint = null;
+        this.endPoint = null;
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup || !this.startPoint || !this.endPoint)
+          return;
+        this.graphicGroup.removeAll();
+        const x1 = this.startPoint[0];
+        const y1 = this.startPoint[1];
+        const x2 = this.endPoint[0];
+        const y2 = this.endPoint[1];
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        LEVELS.forEach((level, index) => {
+          const color = COLORS[index % COLORS.length];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2: x1 + dx, y2: y1 + dy * level },
+              style: { stroke: color, lineWidth: 1 },
+              silent: true
+            })
+          );
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2: x1 + dx * level, y2: y1 + dy },
+              style: { stroke: color, lineWidth: 1 },
+              silent: true
+            })
+          );
+        });
+        for (let i = 0; i < LEVELS.length - 1; i++) {
+          const pr1 = [x1 + dx, y1 + dy * LEVELS[i]];
+          const pr2 = [x1 + dx, y1 + dy * LEVELS[i + 1]];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: [[x1, y1], pr1, pr2] },
+              style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < LEVELS.length - 1; i++) {
+          const tr1 = [x1 + dx * LEVELS[i], y1 + dy];
+          const tr2 = [x1 + dx * LEVELS[i + 1], y1 + dy];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: [[x1, y1], tr1, tr2] },
+              style: { fill: COLORS[(i + 1) % COLORS.length], opacity: 0.06 },
+              silent: true
+            })
+          );
+        }
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1: x2, y1, x2, y2 },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] },
+            silent: true
+          })
+        );
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1: y2, x2, y2 },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [3, 3] },
+            silent: true
+          })
+        );
+        this.graphicGroup.add(
+          new echarts__namespace.graphic.Line({
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#999", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          })
+        );
+      }
+      saveDrawing() {
+        if (!this.startPoint || !this.endPoint)
+          return;
+        const start = this.context.coordinateConversion.pixelToData({
+          x: this.startPoint[0],
+          y: this.startPoint[1]
+        });
+        const end = this.context.coordinateConversion.pixelToData({
+          x: this.endPoint[0],
+          y: this.endPoint[1]
+        });
+        if (start && end) {
+          this.context.addDrawing({
+            id: `fib-fan-${Date.now()}`,
+            type: "fib_speed_resistance_fan",
+            points: [start, end],
+            paneIndex: start.paneIndex || 0,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 1
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp$c = Object.defineProperty;
+    var __defNormalProp$c = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$c = (obj, key, value) => {
+      __defNormalProp$c(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$b = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$7 = ["#2196f3", "#ff9800", "#4caf50", "#f44336"];
+    const FILL_COLOR_1 = "rgba(33, 150, 243, 0.08)";
+    const FILL_COLOR_2 = "rgba(244, 67, 54, 0.08)";
+    class XABCDPatternDrawingRenderer {
+      constructor() {
+        __publicField$c(this, "type", "xabcd_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y])
+            },
+            style: { fill: FILL_COLOR_1, opacity: 1 }
+          });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: {
+              points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y])
+            },
+            style: { fill: FILL_COLOR_2, opacity: 1 }
+          });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          const legColor = LEG_COLORS$7[i % LEG_COLORS$7.length];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: legColor, lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        const connectors = [[0, 2], [1, 3], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            const [x1, y1] = pixelPoints[from];
+            const [x2, y2] = pixelPoints[to];
+            children.push({
+              type: "line",
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 3) {
+          const xa = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const ab = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          if (xa !== 0) {
+            const ratio = (ab / xa).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 4) {
+          const ab = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          const bc = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          if (ab !== 0) {
+            const ratio = (bc / ab).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#4caf50", fontSize: 10 },
+              silent: true
+            });
+          }
+        }
+        if (drawing.points.length >= 5) {
+          const bc = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          const cd = Math.abs(drawing.points[4].value - drawing.points[3].value);
+          if (bc !== 0) {
+            const ratio = (cd / bc).toFixed(3);
+            const mx = (pixelPoints[3][0] + pixelPoints[4][0]) / 2;
+            const my = (pixelPoints[3][1] + pixelPoints[4][1]) / 2;
+            children.push({
+              type: "text",
+              style: { text: ratio, x: mx + 8, y: my, fill: "#f44336", fontSize: 10 },
+              silent: true
+            });
+          }
+          const xa = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const ad = Math.abs(drawing.points[4].value - drawing.points[1].value);
+          if (xa !== 0) {
+            const ratio = (ad / xa).toFixed(3);
+            const [dx, dy] = pixelPoints[4];
+            children.push({
+              type: "text",
+              style: { text: `AD/XA: ${ratio}`, x: dx + 10, y: dy + 14, fill: "#aaa", fontSize: 9 },
+              silent: true
+            });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$b.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isLocalHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          const labelY = isLocalHigh ? py - 14 : py + 16;
+          children.push({
+            type: "text",
+            style: {
+              text: LABELS$b[i],
+              x: px,
+              y: labelY,
+              fill: "#e2e8f0",
+              fontSize: 12,
+              fontWeight: "bold",
+              align: "center",
+              verticalAlign: "middle"
+            },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          const [px, py] = pixelPoints[i];
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: px, cy: py, r: 4 },
+            style: {
+              fill: "#fff",
+              stroke: color,
+              lineWidth: 1,
+              opacity: isSelected ? 1 : 0
+            },
+            z: 100
+          });
+        }
+        return {
+          type: "group",
+          children
+        };
+      }
+    }
+
+    var __defProp$b = Object.defineProperty;
+    var __defNormalProp$b = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$b = (obj, key, value) => {
+      __defNormalProp$b(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$a = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$6 = ["#2196f3", "#ff9800", "#4caf50", "#f44336"];
+    const TOTAL_POINTS$5 = 5;
+    class XABCDPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "xabcd-pattern-tool",
+          name: options.name || "XABCD Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="2,18 6,6 11,14 16,4 21,16"/><circle cx="2" cy="18" r="1.5" fill="#e3e3e3"/><circle cx="6" cy="6" r="1.5" fill="#e3e3e3"/><circle cx="11" cy="14" r="1.5" fill="#e3e3e3"/><circle cx="16" cy="4" r="1.5" fill="#e3e3e3"/><circle cx="21" cy="16" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$b(this, "points", []);
+        __publicField$b(this, "state", "idle");
+        __publicField$b(this, "graphicGroup", null);
+        __publicField$b(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$5) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$b(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new XABCDPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        this.bindEvents();
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        this.unbindEvents();
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      bindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      unbindEvents() {
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3) {
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: pts.slice(0, 3) },
+              style: { fill: "rgba(33, 150, 243, 0.08)" },
+              silent: true
+            })
+          );
+        }
+        if (pts.length >= 5) {
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Polygon({
+              shape: { points: pts.slice(2, 5) },
+              style: { fill: "rgba(244, 67, 54, 0.08)" },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < pts.length - 1; i++) {
+          const [x1, y1] = pts[i];
+          const [x2, y2] = pts[i + 1];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Line({
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: LEG_COLORS$6[i % LEG_COLORS$6.length], lineWidth: 2 },
+              silent: true
+            })
+          );
+        }
+        const connectors = [[0, 2], [1, 3], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pts.length && to < pts.length) {
+            const [x1, y1] = pts[from];
+            const [x2, y2] = pts[to];
+            this.graphicGroup.add(
+              new echarts__namespace.graphic.Line({
+                shape: { x1, y1, x2, y2 },
+                style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              })
+            );
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS$a.length; i++) {
+          const [px, py] = pts[i];
+          const isLocalHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          const labelY = isLocalHigh ? py - 14 : py + 16;
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Text({
+              style: {
+                text: LABELS$a[i],
+                x: px,
+                y: labelY,
+                fill: "#e2e8f0",
+                fontSize: 12,
+                fontWeight: "bold",
+                align: "center",
+                verticalAlign: "middle"
+              },
+              silent: true
+            })
+          );
+        }
+        for (let i = 0; i < pts.length; i++) {
+          const [px, py] = pts[i];
+          this.graphicGroup.add(
+            new echarts__namespace.graphic.Circle({
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 },
+              z: 101,
+              silent: true
+            })
+          );
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map(
+          (pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] })
+        );
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `xabcd-${Date.now()}`,
+            type: "xabcd_pattern",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: {
+              color: "#3b82f6",
+              lineWidth: 2
+            }
+          });
+        }
+      }
+    }
+
+    var __defProp$a = Object.defineProperty;
+    var __defNormalProp$a = (obj, key, value) => key in obj ? __defProp$a(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$a = (obj, key, value) => {
+      __defNormalProp$a(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$9 = ["A", "B", "C", "D"];
+    const LEG_COLORS$5 = ["#2196f3", "#ff9800", "#4caf50"];
+    class ABCDPatternDrawingRenderer {
+      constructor() {
+        __publicField$a(this, "type", "abcd_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(33, 150, 243, 0.08)" }
+          });
+        }
+        if (pixelPoints.length >= 4) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.slice(1, 4).map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(244, 67, 54, 0.08)" }
+          });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: LEG_COLORS$5[i % LEG_COLORS$5.length], lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[0][0], y1: pixelPoints[0][1], x2: pixelPoints[2][0], y2: pixelPoints[2][1] },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          });
+        }
+        if (pixelPoints.length >= 4) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[1][0], y1: pixelPoints[1][1], x2: pixelPoints[3][0], y2: pixelPoints[3][1] },
+            style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+            silent: true
+          });
+        }
+        if (drawing.points.length >= 3) {
+          const ab = Math.abs(drawing.points[1].value - drawing.points[0].value);
+          const bc = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          if (ab !== 0) {
+            const ratio = (bc / ab).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({ type: "text", style: { text: ratio, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 }, silent: true });
+          }
+        }
+        if (drawing.points.length >= 4) {
+          const bc = Math.abs(drawing.points[2].value - drawing.points[1].value);
+          const cd = Math.abs(drawing.points[3].value - drawing.points[2].value);
+          if (bc !== 0) {
+            const ratio = (cd / bc).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({ type: "text", style: { text: ratio, x: mx + 8, y: my, fill: "#4caf50", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$9.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: LABELS$9[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+            z: 100
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$9 = Object.defineProperty;
+    var __defNormalProp$9 = (obj, key, value) => key in obj ? __defProp$9(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$9 = (obj, key, value) => {
+      __defNormalProp$9(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$8 = ["A", "B", "C", "D"];
+    const LEG_COLORS$4 = ["#2196f3", "#ff9800", "#4caf50"];
+    const TOTAL_POINTS$4 = 4;
+    class ABCDPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "abcd-pattern-tool",
+          name: options.name || "ABCD Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="3,18 8,5 15,15 21,3"/><circle cx="3" cy="18" r="1.5" fill="#e3e3e3"/><circle cx="8" cy="5" r="1.5" fill="#e3e3e3"/><circle cx="15" cy="15" r="1.5" fill="#e3e3e3"/><circle cx="21" cy="3" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$9(this, "points", []);
+        __publicField$9(this, "state", "idle");
+        __publicField$9(this, "graphicGroup", null);
+        __publicField$9(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$4) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$9(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new ABCDPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        this.context.getChart().getZr().setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.08)" }, silent: true }));
+        }
+        if (pts.length >= 4) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(1, 4) }, style: { fill: "rgba(244,67,54,0.08)" }, silent: true }));
+        }
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({
+            shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] },
+            style: { stroke: LEG_COLORS$4[i % LEG_COLORS$4.length], lineWidth: 2 },
+            silent: true
+          }));
+        }
+        if (pts.length >= 3) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[0][0], y1: pts[0][1], x2: pts[2][0], y2: pts[2][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+        }
+        if (pts.length >= 4) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[1][0], y1: pts[1][1], x2: pts[3][0], y2: pts[3][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$8.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$8[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({
+            id: `abcd-${Date.now()}`,
+            type: "abcd_pattern",
+            points: dataPoints,
+            paneIndex: dataPoints[0].paneIndex || 0,
+            style: { color: "#3b82f6", lineWidth: 2 }
+          });
+        }
+      }
+    }
+
+    var __defProp$8 = Object.defineProperty;
+    var __defNormalProp$8 = (obj, key, value) => key in obj ? __defProp$8(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$8 = (obj, key, value) => {
+      __defNormalProp$8(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$7 = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$3 = ["#00bcd4", "#e91e63", "#8bc34a", "#ff5722"];
+    class CypherPatternDrawingRenderer {
+      constructor() {
+        __publicField$8(this, "type", "cypher_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(0, 188, 212, 0.08)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(233, 30, 99, 0.08)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({ type: "line", name: "line", shape: { x1, y1, x2, y2 }, style: { stroke: LEG_COLORS$3[i % LEG_COLORS$3.length], lineWidth: drawing.style?.lineWidth || 2 } });
+        }
+        const connectors = [[0, 2], [0, 3], [1, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            children.push({ type: "line", shape: { x1: pixelPoints[from][0], y1: pixelPoints[from][1], x2: pixelPoints[to][0], y2: pixelPoints[to][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true });
+          }
+        }
+        const pts = drawing.points;
+        if (pts.length >= 3) {
+          const xa = Math.abs(pts[1].value - pts[0].value);
+          const ab = Math.abs(pts[2].value - pts[1].value);
+          if (xa !== 0) {
+            const r = (ab / xa).toFixed(3);
+            children.push({ type: "text", style: { text: r, x: (pixelPoints[1][0] + pixelPoints[2][0]) / 2 + 8, y: (pixelPoints[1][1] + pixelPoints[2][1]) / 2, fill: "#e91e63", fontSize: 10 }, silent: true });
+          }
+        }
+        if (pts.length >= 4) {
+          const xa = Math.abs(pts[1].value - pts[0].value);
+          const xc = Math.abs(pts[3].value - pts[0].value);
+          if (xa !== 0) {
+            const r = (xc / xa).toFixed(3);
+            children.push({ type: "text", style: { text: `XC/XA: ${r}`, x: (pixelPoints[0][0] + pixelPoints[3][0]) / 2 + 8, y: (pixelPoints[0][1] + pixelPoints[3][1]) / 2, fill: "#8bc34a", fontSize: 10 }, silent: true });
+          }
+        }
+        if (pts.length >= 5) {
+          const xc = Math.abs(pts[3].value - pts[0].value);
+          const cd = Math.abs(pts[4].value - pts[3].value);
+          if (xc !== 0) {
+            const r = (cd / xc).toFixed(3);
+            children.push({ type: "text", style: { text: r, x: (pixelPoints[3][0] + pixelPoints[4][0]) / 2 + 8, y: (pixelPoints[3][1] + pixelPoints[4][1]) / 2, fill: "#ff5722", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$7.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({ type: "text", style: { text: LABELS$7[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$7 = Object.defineProperty;
+    var __defNormalProp$7 = (obj, key, value) => key in obj ? __defProp$7(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$7 = (obj, key, value) => {
+      __defNormalProp$7(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$6 = ["X", "A", "B", "C", "D"];
+    const LEG_COLORS$2 = ["#00bcd4", "#e91e63", "#8bc34a", "#ff5722"];
+    const TOTAL_POINTS$3 = 5;
+    class CypherPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "cypher-pattern-tool",
+          name: options.name || "Cypher Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="2,16 7,4 11,12 17,2 22,14"/><circle cx="2" cy="16" r="1.5" fill="#e3e3e3"/><circle cx="7" cy="4" r="1.5" fill="#e3e3e3"/><circle cx="11" cy="12" r="1.5" fill="#e3e3e3"/><circle cx="17" cy="2" r="1.5" fill="#e3e3e3"/><circle cx="22" cy="14" r="1.5" fill="#e3e3e3"/></svg>`
+        });
+        __publicField$7(this, "points", []);
+        __publicField$7(this, "state", "idle");
+        __publicField$7(this, "graphicGroup", null);
+        __publicField$7(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$3) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$7(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new CypherPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(0,188,212,0.08)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(233,30,99,0.08)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: LEG_COLORS$2[i % LEG_COLORS$2.length], lineWidth: 2 }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$6.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$6[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `cypher-${Date.now()}`, type: "cypher_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$6 = Object.defineProperty;
+    var __defNormalProp$6 = (obj, key, value) => key in obj ? __defProp$6(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$6 = (obj, key, value) => {
+      __defNormalProp$6(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$5 = ["", "LS", "", "H", "", "RS", ""];
+    class HeadAndShouldersDrawingRenderer {
+      constructor() {
+        __publicField$6(this, "type", "head_and_shoulders");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(244, 67, 54, 0.08)" } });
+        }
+        if (pixelPoints.length >= 7) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(4, 7).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: "#2196f3", lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        if (pixelPoints.length >= 5) {
+          const [nx1, ny1] = pixelPoints[2];
+          const [nx2, ny2] = pixelPoints[4];
+          const dx = nx2 - nx1;
+          const dy = ny2 - ny1;
+          const extL = 0.3;
+          const extR = 0.3;
+          const exlx = nx1 - dx * extL;
+          const exly = ny1 - dy * extL;
+          const exrx = nx2 + dx * extR;
+          const exry = ny2 + dy * extR;
+          children.push({
+            type: "line",
+            shape: { x1: exlx, y1: exly, x2: exrx, y2: exry },
+            style: { stroke: "#ff9800", lineWidth: 2, lineDash: [6, 4] },
+            silent: true
+          });
+          children.push({
+            type: "text",
+            style: { text: "Neckline", x: (nx1 + nx2) / 2, y: (ny1 + ny2) / 2 + 14, fill: "#ff9800", fontSize: 10, align: "center" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$5.length; i++) {
+          if (!LABELS$5[i])
+            continue;
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({
+            type: "text",
+            style: { text: LABELS$5[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({
+            type: "circle",
+            name: `point-${i}`,
+            shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 },
+            z: 100
+          });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$5 = Object.defineProperty;
+    var __defNormalProp$5 = (obj, key, value) => key in obj ? __defProp$5(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$5 = (obj, key, value) => {
+      __defNormalProp$5(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$4 = ["", "LS", "", "H", "", "RS", ""];
+    const TOTAL_POINTS$2 = 7;
+    class HeadAndShouldersTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "head-and-shoulders-tool",
+          name: options.name || "Head & Shoulders",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="1,18 4,10 7,14 12,3 17,14 20,10 23,18"/></svg>`
+        });
+        __publicField$5(this, "points", []);
+        __publicField$5(this, "state", "idle");
+        __publicField$5(this, "graphicGroup", null);
+        __publicField$5(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$2) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$5(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new HeadAndShouldersDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(244,67,54,0.08)" }, silent: true }));
+        if (pts.length >= 7)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(4, 7) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: "#2196f3", lineWidth: 2 }, silent: true }));
+        }
+        if (pts.length >= 5) {
+          const [nx1, ny1] = pts[2];
+          const [nx2, ny2] = pts[4];
+          const dx = nx2 - nx1;
+          const dy = ny2 - ny1;
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: nx1 - dx * 0.3, y1: ny1 - dy * 0.3, x2: nx2 + dx * 0.3, y2: ny2 + dy * 0.3 }, style: { stroke: "#ff9800", lineWidth: 2, lineDash: [6, 4] }, silent: true }));
+        }
+        for (let i = 0; i < pts.length && i < LABELS$4.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          if (LABELS$4[i]) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$4[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          }
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `hs-${Date.now()}`, type: "head_and_shoulders", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$4 = Object.defineProperty;
+    var __defNormalProp$4 = (obj, key, value) => key in obj ? __defProp$4(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$4 = (obj, key, value) => {
+      __defNormalProp$4(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$3 = ["1", "2", "3", "4", "5"];
+    class TrianglePatternDrawingRenderer {
+      constructor() {
+        __publicField$4(this, "type", "triangle_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({
+            type: "polygon",
+            name: "line",
+            shape: { points: pixelPoints.map(([x, y]) => [x, y]) },
+            style: { fill: "rgba(156, 39, 176, 0.06)" }
+          });
+        }
+        const upperPts = pixelPoints.filter((_, i) => i % 2 === 0);
+        if (upperPts.length >= 2) {
+          for (let i = 0; i < upperPts.length - 1; i++) {
+            children.push({
+              type: "line",
+              name: "line",
+              shape: { x1: upperPts[i][0], y1: upperPts[i][1], x2: upperPts[i + 1][0], y2: upperPts[i + 1][1] },
+              style: { stroke: "#f44336", lineWidth: 2 }
+            });
+          }
+          if (upperPts.length >= 2) {
+            const last = upperPts[upperPts.length - 1];
+            const prev = upperPts[upperPts.length - 2];
+            const dx = last[0] - prev[0];
+            const dy = last[1] - prev[1];
+            if (dx !== 0) {
+              const extendX = last[0] + dx * 0.5;
+              const extendY = last[1] + dy * 0.5;
+              children.push({
+                type: "line",
+                shape: { x1: last[0], y1: last[1], x2: extendX, y2: extendY },
+                style: { stroke: "#f44336", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              });
+            }
+          }
+        }
+        const lowerPts = pixelPoints.filter((_, i) => i % 2 === 1);
+        if (lowerPts.length >= 2) {
+          for (let i = 0; i < lowerPts.length - 1; i++) {
+            children.push({
+              type: "line",
+              name: "line",
+              shape: { x1: lowerPts[i][0], y1: lowerPts[i][1], x2: lowerPts[i + 1][0], y2: lowerPts[i + 1][1] },
+              style: { stroke: "#4caf50", lineWidth: 2 }
+            });
+          }
+          if (lowerPts.length >= 2) {
+            const last = lowerPts[lowerPts.length - 1];
+            const prev = lowerPts[lowerPts.length - 2];
+            const dx = last[0] - prev[0];
+            const dy = last[1] - prev[1];
+            if (dx !== 0) {
+              const extendX = last[0] + dx * 0.5;
+              const extendY = last[1] + dy * 0.5;
+              children.push({
+                type: "line",
+                shape: { x1: last[0], y1: last[1], x2: extendX, y2: extendY },
+                style: { stroke: "#4caf50", lineWidth: 1, lineDash: [4, 4] },
+                silent: true
+              });
+            }
+          }
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          children.push({
+            type: "line",
+            shape: { x1: pixelPoints[i][0], y1: pixelPoints[i][1], x2: pixelPoints[i + 1][0], y2: pixelPoints[i + 1][1] },
+            style: { stroke: "#9c27b0", lineWidth: 1, lineDash: [2, 2] },
+            silent: true
+          });
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$3.length; i++) {
+          const [px, py] = pixelPoints[i];
+          const isHigh = i % 2 === 0;
+          children.push({ type: "text", style: { text: LABELS$3[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$3 = Object.defineProperty;
+    var __defNormalProp$3 = (obj, key, value) => key in obj ? __defProp$3(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$3 = (obj, key, value) => {
+      __defNormalProp$3(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$2 = ["1", "2", "3", "4", "5"];
+    const TOTAL_POINTS$1 = 5;
+    class TrianglePatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "triangle-pattern-tool",
+          name: options.name || "Triangle Pattern",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><path d="M2,4 L22,4 L12,20 Z"/></svg>`
+        });
+        __publicField$3(this, "points", []);
+        __publicField$3(this, "state", "idle");
+        __publicField$3(this, "graphicGroup", null);
+        __publicField$3(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS$1) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$3(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new TrianglePatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts }, style: { fill: "rgba(156,39,176,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: "#9c27b0", lineWidth: 2 }, silent: true }));
+        }
+        const upper = pts.filter((_, i) => i % 2 === 0);
+        if (upper.length >= 2) {
+          for (let i = 0; i < upper.length - 1; i++) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: upper[i][0], y1: upper[i][1], x2: upper[i + 1][0], y2: upper[i + 1][1] }, style: { stroke: "#f44336", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        const lower = pts.filter((_, i) => i % 2 === 1);
+        if (lower.length >= 2) {
+          for (let i = 0; i < lower.length - 1; i++) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: lower[i][0], y1: lower[i][1], x2: lower[i + 1][0], y2: lower[i + 1][1] }, style: { stroke: "#4caf50", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS$2.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = i % 2 === 0;
+          this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS$2[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 12, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `triangle-${Date.now()}`, type: "triangle_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
+        }
+      }
+    }
+
+    var __defProp$2 = Object.defineProperty;
+    var __defNormalProp$2 = (obj, key, value) => key in obj ? __defProp$2(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$2 = (obj, key, value) => {
+      __defNormalProp$2(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS$1 = ["0", "D1", "C1", "D2", "C2", "D3", ""];
+    const LEG_COLORS$1 = ["#2196f3", "#ff9800", "#4caf50", "#f44336", "#00bcd4", "#e91e63"];
+    class ThreeDrivesPatternDrawingRenderer {
+      constructor() {
+        __publicField$2(this, "type", "three_drives_pattern");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const color = drawing.style?.color || "#3b82f6";
+        if (pixelPoints.length < 2)
+          return;
+        const children = [];
+        if (pixelPoints.length >= 3) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(0, 3).map(([x, y]) => [x, y]) }, style: { fill: "rgba(33, 150, 243, 0.06)" } });
+        }
+        if (pixelPoints.length >= 5) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(2, 5).map(([x, y]) => [x, y]) }, style: { fill: "rgba(76, 175, 80, 0.06)" } });
+        }
+        if (pixelPoints.length >= 7) {
+          children.push({ type: "polygon", name: "line", shape: { points: pixelPoints.slice(4, 7).map(([x, y]) => [x, y]) }, style: { fill: "rgba(0, 188, 212, 0.06)" } });
+        }
+        for (let i = 0; i < pixelPoints.length - 1; i++) {
+          const [x1, y1] = pixelPoints[i];
+          const [x2, y2] = pixelPoints[i + 1];
+          children.push({
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: LEG_COLORS$1[i % LEG_COLORS$1.length], lineWidth: drawing.style?.lineWidth || 2 }
+          });
+        }
+        const connectors = [[1, 3], [3, 5], [2, 4]];
+        for (const [from, to] of connectors) {
+          if (from < pixelPoints.length && to < pixelPoints.length) {
+            children.push({
+              type: "line",
+              shape: { x1: pixelPoints[from][0], y1: pixelPoints[from][1], x2: pixelPoints[to][0], y2: pixelPoints[to][1] },
+              style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] },
+              silent: true
+            });
+          }
+        }
+        const pts = drawing.points;
+        if (pts.length >= 4) {
+          const d1 = Math.abs(pts[1].value - pts[0].value);
+          const d2 = Math.abs(pts[3].value - pts[2].value);
+          if (d1 !== 0) {
+            const r = (d2 / d1).toFixed(3);
+            const mx = (pixelPoints[2][0] + pixelPoints[3][0]) / 2;
+            const my = (pixelPoints[2][1] + pixelPoints[3][1]) / 2;
+            children.push({ type: "text", style: { text: `D2/D1: ${r}`, x: mx + 10, y: my, fill: "#4caf50", fontSize: 9 }, silent: true });
+          }
+        }
+        if (pts.length >= 6) {
+          const d2 = Math.abs(pts[3].value - pts[2].value);
+          const d3 = Math.abs(pts[5].value - pts[4].value);
+          if (d2 !== 0) {
+            const r = (d3 / d2).toFixed(3);
+            const mx = (pixelPoints[4][0] + pixelPoints[5][0]) / 2;
+            const my = (pixelPoints[4][1] + pixelPoints[5][1]) / 2;
+            children.push({ type: "text", style: { text: `D3/D2: ${r}`, x: mx + 10, y: my, fill: "#00bcd4", fontSize: 9 }, silent: true });
+          }
+        }
+        if (pts.length >= 3) {
+          const d1 = Math.abs(pts[1].value - pts[0].value);
+          const c1 = Math.abs(pts[2].value - pts[1].value);
+          if (d1 !== 0) {
+            const r = (c1 / d1).toFixed(3);
+            const mx = (pixelPoints[1][0] + pixelPoints[2][0]) / 2;
+            const my = (pixelPoints[1][1] + pixelPoints[2][1]) / 2;
+            children.push({ type: "text", style: { text: r, x: mx + 8, y: my, fill: "#ff9800", fontSize: 10 }, silent: true });
+          }
+        }
+        for (let i = 0; i < pixelPoints.length && i < LABELS$1.length; i++) {
+          if (!LABELS$1[i])
+            continue;
+          const [px, py] = pixelPoints[i];
+          const isHigh = (i === 0 || py <= pixelPoints[i - 1][1]) && (i === pixelPoints.length - 1 || py <= pixelPoints[i + 1]?.[1]);
+          children.push({ type: "text", style: { text: LABELS$1[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 11, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true });
+        }
+        for (let i = 0; i < pixelPoints.length; i++) {
+          children.push({ type: "circle", name: `point-${i}`, shape: { cx: pixelPoints[i][0], cy: pixelPoints[i][1], r: 4 }, style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }, z: 100 });
+        }
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$1 = Object.defineProperty;
+    var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$1 = (obj, key, value) => {
+      __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const LABELS = ["0", "D1", "C1", "D2", "C2", "D3", ""];
+    const LEG_COLORS = ["#2196f3", "#ff9800", "#4caf50", "#f44336", "#00bcd4", "#e91e63"];
+    const TOTAL_POINTS = 7;
+    class ThreeDrivesPatternTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "three-drives-pattern-tool",
+          name: options.name || "Three Drives",
+          icon: options.icon || `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e3e3e3" stroke-width="1.5"><polyline points="1,20 4,8 7,14 11,5 15,12 19,2 23,10"/></svg>`
+        });
+        __publicField$1(this, "points", []);
+        __publicField$1(this, "state", "idle");
+        __publicField$1(this, "graphicGroup", null);
+        __publicField$1(this, "onClick", (params) => {
+          const pt = [params.offsetX, params.offsetY];
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.points = [pt, [...pt]];
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.points[this.points.length - 1] = pt;
+            if (this.points.length >= TOTAL_POINTS) {
+              this.state = "finished";
+              this.updateGraphic();
+              this.saveDrawing();
+              this.removeGraphic();
+              this.context.disableTools();
+            } else {
+              this.points.push([...pt]);
+              this.updateGraphic();
+            }
+          }
+        });
+        __publicField$1(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing" || this.points.length < 2)
+            return;
+          this.points[this.points.length - 1] = [params.offsetX, params.offsetY];
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.context.registerDrawingRenderer(new ThreeDrivesPatternDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.points = [];
+        this.context.getChart().getZr().setCursorStyle("crosshair");
+        const zr = this.context.getChart().getZr();
+        zr.on("click", this.onClick);
+        zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.points = [];
+        this.removeGraphic();
+        const zr = this.context.getChart().getZr();
+        zr.off("click", this.onClick);
+        zr.off("mousemove", this.onMouseMove);
+        zr.setCursorStyle("default");
+      }
+      initGraphic() {
+        this.graphicGroup = new echarts__namespace.graphic.Group();
+        this.context.getChart().getZr().add(this.graphicGroup);
+      }
+      removeGraphic() {
+        if (this.graphicGroup) {
+          this.context.getChart().getZr().remove(this.graphicGroup);
+          this.graphicGroup = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.graphicGroup)
+          return;
+        this.graphicGroup.removeAll();
+        const pts = this.points;
+        if (pts.length >= 3)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(0, 3) }, style: { fill: "rgba(33,150,243,0.06)" }, silent: true }));
+        if (pts.length >= 5)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(2, 5) }, style: { fill: "rgba(76,175,80,0.06)" }, silent: true }));
+        if (pts.length >= 7)
+          this.graphicGroup.add(new echarts__namespace.graphic.Polygon({ shape: { points: pts.slice(4, 7) }, style: { fill: "rgba(0,188,212,0.06)" }, silent: true }));
+        for (let i = 0; i < pts.length - 1; i++) {
+          this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[i][0], y1: pts[i][1], x2: pts[i + 1][0], y2: pts[i + 1][1] }, style: { stroke: LEG_COLORS[i % LEG_COLORS.length], lineWidth: 2 }, silent: true }));
+        }
+        const conn = [[1, 3], [3, 5], [2, 4]];
+        for (const [f, t] of conn) {
+          if (f < pts.length && t < pts.length) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Line({ shape: { x1: pts[f][0], y1: pts[f][1], x2: pts[t][0], y2: pts[t][1] }, style: { stroke: "#555", lineWidth: 1, lineDash: [4, 4] }, silent: true }));
+          }
+        }
+        for (let i = 0; i < pts.length && i < LABELS.length; i++) {
+          const [px, py] = pts[i];
+          const isHigh = (i === 0 || py <= pts[i - 1][1]) && (i === pts.length - 1 || py <= pts[i + 1]?.[1]);
+          if (LABELS[i]) {
+            this.graphicGroup.add(new echarts__namespace.graphic.Text({ style: { text: LABELS[i], x: px, y: isHigh ? py - 14 : py + 16, fill: "#e2e8f0", fontSize: 11, fontWeight: "bold", align: "center", verticalAlign: "middle" }, silent: true }));
+          }
+          this.graphicGroup.add(new echarts__namespace.graphic.Circle({ shape: { cx: px, cy: py, r: 4 }, style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1.5 }, z: 101, silent: true }));
+        }
+      }
+      saveDrawing() {
+        const dataPoints = this.points.map((pt) => this.context.coordinateConversion.pixelToData({ x: pt[0], y: pt[1] }));
+        if (dataPoints.every((p) => p !== null)) {
+          this.context.addDrawing({ id: `3drives-${Date.now()}`, type: "three_drives_pattern", points: dataPoints, paneIndex: dataPoints[0].paneIndex || 0, style: { color: "#3b82f6", lineWidth: 2 } });
         }
       }
     }
@@ -6983,17 +8658,31 @@ ${timeString}`;
       }
     }
 
+    exports.ABCDPatternDrawingRenderer = ABCDPatternDrawingRenderer;
+    exports.ABCDPatternTool = ABCDPatternTool;
     exports.AbstractPlugin = AbstractPlugin;
+    exports.CypherPatternDrawingRenderer = CypherPatternDrawingRenderer;
+    exports.CypherPatternTool = CypherPatternTool;
     exports.DrawingRendererRegistry = DrawingRendererRegistry;
+    exports.FibSpeedResistanceFanDrawingRenderer = FibSpeedResistanceFanDrawingRenderer;
+    exports.FibSpeedResistanceFanTool = FibSpeedResistanceFanTool;
     exports.FibonacciChannelDrawingRenderer = FibonacciChannelDrawingRenderer;
     exports.FibonacciChannelTool = FibonacciChannelTool;
     exports.FibonacciDrawingRenderer = FibonacciDrawingRenderer;
     exports.FibonacciTool = FibonacciTool;
+    exports.HeadAndShouldersDrawingRenderer = HeadAndShouldersDrawingRenderer;
+    exports.HeadAndShouldersTool = HeadAndShouldersTool;
     exports.LineDrawingRenderer = LineDrawingRenderer;
     exports.LineTool = LineTool;
     exports.MeasureTool = MeasureTool;
     exports.QFChart = QFChart;
+    exports.ThreeDrivesPatternDrawingRenderer = ThreeDrivesPatternDrawingRenderer;
+    exports.ThreeDrivesPatternTool = ThreeDrivesPatternTool;
     exports.ToolGroup = ToolGroup;
+    exports.TrianglePatternDrawingRenderer = TrianglePatternDrawingRenderer;
+    exports.TrianglePatternTool = TrianglePatternTool;
+    exports.XABCDPatternDrawingRenderer = XABCDPatternDrawingRenderer;
+    exports.XABCDPatternTool = XABCDPatternTool;
 
 }));
 //# sourceMappingURL=qfchart.dev.browser.js.map

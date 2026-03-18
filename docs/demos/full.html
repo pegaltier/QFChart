@@ -288,9 +288,11 @@ chart.registerPlugin(new QFChart.FibonacciTool());
                 // 2. Create your individual tools
                 const fibTool2 = new QFChart.FibonacciTool();
                 const fibChannelTool = new QFChart.FibonacciChannelTool();
+                const fibFanTool = new QFChart.FibSpeedResistanceFanTool();
                 // 3. Add tools to the group
                 fibGroup.add(fibTool2);
                 fibGroup.add(fibChannelTool);
+                fibGroup.add(fibFanTool);
                 // 4. Register the group as a single plugin on the chart
                 chart.registerPlugin(fibGroup);
 
