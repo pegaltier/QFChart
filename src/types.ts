@@ -208,6 +208,8 @@ export interface DrawingRenderContext {
     isSelected: boolean;
     /** The ECharts custom series api object */
     api: any;
+    /** Grid coordinate system bounds (x, y, width, height in pixels) */
+    coordSys: { x: number; y: number; width: number; height: number };
 }
 
 export interface DrawingRenderer {

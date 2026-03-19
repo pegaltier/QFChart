@@ -7,7 +7,7 @@ export class LineDrawingRenderer implements DrawingRenderer {
         const { drawing, pixelPoints, isSelected } = ctx;
         const [x1, y1] = pixelPoints[0];
         const [x2, y2] = pixelPoints[1];
-        const color = drawing.style?.color || '#3b82f6';
+        const color = drawing.style?.color || '#d1d4dc';
 
         return {
             type: 'group',
@@ -18,7 +18,7 @@ export class LineDrawingRenderer implements DrawingRenderer {
                     shape: { x1, y1, x2, y2 },
                     style: {
                         stroke: color,
-                        lineWidth: drawing.style?.lineWidth || 2,
+                        lineWidth: drawing.style?.lineWidth || 1,
                     },
                 },
                 {
