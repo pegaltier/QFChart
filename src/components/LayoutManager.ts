@@ -268,6 +268,18 @@ export class LayoutManager {
 
         let mainHeightVal = 75; // Default if no separate pane
 
+        // Parse layout.mainPaneHeight option (e.g. '40%' or 40)
+        let configuredMainHeight: number | undefined;
+        if (options.layout?.mainPaneHeight !== undefined) {
+            const raw = options.layout.mainPaneHeight;
+            if (typeof raw === 'string') {
+                const parsed = parseFloat(raw);
+                if (!isNaN(parsed)) configuredMainHeight = parsed;
+            } else if (typeof raw === 'number') {
+                configuredMainHeight = raw as unknown as number;
+            }
+        }
+
         // Prepare separate panes configuration
         let paneConfigs: PaneConfiguration[] = [];
 
@@ -286,33 +298,54 @@ export class LayoutManager {
                 };
             });
 
-            // 2. Assign actual heights
-            // If collapsed, use small fixed height (e.g. 3%)
-            const resolvedPanes = panes.map((p) => ({
+            // 2. Assign raw heights (collapsed = 3%, otherwise use requested or default 15)
+            const rawPanes = panes.map((p) => ({
                 ...p,
-                height: p.isCollapsed ? 3 : p.requestedHeight !== undefined ? p.requestedHeight : 15,
+                rawHeight: p.isCollapsed ? 3 : p.requestedHeight !== undefined ? p.requestedHeight : 15,
             }));
 
-            // 3. Calculate total space needed for indicators
-            const totalIndicatorHeight = resolvedPanes.reduce((sum, p) => sum + p.height, 0);
-            const totalGaps = resolvedPanes.length * gapPercent;
-            const totalBottomSpace = totalIndicatorHeight + totalGaps;
-
-            // 4. Calculate Main Chart Height
-            // Available space = chartAreaBottom - mainPaneTop;
             const totalAvailable = chartAreaBottom - mainPaneTop;
-            mainHeightVal = totalAvailable - totalBottomSpace;
+            const totalGaps = rawPanes.length * gapPercent;
 
-            // Apply user-dragged main height override
+            // 4. Determine main chart height
             if (mainHeightOverride !== undefined && mainHeightOverride > 0 && !isMainCollapsed) {
+                // Drag-resize takes absolute priority
                 mainHeightVal = mainHeightOverride;
             } else if (isMainCollapsed) {
                 mainHeightVal = 3;
+            } else if (configuredMainHeight !== undefined && configuredMainHeight > 0) {
+                // User set mainPaneHeight — indicators fill remaining space proportionally
+                mainHeightVal = configuredMainHeight;
             } else {
-                // Safety check: ensure main chart has at least some space (e.g. 20%)
-                if (mainHeightVal < 20) {
-                    mainHeightVal = Math.max(mainHeightVal, 10);
-                }
+                // Auto: subtract indicator heights from available space
+                const totalIndicatorHeight = rawPanes.reduce((sum, p) => sum + p.rawHeight, 0);
+                mainHeightVal = totalAvailable - totalIndicatorHeight - totalGaps;
+                if (mainHeightVal < 20) mainHeightVal = Math.max(mainHeightVal, 10);
+            }
+
+            // 3. Resolve indicator heights
+            // When mainPaneHeight is configured (or drag override active), distribute remaining space
+            // proportionally among non-collapsed panes using their rawHeight as weights.
+            const isMainHeightFixed = (mainHeightOverride !== undefined && mainHeightOverride > 0 && !isMainCollapsed)
+                || (configuredMainHeight !== undefined && configuredMainHeight > 0 && !isMainCollapsed);
+
+            type ResolvedPane = (typeof rawPanes)[number] & { height: number };
+            let resolvedPanes: ResolvedPane[];
+            if (isMainHeightFixed) {
+                const remainingForIndicators = totalAvailable - mainHeightVal - totalGaps;
+                const totalWeights = rawPanes
+                    .filter((p) => !p.isCollapsed)
+                    .reduce((sum, p) => sum + p.rawHeight, 0);
+                resolvedPanes = rawPanes.map((p) => ({
+                    ...p,
+                    height: p.isCollapsed
+                        ? 3
+                        : totalWeights > 0
+                            ? Math.max(5, (p.rawHeight / totalWeights) * remainingForIndicators)
+                            : remainingForIndicators / rawPanes.filter((x) => !x.isCollapsed).length,
+                }));
+            } else {
+                resolvedPanes = rawPanes.map((p) => ({ ...p, height: p.rawHeight }));
             }
 
             // 5. Calculate positions
@@ -332,6 +365,7 @@ export class LayoutManager {
                 return config;
             });
         } else {
+            // No secondary panes — mainPaneHeight is ignored, fill all available space
             mainHeightVal = chartAreaBottom - mainPaneTop;
             if (isMainCollapsed) {
                 mainHeightVal = 3;

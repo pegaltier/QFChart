@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2026-03-19 - Line Drawing Tools, Layout Fixes & DataZoom Stability
+
+### Added
+
+- **Line Drawing Tools**: Eight new drawing tools, grouped under a "Lines" `ToolGroup`:
+  - `RayTool` — 2-click ray extending from the start point through the direction point to the chart edge
+  - `InfoLineTool` — 2-click trendline with an info box showing price change, percentage change, and bar count
+  - `ExtendedLineTool` — 2-click line extending infinitely in both directions to chart edges
+  - `TrendAngleTool` — 2-click trendline displaying the angle relative to horizontal with an arc indicator
+  - `HorizontalLineTool` — 1-click full-width horizontal line at a price level with a price label
+  - `HorizontalRayTool` — 1-click horizontal line extending from click point to the right edge
+  - `VerticalLineTool` — 1-click full-height vertical line at a specific time
+  - `CrossLineTool` — 1-click crosshair (horizontal + vertical) at a specific point
+- **Dashed Preview Lines**: Ray, Extended Line, and Trend Angle tools now show dashed extension lines during drawing to preview where the final line will extend.
+- **`coordSys` in `DrawingRenderContext`**: Renderers now receive the grid bounding box (`x`, `y`, `width`, `height` in pixels), enabling line extension and edge-aware rendering.
+
+### Changed
+
+- **Default Drawing Color**: All line drawing tools now default to `#d1d4dc` (light gray/white) with `lineWidth: 1`, matching TradingView's visual style.
+
+### Fixed
+
+- **`layout.mainPaneHeight` Regression**: The `mainPaneHeight` option (e.g., `'40%'`) was declared in the type definition but never read by `LayoutManager`. Now properly honored: when set with secondary panes, indicator panes proportionally fill the remaining space; without secondary panes, the option is ignored and the main pane fills all available space.
+- **DataZoom Slider Reappearing**: When `dataZoom: { visible: false }` was set, the slider would reappear after any mouse zoom/scroll that triggered lazy padding expansion. The expansion code was hardcoding two `dataZoom` entries (inside + slider) regardless of configuration. Now maps over the actual current `dataZoom` entries.
+- **Single-Point Drawing Crash on Scroll**: Drawings with a single point (horizontal line, vertical line, horizontal ray, cross line) caused `Cannot read properties of undefined (reading 'timeIndex')` errors during lazy padding expansion, because the update code assumed all drawings had exactly 2 points. Now iterates all points dynamically.
+
+---
+
 ## [0.8.1] - 2026-03-18 - Plugin System Refactor, Chart Patterns & Drawing Tool Improvements
 
 ### Added

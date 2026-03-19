@@ -39,21 +39,21 @@
 
     var echarts__namespace = /*#__PURE__*/_interopNamespaceDefault(echarts);
 
-    var __defProp$w = Object.defineProperty;
-    var __defNormalProp$w = (obj, key, value) => key in obj ? __defProp$w(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$w = (obj, key, value) => {
-      __defNormalProp$w(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$M = Object.defineProperty;
+    var __defNormalProp$M = (obj, key, value) => key in obj ? __defProp$M(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$M = (obj, key, value) => {
+      __defNormalProp$M(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class Indicator {
       constructor(id, plots, paneIndex, options = {}) {
-        __publicField$w(this, "id");
-        __publicField$w(this, "plots");
-        __publicField$w(this, "paneIndex");
-        __publicField$w(this, "height");
-        __publicField$w(this, "collapsed");
-        __publicField$w(this, "titleColor");
-        __publicField$w(this, "controls");
+        __publicField$M(this, "id");
+        __publicField$M(this, "plots");
+        __publicField$M(this, "paneIndex");
+        __publicField$M(this, "height");
+        __publicField$M(this, "collapsed");
+        __publicField$M(this, "titleColor");
+        __publicField$M(this, "controls");
         this.id = id;
         this.plots = plots;
         this.paneIndex = paneIndex;
@@ -330,6 +330,17 @@
           gapPercent = 20 / containerHeight * 100;
         }
         let mainHeightVal = 75;
+        let configuredMainHeight;
+        if (options.layout?.mainPaneHeight !== void 0) {
+          const raw = options.layout.mainPaneHeight;
+          if (typeof raw === "string") {
+            const parsed = parseFloat(raw);
+            if (!isNaN(parsed))
+              configuredMainHeight = parsed;
+          } else if (typeof raw === "number") {
+            configuredMainHeight = raw;
+          }
+        }
         let paneConfigs = [];
         if (hasSeparatePane) {
           const panes = separatePaneIndices.map((idx) => {
@@ -343,23 +354,35 @@
               controls: ind?.controls
             };
           });
-          const resolvedPanes = panes.map((p) => ({
+          const rawPanes = panes.map((p) => ({
             ...p,
-            height: p.isCollapsed ? 3 : p.requestedHeight !== void 0 ? p.requestedHeight : 15
+            rawHeight: p.isCollapsed ? 3 : p.requestedHeight !== void 0 ? p.requestedHeight : 15
           }));
-          const totalIndicatorHeight = resolvedPanes.reduce((sum, p) => sum + p.height, 0);
-          const totalGaps = resolvedPanes.length * gapPercent;
-          const totalBottomSpace = totalIndicatorHeight + totalGaps;
           const totalAvailable = chartAreaBottom - mainPaneTop;
-          mainHeightVal = totalAvailable - totalBottomSpace;
+          const totalGaps = rawPanes.length * gapPercent;
           if (mainHeightOverride !== void 0 && mainHeightOverride > 0 && !isMainCollapsed) {
             mainHeightVal = mainHeightOverride;
           } else if (isMainCollapsed) {
             mainHeightVal = 3;
+          } else if (configuredMainHeight !== void 0 && configuredMainHeight > 0) {
+            mainHeightVal = configuredMainHeight;
           } else {
-            if (mainHeightVal < 20) {
+            const totalIndicatorHeight = rawPanes.reduce((sum, p) => sum + p.rawHeight, 0);
+            mainHeightVal = totalAvailable - totalIndicatorHeight - totalGaps;
+            if (mainHeightVal < 20)
               mainHeightVal = Math.max(mainHeightVal, 10);
-            }
+          }
+          const isMainHeightFixed = mainHeightOverride !== void 0 && mainHeightOverride > 0 && !isMainCollapsed || configuredMainHeight !== void 0 && configuredMainHeight > 0 && !isMainCollapsed;
+          let resolvedPanes;
+          if (isMainHeightFixed) {
+            const remainingForIndicators = totalAvailable - mainHeightVal - totalGaps;
+            const totalWeights = rawPanes.filter((p) => !p.isCollapsed).reduce((sum, p) => sum + p.rawHeight, 0);
+            resolvedPanes = rawPanes.map((p) => ({
+              ...p,
+              height: p.isCollapsed ? 3 : totalWeights > 0 ? Math.max(5, p.rawHeight / totalWeights * remainingForIndicators) : remainingForIndicators / rawPanes.filter((x) => !x.isCollapsed).length
+            }));
+          } else {
+            resolvedPanes = rawPanes.map((p) => ({ ...p, height: p.rawHeight }));
           }
           let currentTop = mainPaneTop + mainHeightVal + gapPercent;
           paneConfigs = resolvedPanes.map((p) => {
@@ -2513,10 +2536,10 @@
       }
     }
 
-    var __defProp$v = Object.defineProperty;
-    var __defNormalProp$v = (obj, key, value) => key in obj ? __defProp$v(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$v = (obj, key, value) => {
-      __defNormalProp$v(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$L = Object.defineProperty;
+    var __defNormalProp$L = (obj, key, value) => key in obj ? __defProp$L(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$L = (obj, key, value) => {
+      __defNormalProp$L(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesRendererFactory = class _SeriesRendererFactory {
@@ -2527,7 +2550,7 @@
         return this.renderers.get(style) || this.renderers.get("line");
       }
     };
-    __publicField$v(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
+    __publicField$L(_SeriesRendererFactory, "renderers", /* @__PURE__ */ new Map());
     _SeriesRendererFactory.register("line", new LineRenderer());
     _SeriesRendererFactory.register("step", new StepRenderer());
     _SeriesRendererFactory.register("histogram", new HistogramRenderer());
@@ -2547,10 +2570,10 @@
     _SeriesRendererFactory.register("drawing_box", new BoxRenderer());
     let SeriesRendererFactory = _SeriesRendererFactory;
 
-    var __defProp$u = Object.defineProperty;
-    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$u = (obj, key, value) => {
-      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$K = Object.defineProperty;
+    var __defNormalProp$K = (obj, key, value) => key in obj ? __defProp$K(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$K = (obj, key, value) => {
+      __defNormalProp$K(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     const _SeriesBuilder = class _SeriesBuilder {
@@ -2829,7 +2852,7 @@
         return { series, barColors };
       }
     };
-    __publicField$u(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
+    __publicField$K(_SeriesBuilder, "DEFAULT_COLOR", "#2962ff");
     let SeriesBuilder = _SeriesBuilder;
 
     class GraphicBuilder {
@@ -3143,20 +3166,20 @@
       }
     }
 
-    var __defProp$t = Object.defineProperty;
-    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$t = (obj, key, value) => {
-      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$J = Object.defineProperty;
+    var __defNormalProp$J = (obj, key, value) => key in obj ? __defProp$J(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$J = (obj, key, value) => {
+      __defNormalProp$J(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class PluginManager {
       constructor(context, toolbarContainer) {
-        __publicField$t(this, "plugins", /* @__PURE__ */ new Map());
-        __publicField$t(this, "activePluginId", null);
-        __publicField$t(this, "context");
-        __publicField$t(this, "toolbarContainer");
-        __publicField$t(this, "tooltipElement", null);
-        __publicField$t(this, "hideTimeout", null);
+        __publicField$J(this, "plugins", /* @__PURE__ */ new Map());
+        __publicField$J(this, "activePluginId", null);
+        __publicField$J(this, "context");
+        __publicField$J(this, "toolbarContainer");
+        __publicField$J(this, "tooltipElement", null);
+        __publicField$J(this, "hideTimeout", null);
         this.context = context;
         this.toolbarContainer = toolbarContainer;
         this.createTooltip();
@@ -3340,27 +3363,27 @@
       }
     }
 
-    var __defProp$s = Object.defineProperty;
-    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$s = (obj, key, value) => {
-      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$I = Object.defineProperty;
+    var __defNormalProp$I = (obj, key, value) => key in obj ? __defProp$I(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$I = (obj, key, value) => {
+      __defNormalProp$I(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingEditor {
       constructor(context) {
-        __publicField$s(this, "context");
-        __publicField$s(this, "isEditing", false);
-        __publicField$s(this, "currentDrawing", null);
-        __publicField$s(this, "editingPointIndex", null);
-        __publicField$s(this, "zr");
+        __publicField$I(this, "context");
+        __publicField$I(this, "isEditing", false);
+        __publicField$I(this, "currentDrawing", null);
+        __publicField$I(this, "editingPointIndex", null);
+        __publicField$I(this, "zr");
         // Temporary ZRender elements for visual feedback during drag
-        __publicField$s(this, "editGroup", null);
-        __publicField$s(this, "editLines", []);
-        __publicField$s(this, "editPoints", []);
-        __publicField$s(this, "isMovingShape", false);
-        __publicField$s(this, "dragStart", null);
-        __publicField$s(this, "initialPixelPoints", []);
-        __publicField$s(this, "onDrawingMouseDown", (payload) => {
+        __publicField$I(this, "editGroup", null);
+        __publicField$I(this, "editLines", []);
+        __publicField$I(this, "editPoints", []);
+        __publicField$I(this, "isMovingShape", false);
+        __publicField$I(this, "dragStart", null);
+        __publicField$I(this, "initialPixelPoints", []);
+        __publicField$I(this, "onDrawingMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3380,7 +3403,7 @@
           this.zr.on("mouseup", this.onMouseUp);
           window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$s(this, "onPointMouseDown", (payload) => {
+        __publicField$I(this, "onPointMouseDown", (payload) => {
           if (this.isEditing)
             return;
           const drawing = this.context.getDrawing(payload.id);
@@ -3399,7 +3422,7 @@
           this.zr.on("mouseup", this.onMouseUp);
           window.addEventListener("mouseup", this.onWindowMouseUp);
         });
-        __publicField$s(this, "onMouseMove", (e) => {
+        __publicField$I(this, "onMouseMove", (e) => {
           if (!this.isEditing || !this.currentDrawing)
             return;
           const x = e.offsetX;
@@ -3436,7 +3459,7 @@
             this.editPoints[this.editingPointIndex].setShape({ cx: x, cy: y });
           }
         });
-        __publicField$s(this, "onMouseUp", (e) => {
+        __publicField$I(this, "onMouseUp", (e) => {
           if (!this.isEditing)
             return;
           this.finishEditing(e.offsetX, e.offsetY);
@@ -3446,7 +3469,7 @@
          * Uses the last known pixel positions to compute the final drop location
          * relative to the chart container.
          */
-        __publicField$s(this, "onWindowMouseUp", (e) => {
+        __publicField$I(this, "onWindowMouseUp", (e) => {
           if (!this.isEditing)
             return;
           const dom = this.zr.dom;
@@ -3581,15 +3604,15 @@
       }
     }
 
-    var __defProp$r = Object.defineProperty;
-    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$r = (obj, key, value) => {
-      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$H = Object.defineProperty;
+    var __defNormalProp$H = (obj, key, value) => key in obj ? __defProp$H(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$H = (obj, key, value) => {
+      __defNormalProp$H(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class DrawingRendererRegistry {
       constructor() {
-        __publicField$r(this, "renderers", /* @__PURE__ */ new Map());
+        __publicField$H(this, "renderers", /* @__PURE__ */ new Map());
       }
       register(renderer) {
         this.renderers.set(renderer.type, renderer);
@@ -3599,15 +3622,15 @@
       }
     }
 
-    var __defProp$q = Object.defineProperty;
-    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$q = (obj, key, value) => {
-      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$G = Object.defineProperty;
+    var __defNormalProp$G = (obj, key, value) => key in obj ? __defProp$G(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$G = (obj, key, value) => {
+      __defNormalProp$G(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class EventBus {
       constructor() {
-        __publicField$q(this, "handlers", /* @__PURE__ */ new Map());
+        __publicField$G(this, "handlers", /* @__PURE__ */ new Map());
       }
       on(event, handler) {
         if (!this.handlers.has(event)) {
@@ -4365,31 +4388,31 @@
       }
     }
 
-    var __defProp$p = Object.defineProperty;
-    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$p = (obj, key, value) => {
-      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$F = Object.defineProperty;
+    var __defNormalProp$F = (obj, key, value) => key in obj ? __defProp$F(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$F = (obj, key, value) => {
+      __defNormalProp$F(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class QFChart {
       constructor(container, options = {}) {
-        __publicField$p(this, "chart");
-        __publicField$p(this, "options");
-        __publicField$p(this, "marketData", []);
-        __publicField$p(this, "indicators", /* @__PURE__ */ new Map());
-        __publicField$p(this, "timeToIndex", /* @__PURE__ */ new Map());
-        __publicField$p(this, "pluginManager");
-        __publicField$p(this, "drawingEditor");
-        __publicField$p(this, "events", new EventBus());
-        __publicField$p(this, "isMainCollapsed", false);
-        __publicField$p(this, "maximizedPaneId", null);
-        __publicField$p(this, "countdownInterval", null);
-        __publicField$p(this, "selectedDrawingId", null);
+        __publicField$F(this, "chart");
+        __publicField$F(this, "options");
+        __publicField$F(this, "marketData", []);
+        __publicField$F(this, "indicators", /* @__PURE__ */ new Map());
+        __publicField$F(this, "timeToIndex", /* @__PURE__ */ new Map());
+        __publicField$F(this, "pluginManager");
+        __publicField$F(this, "drawingEditor");
+        __publicField$F(this, "events", new EventBus());
+        __publicField$F(this, "isMainCollapsed", false);
+        __publicField$F(this, "maximizedPaneId", null);
+        __publicField$F(this, "countdownInterval", null);
+        __publicField$F(this, "selectedDrawingId", null);
         // Track selected drawing
         // Drawing System
-        __publicField$p(this, "drawings", []);
-        __publicField$p(this, "drawingRenderers", new DrawingRendererRegistry());
-        __publicField$p(this, "coordinateConversion", {
+        __publicField$F(this, "drawings", []);
+        __publicField$F(this, "drawingRenderers", new DrawingRendererRegistry());
+        __publicField$F(this, "coordinateConversion", {
           pixelToData: (point) => {
             const option = this.chart.getOption();
             if (!option || !option.grid)
@@ -4416,58 +4439,58 @@
           }
         });
         // Default colors and constants
-        __publicField$p(this, "upColor", "#00da3c");
-        __publicField$p(this, "downColor", "#ec0000");
-        __publicField$p(this, "defaultPadding", 0);
-        __publicField$p(this, "padding");
-        __publicField$p(this, "dataIndexOffset", 0);
+        __publicField$F(this, "upColor", "#00da3c");
+        __publicField$F(this, "downColor", "#ec0000");
+        __publicField$F(this, "defaultPadding", 0);
+        __publicField$F(this, "padding");
+        __publicField$F(this, "dataIndexOffset", 0);
         // Offset for phantom padding data
-        __publicField$p(this, "_paddingPoints", 0);
+        __publicField$F(this, "_paddingPoints", 0);
         // Current symmetric padding (empty bars per side)
-        __publicField$p(this, "LAZY_MIN_PADDING", 5);
+        __publicField$F(this, "LAZY_MIN_PADDING", 5);
         // Always have a tiny buffer so edge scroll triggers
-        __publicField$p(this, "LAZY_MAX_PADDING", 500);
+        __publicField$F(this, "LAZY_MAX_PADDING", 500);
         // Hard cap per side
-        __publicField$p(this, "LAZY_CHUNK_SIZE", 50);
+        __publicField$F(this, "LAZY_CHUNK_SIZE", 50);
         // Bars added per expansion
-        __publicField$p(this, "LAZY_EDGE_THRESHOLD", 10);
+        __publicField$F(this, "LAZY_EDGE_THRESHOLD", 10);
         // Bars from edge to trigger
-        __publicField$p(this, "_expandScheduled", false);
+        __publicField$F(this, "_expandScheduled", false);
         // Debounce flag
         // DOM Elements for Layout
-        __publicField$p(this, "rootContainer");
-        __publicField$p(this, "layoutContainer");
-        __publicField$p(this, "toolbarContainer");
+        __publicField$F(this, "rootContainer");
+        __publicField$F(this, "layoutContainer");
+        __publicField$F(this, "toolbarContainer");
         // New Toolbar
-        __publicField$p(this, "leftSidebar");
-        __publicField$p(this, "rightSidebar");
-        __publicField$p(this, "chartContainer");
-        __publicField$p(this, "overlayContainer");
-        __publicField$p(this, "_lastTables", []);
-        __publicField$p(this, "_tableGraphicIds", []);
+        __publicField$F(this, "leftSidebar");
+        __publicField$F(this, "rightSidebar");
+        __publicField$F(this, "chartContainer");
+        __publicField$F(this, "overlayContainer");
+        __publicField$F(this, "_lastTables", []);
+        __publicField$F(this, "_tableGraphicIds", []);
         // Track canvas table graphic IDs for cleanup
-        __publicField$p(this, "_baseGraphics", []);
+        __publicField$F(this, "_baseGraphics", []);
         // Non-table graphic elements (title, watermark, pane labels)
-        __publicField$p(this, "_labelTooltipEl", null);
+        __publicField$F(this, "_labelTooltipEl", null);
         // Floating tooltip for label.set_tooltip()
         // Pane drag-resize state
-        __publicField$p(this, "_lastLayout", null);
-        __publicField$p(this, "_mainHeightOverride", null);
-        __publicField$p(this, "_paneDragState", null);
-        __publicField$p(this, "_paneResizeRafId", null);
-        __publicField$p(this, "onKeyDown", (e) => {
+        __publicField$F(this, "_lastLayout", null);
+        __publicField$F(this, "_mainHeightOverride", null);
+        __publicField$F(this, "_paneDragState", null);
+        __publicField$F(this, "_paneResizeRafId", null);
+        __publicField$F(this, "onKeyDown", (e) => {
           if ((e.key === "Delete" || e.key === "Backspace") && this.selectedDrawingId) {
             this.removeDrawing(this.selectedDrawingId);
             this.selectedDrawingId = null;
             this.render();
           }
         });
-        __publicField$p(this, "onFullscreenChange", () => {
+        __publicField$F(this, "onFullscreenChange", () => {
           this.render();
         });
         // --- Interaction Locking ---
-        __publicField$p(this, "isLocked", false);
-        __publicField$p(this, "lockedState", null);
+        __publicField$F(this, "isLocked", false);
+        __publicField$F(this, "lockedState", null);
         this.rootContainer = container;
         this.options = {
           title: void 0,
@@ -5411,20 +5434,21 @@ ${timeString}`;
         });
         drawingsByPane.forEach((paneDrawings) => {
           drawingSeriesUpdates.push({
-            data: paneDrawings.map((d) => [
-              d.points[0].timeIndex + this.dataIndexOffset,
-              d.points[0].value,
-              d.points[1].timeIndex + this.dataIndexOffset,
-              d.points[1].value
-            ])
+            data: paneDrawings.map((d) => {
+              const row = [];
+              d.points.forEach((p) => {
+                row.push(p.timeIndex + this.dataIndexOffset, p.value);
+              });
+              return row;
+            })
           });
         });
         const updateOption = {
           xAxis: currentOption.xAxis.map(() => ({ data: categoryData })),
-          dataZoom: [
-            { start: newStart, end: newEnd },
-            { start: newStart, end: newEnd }
-          ],
+          dataZoom: (currentOption.dataZoom || []).map(() => ({
+            start: newStart,
+            end: newEnd
+          })),
           series: [
             { data: coloredCandlestickData, markLine: candlestickSeries.markLine },
             ...indicatorSeries.map((s) => {
@@ -5630,7 +5654,8 @@ ${timeString}`;
                 drawing,
                 pixelPoints,
                 isSelected: drawing.id === this.selectedDrawingId,
-                api
+                api,
+                coordSys: params.coordSys
               });
             },
             data: drawings.map((d) => {
@@ -5744,27 +5769,27 @@ ${timeString}`;
       }
     }
 
-    var __defProp$o = Object.defineProperty;
-    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$o = (obj, key, value) => {
-      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$E = Object.defineProperty;
+    var __defNormalProp$E = (obj, key, value) => key in obj ? __defProp$E(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$E = (obj, key, value) => {
+      __defNormalProp$E(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class AbstractPlugin {
       constructor(config) {
-        __publicField$o(this, "id");
-        __publicField$o(this, "name");
-        __publicField$o(this, "icon");
-        __publicField$o(this, "context");
-        __publicField$o(this, "eventListeners", []);
+        __publicField$E(this, "id");
+        __publicField$E(this, "name");
+        __publicField$E(this, "icon");
+        __publicField$E(this, "context");
+        __publicField$E(this, "eventListeners", []);
         // Snap indicator
-        __publicField$o(this, "_snapIndicator", null);
-        __publicField$o(this, "_snapMoveHandler", null);
-        __publicField$o(this, "_snapKeyDownHandler", null);
-        __publicField$o(this, "_snapKeyUpHandler", null);
-        __publicField$o(this, "_snapBlurHandler", null);
-        __publicField$o(this, "_snapActive", false);
-        __publicField$o(this, "_lastMouseEvent", null);
+        __publicField$E(this, "_snapIndicator", null);
+        __publicField$E(this, "_snapMoveHandler", null);
+        __publicField$E(this, "_snapKeyDownHandler", null);
+        __publicField$E(this, "_snapKeyUpHandler", null);
+        __publicField$E(this, "_snapBlurHandler", null);
+        __publicField$E(this, "_snapActive", false);
+        __publicField$E(this, "_lastMouseEvent", null);
         this.id = config.id;
         this.name = config.name;
         this.icon = config.icon;
@@ -5953,10 +5978,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$n = Object.defineProperty;
-    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$n = (obj, key, value) => {
-      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$D = Object.defineProperty;
+    var __defNormalProp$D = (obj, key, value) => key in obj ? __defProp$D(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$D = (obj, key, value) => {
+      __defNormalProp$D(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class MeasureTool extends AbstractPlugin {
@@ -5966,31 +5991,31 @@ ${timeString}`;
           name: options?.name || "Measure",
           icon: options?.icon || `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></svg>`
         });
-        __publicField$n(this, "zr");
-        __publicField$n(this, "state", "idle");
-        __publicField$n(this, "startPoint", null);
-        __publicField$n(this, "endPoint", null);
+        __publicField$D(this, "zr");
+        __publicField$D(this, "state", "idle");
+        __publicField$D(this, "startPoint", null);
+        __publicField$D(this, "endPoint", null);
         // ZRender Elements
-        __publicField$n(this, "group", null);
-        __publicField$n(this, "rect", null);
-        __publicField$n(this, "labelRect", null);
-        __publicField$n(this, "labelText", null);
-        __publicField$n(this, "lineV", null);
-        __publicField$n(this, "lineH", null);
-        __publicField$n(this, "arrowStart", null);
-        __publicField$n(this, "arrowEnd", null);
+        __publicField$D(this, "group", null);
+        __publicField$D(this, "rect", null);
+        __publicField$D(this, "labelRect", null);
+        __publicField$D(this, "labelText", null);
+        __publicField$D(this, "lineV", null);
+        __publicField$D(this, "lineH", null);
+        __publicField$D(this, "arrowStart", null);
+        __publicField$D(this, "arrowEnd", null);
         // --- Interaction Handlers ---
-        __publicField$n(this, "onMouseDown", () => {
+        __publicField$D(this, "onMouseDown", () => {
           if (this.state === "finished") {
             this.removeGraphic();
           }
         });
-        __publicField$n(this, "onChartInteraction", () => {
+        __publicField$D(this, "onChartInteraction", () => {
           if (this.group) {
             this.removeGraphic();
           }
         });
-        __publicField$n(this, "onClick", (params) => {
+        __publicField$D(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = this.getPoint(params);
@@ -6005,8 +6030,8 @@ ${timeString}`;
             this.enableClearListeners();
           }
         });
-        __publicField$n(this, "clearHandlers", {});
-        __publicField$n(this, "onMouseMove", (params) => {
+        __publicField$D(this, "clearHandlers", {});
+        __publicField$D(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = this.getPoint(params);
@@ -6228,21 +6253,21 @@ ${timeString}`;
       }
     }
 
-    var __defProp$m = Object.defineProperty;
-    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$m = (obj, key, value) => {
-      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$C = Object.defineProperty;
+    var __defNormalProp$C = (obj, key, value) => key in obj ? __defProp$C(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$C = (obj, key, value) => {
+      __defNormalProp$C(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineDrawingRenderer {
       constructor() {
-        __publicField$m(this, "type", "line");
+        __publicField$C(this, "type", "line");
       }
       render(ctx) {
         const { drawing, pixelPoints, isSelected } = ctx;
         const [x1, y1] = pixelPoints[0];
         const [x2, y2] = pixelPoints[1];
-        const color = drawing.style?.color || "#3b82f6";
+        const color = drawing.style?.color || "#d1d4dc";
         return {
           type: "group",
           children: [
@@ -6252,7 +6277,7 @@ ${timeString}`;
               shape: { x1, y1, x2, y2 },
               style: {
                 stroke: color,
-                lineWidth: drawing.style?.lineWidth || 2
+                lineWidth: drawing.style?.lineWidth || 1
               }
             },
             {
@@ -6282,10 +6307,10 @@ ${timeString}`;
       }
     }
 
-    var __defProp$l = Object.defineProperty;
-    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-    var __publicField$l = (obj, key, value) => {
-      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
+    var __defProp$B = Object.defineProperty;
+    var __defNormalProp$B = (obj, key, value) => key in obj ? __defProp$B(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$B = (obj, key, value) => {
+      __defNormalProp$B(obj, typeof key !== "symbol" ? key + "" : key, value);
       return value;
     };
     class LineTool extends AbstractPlugin {
@@ -6295,17 +6320,17 @@ ${timeString}`;
           name: options?.name || "Trend Line",
           icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2" /></svg>`
         });
-        __publicField$l(this, "zr");
-        __publicField$l(this, "state", "idle");
-        __publicField$l(this, "startPoint", null);
-        __publicField$l(this, "endPoint", null);
+        __publicField$B(this, "zr");
+        __publicField$B(this, "state", "idle");
+        __publicField$B(this, "startPoint", null);
+        __publicField$B(this, "endPoint", null);
         // ZRender Elements
-        __publicField$l(this, "group", null);
-        __publicField$l(this, "line", null);
-        __publicField$l(this, "startCircle", null);
-        __publicField$l(this, "endCircle", null);
+        __publicField$B(this, "group", null);
+        __publicField$B(this, "line", null);
+        __publicField$B(this, "startCircle", null);
+        __publicField$B(this, "endCircle", null);
         // --- Interaction Handlers ---
-        __publicField$l(this, "onClick", (params) => {
+        __publicField$B(this, "onClick", (params) => {
           if (this.state === "idle") {
             this.state = "drawing";
             this.startPoint = this.getPoint(params);
@@ -6333,8 +6358,8 @@ ${timeString}`;
                   points: [start, end],
                   paneIndex,
                   style: {
-                    color: "#3b82f6",
-                    lineWidth: 2
+                    color: "#d1d4dc",
+                    lineWidth: 1
                   }
                 });
               }
@@ -6343,7 +6368,7 @@ ${timeString}`;
             this.context.disableTools();
           }
         });
-        __publicField$l(this, "onMouseMove", (params) => {
+        __publicField$B(this, "onMouseMove", (params) => {
           if (this.state !== "drawing")
             return;
           this.endPoint = this.getPoint(params);
@@ -6379,17 +6404,17 @@ ${timeString}`;
         this.group = new echarts__namespace.graphic.Group();
         this.line = new echarts__namespace.graphic.Line({
           shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
-          style: { stroke: "#3b82f6", lineWidth: 2 },
+          style: { stroke: "#d1d4dc", lineWidth: 1 },
           z: 100
         });
         this.startCircle = new echarts__namespace.graphic.Circle({
           shape: { cx: 0, cy: 0, r: 4 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1 },
+          style: { fill: "#fff", stroke: "#d1d4dc", lineWidth: 1 },
           z: 101
         });
         this.endCircle = new echarts__namespace.graphic.Circle({
           shape: { cx: 0, cy: 0, r: 4 },
-          style: { fill: "#fff", stroke: "#3b82f6", lineWidth: 1 },
+          style: { fill: "#fff", stroke: "#d1d4dc", lineWidth: 1 },
           z: 101
         });
         this.group.add(this.line);
@@ -6411,6 +6436,1285 @@ ${timeString}`;
         this.line.setShape({ x1, y1, x2, y2 });
         this.startCircle.setShape({ cx: x1, cy: y1 });
         this.endCircle.setShape({ cx: x2, cy: y2 });
+      }
+    }
+
+    var __defProp$A = Object.defineProperty;
+    var __defNormalProp$A = (obj, key, value) => key in obj ? __defProp$A(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$A = (obj, key, value) => {
+      __defNormalProp$A(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class RayDrawingRenderer {
+      constructor() {
+        __publicField$A(this, "type", "ray");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#d1d4dc";
+        const [ex, ey] = this.extendToEdge(x1, y1, x2, y2, coordSys);
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2: ex, y2: ey },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+      extendToEdge(x1, y1, x2, y2, cs) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        if (dx === 0 && dy === 0)
+          return [x2, y2];
+        const left = cs.x;
+        const right = cs.x + cs.width;
+        const top = cs.y;
+        const bottom = cs.y + cs.height;
+        let tMax = Infinity;
+        if (dx !== 0) {
+          const tx = dx > 0 ? (right - x1) / dx : (left - x1) / dx;
+          if (tx > 0)
+            tMax = Math.min(tMax, tx);
+        }
+        if (dy !== 0) {
+          const ty = dy > 0 ? (bottom - y1) / dy : (top - y1) / dy;
+          if (ty > 0)
+            tMax = Math.min(tMax, ty);
+        }
+        if (!isFinite(tMax))
+          tMax = 1;
+        return [x1 + tMax * dx, y1 + tMax * dy];
+      }
+    }
+
+    var __defProp$z = Object.defineProperty;
+    var __defNormalProp$z = (obj, key, value) => key in obj ? __defProp$z(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$z = (obj, key, value) => {
+      __defNormalProp$z(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const COLOR$2 = "#d1d4dc";
+    class RayTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "ray-tool",
+          name: options?.name || "Ray",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="20" x2="21" y2="4"/><circle cx="21" cy="4" r="0" fill="currentColor"/><polyline points="16,4 21,4 21,9" stroke-width="1.5"/></svg>`
+        });
+        __publicField$z(this, "zr");
+        __publicField$z(this, "state", "idle");
+        __publicField$z(this, "startPoint", null);
+        __publicField$z(this, "endPoint", null);
+        __publicField$z(this, "group", null);
+        __publicField$z(this, "line", null);
+        __publicField$z(this, "dashLine", null);
+        __publicField$z(this, "startCircle", null);
+        __publicField$z(this, "endCircle", null);
+        __publicField$z(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = this.getPoint(params);
+            if (this.startPoint && this.endPoint) {
+              const start = this.context.coordinateConversion.pixelToData({
+                x: this.startPoint[0],
+                y: this.startPoint[1]
+              });
+              const end = this.context.coordinateConversion.pixelToData({
+                x: this.endPoint[0],
+                y: this.endPoint[1]
+              });
+              if (start && end) {
+                this.context.addDrawing({
+                  id: `ray-${Date.now()}`,
+                  type: "ray",
+                  points: [start, end],
+                  paneIndex: start.paneIndex || 0,
+                  style: { color: COLOR$2, lineWidth: 1 }
+                });
+              }
+            }
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$z(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing")
+            return;
+          this.endPoint = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new RayDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+        this.zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+        this.zr.off("mousemove", this.onMouseMove);
+        this.removeGraphic();
+      }
+      onDestroy() {
+        this.removeGraphic();
+      }
+      initGraphic() {
+        if (this.group)
+          return;
+        this.group = new echarts__namespace.graphic.Group();
+        this.line = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR$2, lineWidth: 1 },
+          z: 100
+        });
+        this.dashLine = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR$2, lineWidth: 1, lineDash: [4, 4], opacity: 0.5 },
+          z: 99
+        });
+        this.startCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR$2, lineWidth: 1 },
+          z: 101
+        });
+        this.endCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR$2, lineWidth: 1 },
+          z: 101
+        });
+        this.group.add(this.dashLine);
+        this.group.add(this.line);
+        this.group.add(this.startCircle);
+        this.group.add(this.endCircle);
+        this.zr.add(this.group);
+      }
+      removeGraphic() {
+        if (this.group) {
+          this.zr.remove(this.group);
+          this.group = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.startPoint || !this.endPoint || !this.group)
+          return;
+        const [x1, y1] = this.startPoint;
+        const [x2, y2] = this.endPoint;
+        this.line.setShape({ x1, y1, x2, y2 });
+        this.startCircle.setShape({ cx: x1, cy: y1 });
+        this.endCircle.setShape({ cx: x2, cy: y2 });
+        const [ex, ey] = this.extendToEdge(x1, y1, x2, y2);
+        this.dashLine.setShape({ x1: x2, y1: y2, x2: ex, y2: ey });
+      }
+      extendToEdge(x1, y1, x2, y2) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        if (dx === 0 && dy === 0)
+          return [x2, y2];
+        const w = this.chart.getWidth();
+        const h = this.chart.getHeight();
+        let tMax = Infinity;
+        if (dx !== 0) {
+          const tx = dx > 0 ? (w - x1) / dx : -x1 / dx;
+          if (tx > 0)
+            tMax = Math.min(tMax, tx);
+        }
+        if (dy !== 0) {
+          const ty = dy > 0 ? (h - y1) / dy : -y1 / dy;
+          if (ty > 0)
+            tMax = Math.min(tMax, ty);
+        }
+        if (!isFinite(tMax))
+          tMax = 1;
+        return [x1 + tMax * dx, y1 + tMax * dy];
+      }
+    }
+
+    var __defProp$y = Object.defineProperty;
+    var __defNormalProp$y = (obj, key, value) => key in obj ? __defProp$y(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$y = (obj, key, value) => {
+      __defNormalProp$y(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class InfoLineDrawingRenderer {
+      constructor() {
+        __publicField$y(this, "type", "info-line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#d1d4dc";
+        const p0 = drawing.points[0];
+        const p1 = drawing.points[1];
+        const priceChange = p1.value - p0.value;
+        const pctChange = p0.value !== 0 ? priceChange / p0.value * 100 : 0;
+        const bars = Math.abs(p1.timeIndex - p0.timeIndex);
+        const sign = priceChange >= 0 ? "+" : "";
+        const infoText = `${sign}${priceChange.toFixed(2)} (${sign}${pctChange.toFixed(2)}%)  ${bars} bars`;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const isUp = priceChange >= 0;
+        const textColor = isUp ? "#26a69a" : "#ef5350";
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1, y1, x2, y2 },
+              style: { stroke: color, lineWidth: drawing.style?.lineWidth || 1 }
+            },
+            // Info box background
+            {
+              type: "rect",
+              shape: { x: mx - 2, y: my - 22, width: infoText.length * 6.5 + 12, height: 18, r: 3 },
+              style: { fill: "#1e293b", stroke: "#475569", lineWidth: 1, opacity: 0.9 },
+              z2: 10
+            },
+            // Info text
+            {
+              type: "text",
+              x: mx + 4,
+              y: my - 20,
+              style: {
+                text: infoText,
+                fill: textColor,
+                fontSize: 11,
+                fontFamily: "monospace"
+              },
+              z2: 11
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$x = Object.defineProperty;
+    var __defNormalProp$x = (obj, key, value) => key in obj ? __defProp$x(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$x = (obj, key, value) => {
+      __defNormalProp$x(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class InfoLineTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "info-line-tool",
+          name: options?.name || "Info Line",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="22" x2="22" y2="2"/><rect x="12" y="8" width="8" height="5" rx="1" fill="none" stroke-width="1.5"/></svg>`
+        });
+        __publicField$x(this, "zr");
+        __publicField$x(this, "state", "idle");
+        __publicField$x(this, "startPoint", null);
+        __publicField$x(this, "endPoint", null);
+        __publicField$x(this, "group", null);
+        __publicField$x(this, "line", null);
+        __publicField$x(this, "startCircle", null);
+        __publicField$x(this, "endCircle", null);
+        __publicField$x(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = this.getPoint(params);
+            this.updateGraphic();
+            if (this.startPoint && this.endPoint) {
+              const start = this.context.coordinateConversion.pixelToData({
+                x: this.startPoint[0],
+                y: this.startPoint[1]
+              });
+              const end = this.context.coordinateConversion.pixelToData({
+                x: this.endPoint[0],
+                y: this.endPoint[1]
+              });
+              if (start && end) {
+                this.context.addDrawing({
+                  id: `info-line-${Date.now()}`,
+                  type: "info-line",
+                  points: [start, end],
+                  paneIndex: start.paneIndex || 0,
+                  style: { color: "#d1d4dc", lineWidth: 1 }
+                });
+              }
+            }
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$x(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing")
+            return;
+          this.endPoint = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new InfoLineDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+        this.zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+        this.zr.off("mousemove", this.onMouseMove);
+        this.removeGraphic();
+      }
+      onDestroy() {
+        this.removeGraphic();
+      }
+      initGraphic() {
+        if (this.group)
+          return;
+        this.group = new echarts__namespace.graphic.Group();
+        this.line = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: "#d1d4dc", lineWidth: 1 },
+          z: 100
+        });
+        this.startCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: "#d1d4dc", lineWidth: 1 },
+          z: 101
+        });
+        this.endCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: "#d1d4dc", lineWidth: 1 },
+          z: 101
+        });
+        this.group.add(this.line);
+        this.group.add(this.startCircle);
+        this.group.add(this.endCircle);
+        this.zr.add(this.group);
+      }
+      removeGraphic() {
+        if (this.group) {
+          this.zr.remove(this.group);
+          this.group = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.startPoint || !this.endPoint || !this.group)
+          return;
+        const [x1, y1] = this.startPoint;
+        const [x2, y2] = this.endPoint;
+        this.line.setShape({ x1, y1, x2, y2 });
+        this.startCircle.setShape({ cx: x1, cy: y1 });
+        this.endCircle.setShape({ cx: x2, cy: y2 });
+      }
+    }
+
+    var __defProp$w = Object.defineProperty;
+    var __defNormalProp$w = (obj, key, value) => key in obj ? __defProp$w(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$w = (obj, key, value) => {
+      __defNormalProp$w(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class ExtendedLineDrawingRenderer {
+      constructor() {
+        __publicField$w(this, "type", "extended-line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#d1d4dc";
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        let ex1 = x1, ey1 = y1, ex2 = x2, ey2 = y2;
+        if (dx !== 0 || dy !== 0) {
+          const left = coordSys.x;
+          const right = coordSys.x + coordSys.width;
+          const top = coordSys.y;
+          const bottom = coordSys.y + coordSys.height;
+          [ex2, ey2] = this.extendToEdge(x1, y1, dx, dy, left, right, top, bottom);
+          [ex1, ey1] = this.extendToEdge(x2, y2, -dx, -dy, left, right, top, bottom);
+        }
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1: ex1, y1: ey1, x2: ex2, y2: ey2 },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: x1, cy: y1, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            },
+            {
+              type: "circle",
+              name: "point-1",
+              shape: { cx: x2, cy: y2, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+      extendToEdge(ox, oy, dx, dy, left, right, top, bottom) {
+        let tMax = Infinity;
+        if (dx !== 0) {
+          const tx = dx > 0 ? (right - ox) / dx : (left - ox) / dx;
+          if (tx > 0)
+            tMax = Math.min(tMax, tx);
+        }
+        if (dy !== 0) {
+          const ty = dy > 0 ? (bottom - oy) / dy : (top - oy) / dy;
+          if (ty > 0)
+            tMax = Math.min(tMax, ty);
+        }
+        if (!isFinite(tMax))
+          tMax = 1;
+        return [ox + tMax * dx, oy + tMax * dy];
+      }
+    }
+
+    var __defProp$v = Object.defineProperty;
+    var __defNormalProp$v = (obj, key, value) => key in obj ? __defProp$v(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$v = (obj, key, value) => {
+      __defNormalProp$v(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const COLOR$1 = "#d1d4dc";
+    class ExtendedLineTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "extended-line-tool",
+          name: options?.name || "Extended Line",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="23" x2="23" y2="1" stroke-dasharray="2,2" opacity="0.4"/><line x1="6" y1="18" x2="18" y2="6"/></svg>`
+        });
+        __publicField$v(this, "zr");
+        __publicField$v(this, "state", "idle");
+        __publicField$v(this, "startPoint", null);
+        __publicField$v(this, "endPoint", null);
+        __publicField$v(this, "group", null);
+        __publicField$v(this, "line", null);
+        __publicField$v(this, "dashLineForward", null);
+        __publicField$v(this, "dashLineBackward", null);
+        __publicField$v(this, "startCircle", null);
+        __publicField$v(this, "endCircle", null);
+        __publicField$v(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = this.getPoint(params);
+            if (this.startPoint && this.endPoint) {
+              const start = this.context.coordinateConversion.pixelToData({
+                x: this.startPoint[0],
+                y: this.startPoint[1]
+              });
+              const end = this.context.coordinateConversion.pixelToData({
+                x: this.endPoint[0],
+                y: this.endPoint[1]
+              });
+              if (start && end) {
+                this.context.addDrawing({
+                  id: `extended-line-${Date.now()}`,
+                  type: "extended-line",
+                  points: [start, end],
+                  paneIndex: start.paneIndex || 0,
+                  style: { color: COLOR$1, lineWidth: 1 }
+                });
+              }
+            }
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$v(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing")
+            return;
+          this.endPoint = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new ExtendedLineDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+        this.zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+        this.zr.off("mousemove", this.onMouseMove);
+        this.removeGraphic();
+      }
+      onDestroy() {
+        this.removeGraphic();
+      }
+      initGraphic() {
+        if (this.group)
+          return;
+        this.group = new echarts__namespace.graphic.Group();
+        this.line = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR$1, lineWidth: 1 },
+          z: 100
+        });
+        this.dashLineForward = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR$1, lineWidth: 1, lineDash: [4, 4], opacity: 0.5 },
+          z: 99
+        });
+        this.dashLineBackward = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR$1, lineWidth: 1, lineDash: [4, 4], opacity: 0.5 },
+          z: 99
+        });
+        this.startCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR$1, lineWidth: 1 },
+          z: 101
+        });
+        this.endCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR$1, lineWidth: 1 },
+          z: 101
+        });
+        this.group.add(this.dashLineBackward);
+        this.group.add(this.dashLineForward);
+        this.group.add(this.line);
+        this.group.add(this.startCircle);
+        this.group.add(this.endCircle);
+        this.zr.add(this.group);
+      }
+      removeGraphic() {
+        if (this.group) {
+          this.zr.remove(this.group);
+          this.group = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.startPoint || !this.endPoint || !this.group)
+          return;
+        const [x1, y1] = this.startPoint;
+        const [x2, y2] = this.endPoint;
+        this.line.setShape({ x1, y1, x2, y2 });
+        this.startCircle.setShape({ cx: x1, cy: y1 });
+        this.endCircle.setShape({ cx: x2, cy: y2 });
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        if (dx === 0 && dy === 0)
+          return;
+        const [fwX, fwY] = this.extendToEdge(x1, y1, dx, dy);
+        this.dashLineForward.setShape({ x1: x2, y1: y2, x2: fwX, y2: fwY });
+        const [bwX, bwY] = this.extendToEdge(x2, y2, -dx, -dy);
+        this.dashLineBackward.setShape({ x1, y1, x2: bwX, y2: bwY });
+      }
+      extendToEdge(ox, oy, dx, dy) {
+        const w = this.chart.getWidth();
+        const h = this.chart.getHeight();
+        let tMax = Infinity;
+        if (dx !== 0) {
+          const tx = dx > 0 ? (w - ox) / dx : -ox / dx;
+          if (tx > 0)
+            tMax = Math.min(tMax, tx);
+        }
+        if (dy !== 0) {
+          const ty = dy > 0 ? (h - oy) / dy : -oy / dy;
+          if (ty > 0)
+            tMax = Math.min(tMax, ty);
+        }
+        if (!isFinite(tMax))
+          tMax = 1;
+        return [ox + tMax * dx, oy + tMax * dy];
+      }
+    }
+
+    var __defProp$u = Object.defineProperty;
+    var __defNormalProp$u = (obj, key, value) => key in obj ? __defProp$u(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$u = (obj, key, value) => {
+      __defNormalProp$u(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class TrendAngleDrawingRenderer {
+      constructor() {
+        __publicField$u(this, "type", "trend-angle");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected } = ctx;
+        const [x1, y1] = pixelPoints[0];
+        const [x2, y2] = pixelPoints[1];
+        const color = drawing.style?.color || "#d1d4dc";
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const angleRad = Math.atan2(-dy, dx);
+        const angleDeg = angleRad * (180 / Math.PI);
+        const displayAngle = angleDeg.toFixed(1);
+        const arcR = Math.min(30, Math.sqrt(dx * dx + dy * dy) * 0.3);
+        const hLineEndX = x1 + Math.max(Math.abs(dx), arcR + 20);
+        const startAngle = 0;
+        const endAngle = -angleRad;
+        const children = [
+          // Main trend line
+          {
+            type: "line",
+            name: "line",
+            shape: { x1, y1, x2, y2 },
+            style: { stroke: color, lineWidth: drawing.style?.lineWidth || 1 }
+          },
+          // Horizontal reference line
+          {
+            type: "line",
+            shape: { x1, y1, x2: hLineEndX, y2: y1 },
+            style: { stroke: color, lineWidth: 1, opacity: 0.4, lineDash: [4, 4] }
+          },
+          // Arc
+          {
+            type: "arc",
+            shape: {
+              cx: x1,
+              cy: y1,
+              r: arcR,
+              startAngle: Math.min(startAngle, endAngle),
+              endAngle: Math.max(startAngle, endAngle)
+            },
+            style: { stroke: color, lineWidth: 1.5, fill: "none" }
+          },
+          // Angle label
+          {
+            type: "text",
+            x: x1 + arcR + 6,
+            y: y1 + (dy < 0 ? -14 : 2),
+            style: {
+              text: `${displayAngle}\xB0`,
+              fill: color,
+              fontSize: 11,
+              fontFamily: "sans-serif"
+            },
+            z2: 10
+          },
+          // Control points
+          {
+            type: "circle",
+            name: "point-0",
+            shape: { cx: x1, cy: y1, r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+          },
+          {
+            type: "circle",
+            name: "point-1",
+            shape: { cx: x2, cy: y2, r: 4 },
+            style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+          }
+        ];
+        return { type: "group", children };
+      }
+    }
+
+    var __defProp$t = Object.defineProperty;
+    var __defNormalProp$t = (obj, key, value) => key in obj ? __defProp$t(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$t = (obj, key, value) => {
+      __defNormalProp$t(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    const COLOR = "#d1d4dc";
+    class TrendAngleTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "trend-angle-tool",
+          name: options?.name || "Trend Angle",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="20" x2="21" y2="6"/><line x1="3" y1="20" x2="14" y2="20" opacity="0.4"/><path d="M8 20 A5 5 0 0 1 7 16" stroke-width="1.5"/></svg>`
+        });
+        __publicField$t(this, "zr");
+        __publicField$t(this, "state", "idle");
+        __publicField$t(this, "startPoint", null);
+        __publicField$t(this, "endPoint", null);
+        __publicField$t(this, "group", null);
+        __publicField$t(this, "line", null);
+        __publicField$t(this, "hRefLine", null);
+        __publicField$t(this, "arc", null);
+        __publicField$t(this, "angleText", null);
+        __publicField$t(this, "startCircle", null);
+        __publicField$t(this, "endCircle", null);
+        __publicField$t(this, "onClick", (params) => {
+          if (this.state === "idle") {
+            this.state = "drawing";
+            this.startPoint = this.getPoint(params);
+            this.endPoint = this.getPoint(params);
+            this.initGraphic();
+            this.updateGraphic();
+          } else if (this.state === "drawing") {
+            this.state = "finished";
+            this.endPoint = this.getPoint(params);
+            if (this.startPoint && this.endPoint) {
+              const start = this.context.coordinateConversion.pixelToData({
+                x: this.startPoint[0],
+                y: this.startPoint[1]
+              });
+              const end = this.context.coordinateConversion.pixelToData({
+                x: this.endPoint[0],
+                y: this.endPoint[1]
+              });
+              if (start && end) {
+                this.context.addDrawing({
+                  id: `trend-angle-${Date.now()}`,
+                  type: "trend-angle",
+                  points: [start, end],
+                  paneIndex: start.paneIndex || 0,
+                  style: { color: COLOR, lineWidth: 1 }
+                });
+              }
+            }
+            this.removeGraphic();
+            this.context.disableTools();
+          }
+        });
+        __publicField$t(this, "onMouseMove", (params) => {
+          if (this.state !== "drawing")
+            return;
+          this.endPoint = this.getPoint(params);
+          this.updateGraphic();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new TrendAngleDrawingRenderer());
+      }
+      onActivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+        this.zr.on("mousemove", this.onMouseMove);
+      }
+      onDeactivate() {
+        this.state = "idle";
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+        this.zr.off("mousemove", this.onMouseMove);
+        this.removeGraphic();
+      }
+      onDestroy() {
+        this.removeGraphic();
+      }
+      initGraphic() {
+        if (this.group)
+          return;
+        this.group = new echarts__namespace.graphic.Group();
+        this.line = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR, lineWidth: 1 },
+          z: 100
+        });
+        this.hRefLine = new echarts__namespace.graphic.Line({
+          shape: { x1: 0, y1: 0, x2: 0, y2: 0 },
+          style: { stroke: COLOR, lineWidth: 1, lineDash: [4, 4], opacity: 0.4 },
+          z: 99
+        });
+        this.arc = new echarts__namespace.graphic.Arc({
+          shape: { cx: 0, cy: 0, r: 25, startAngle: 0, endAngle: 0 },
+          style: { stroke: COLOR, lineWidth: 1, fill: "none" },
+          z: 99
+        });
+        this.angleText = new echarts__namespace.graphic.Text({
+          style: { text: "", fill: COLOR, fontSize: 11, fontFamily: "sans-serif" },
+          z: 101
+        });
+        this.startCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR, lineWidth: 1 },
+          z: 101
+        });
+        this.endCircle = new echarts__namespace.graphic.Circle({
+          shape: { cx: 0, cy: 0, r: 4 },
+          style: { fill: "#fff", stroke: COLOR, lineWidth: 1 },
+          z: 101
+        });
+        this.group.add(this.hRefLine);
+        this.group.add(this.arc);
+        this.group.add(this.line);
+        this.group.add(this.angleText);
+        this.group.add(this.startCircle);
+        this.group.add(this.endCircle);
+        this.zr.add(this.group);
+      }
+      removeGraphic() {
+        if (this.group) {
+          this.zr.remove(this.group);
+          this.group = null;
+        }
+      }
+      updateGraphic() {
+        if (!this.startPoint || !this.endPoint || !this.group)
+          return;
+        const [x1, y1] = this.startPoint;
+        const [x2, y2] = this.endPoint;
+        this.line.setShape({ x1, y1, x2, y2 });
+        this.startCircle.setShape({ cx: x1, cy: y1 });
+        this.endCircle.setShape({ cx: x2, cy: y2 });
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const hLen = Math.max(Math.abs(dx), 40);
+        this.hRefLine.setShape({ x1, y1, x2: x1 + hLen, y2: y1 });
+        const angleRad = Math.atan2(-dy, dx);
+        const angleDeg = angleRad * (180 / Math.PI);
+        const arcR = Math.min(25, Math.sqrt(dx * dx + dy * dy) * 0.3);
+        const screenAngle = Math.atan2(dy, dx);
+        const arcStart = Math.min(0, screenAngle);
+        const arcEnd = Math.max(0, screenAngle);
+        this.arc.setShape({ cx: x1, cy: y1, r: arcR, startAngle: arcStart, endAngle: arcEnd });
+        this.angleText.setStyle({ text: `${angleDeg.toFixed(1)}\xB0` });
+        this.angleText.x = x1 + arcR + 6;
+        this.angleText.y = y1 + (dy < 0 ? -14 : 2);
+        this.angleText.markRedraw();
+      }
+    }
+
+    var __defProp$s = Object.defineProperty;
+    var __defNormalProp$s = (obj, key, value) => key in obj ? __defProp$s(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$s = (obj, key, value) => {
+      __defNormalProp$s(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class HorizontalLineDrawingRenderer {
+      constructor() {
+        __publicField$s(this, "type", "horizontal-line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [px, py] = pixelPoints[0];
+        const color = drawing.style?.color || "#d1d4dc";
+        const left = coordSys.x;
+        const right = coordSys.x + coordSys.width;
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1: left, y1: py, x2: right, y2: py },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            // Price label on the right
+            {
+              type: "rect",
+              shape: { x: right - 70, y: py - 10, width: 65, height: 18, r: 2 },
+              style: { fill: color, opacity: 0.9 },
+              z2: 10
+            },
+            {
+              type: "text",
+              x: right - 67,
+              y: py - 8,
+              style: {
+                text: drawing.points[0].value.toFixed(2),
+                fill: "#fff",
+                fontSize: 10,
+                fontFamily: "monospace"
+              },
+              z2: 11
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$r = Object.defineProperty;
+    var __defNormalProp$r = (obj, key, value) => key in obj ? __defProp$r(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$r = (obj, key, value) => {
+      __defNormalProp$r(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class HorizontalLineTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "horizontal-line-tool",
+          name: options?.name || "Horizontal Line",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`
+        });
+        __publicField$r(this, "zr");
+        __publicField$r(this, "onClick", (params) => {
+          const point = this.getPoint(params);
+          if (!point)
+            return;
+          const data = this.context.coordinateConversion.pixelToData({
+            x: point[0],
+            y: point[1]
+          });
+          if (data) {
+            this.context.addDrawing({
+              id: `hline-${Date.now()}`,
+              type: "horizontal-line",
+              points: [data],
+              paneIndex: data.paneIndex || 0,
+              style: { color: "#d1d4dc", lineWidth: 1 }
+            });
+          }
+          this.context.disableTools();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new HorizontalLineDrawingRenderer());
+      }
+      onActivate() {
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+      }
+      onDeactivate() {
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+      }
+      onDestroy() {
+      }
+    }
+
+    var __defProp$q = Object.defineProperty;
+    var __defNormalProp$q = (obj, key, value) => key in obj ? __defProp$q(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$q = (obj, key, value) => {
+      __defNormalProp$q(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class HorizontalRayDrawingRenderer {
+      constructor() {
+        __publicField$q(this, "type", "horizontal-ray");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [px, py] = pixelPoints[0];
+        const color = drawing.style?.color || "#d1d4dc";
+        const right = coordSys.x + coordSys.width;
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1: px, y1: py, x2: right, y2: py },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$p = Object.defineProperty;
+    var __defNormalProp$p = (obj, key, value) => key in obj ? __defProp$p(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$p = (obj, key, value) => {
+      __defNormalProp$p(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class HorizontalRayTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "horizontal-ray-tool",
+          name: options?.name || "Horizontal Ray",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="22" y2="12"/><circle cx="4" cy="12" r="2" fill="currentColor"/></svg>`
+        });
+        __publicField$p(this, "zr");
+        __publicField$p(this, "onClick", (params) => {
+          const point = this.getPoint(params);
+          if (!point)
+            return;
+          const data = this.context.coordinateConversion.pixelToData({
+            x: point[0],
+            y: point[1]
+          });
+          if (data) {
+            this.context.addDrawing({
+              id: `hray-${Date.now()}`,
+              type: "horizontal-ray",
+              points: [data],
+              paneIndex: data.paneIndex || 0,
+              style: { color: "#d1d4dc", lineWidth: 1 }
+            });
+          }
+          this.context.disableTools();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new HorizontalRayDrawingRenderer());
+      }
+      onActivate() {
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+      }
+      onDeactivate() {
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+      }
+      onDestroy() {
+      }
+    }
+
+    var __defProp$o = Object.defineProperty;
+    var __defNormalProp$o = (obj, key, value) => key in obj ? __defProp$o(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$o = (obj, key, value) => {
+      __defNormalProp$o(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class VerticalLineDrawingRenderer {
+      constructor() {
+        __publicField$o(this, "type", "vertical-line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [px, py] = pixelPoints[0];
+        const color = drawing.style?.color || "#d1d4dc";
+        const top = coordSys.y;
+        const bottom = coordSys.y + coordSys.height;
+        return {
+          type: "group",
+          children: [
+            {
+              type: "line",
+              name: "line",
+              shape: { x1: px, y1: top, x2: px, y2: bottom },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$n = Object.defineProperty;
+    var __defNormalProp$n = (obj, key, value) => key in obj ? __defProp$n(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$n = (obj, key, value) => {
+      __defNormalProp$n(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class VerticalLineTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "vertical-line-tool",
+          name: options?.name || "Vertical Line",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`
+        });
+        __publicField$n(this, "zr");
+        __publicField$n(this, "onClick", (params) => {
+          const point = this.getPoint(params);
+          if (!point)
+            return;
+          const data = this.context.coordinateConversion.pixelToData({
+            x: point[0],
+            y: point[1]
+          });
+          if (data) {
+            this.context.addDrawing({
+              id: `vline-${Date.now()}`,
+              type: "vertical-line",
+              points: [data],
+              paneIndex: data.paneIndex || 0,
+              style: { color: "#d1d4dc", lineWidth: 1 }
+            });
+          }
+          this.context.disableTools();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new VerticalLineDrawingRenderer());
+      }
+      onActivate() {
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+      }
+      onDeactivate() {
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+      }
+      onDestroy() {
+      }
+    }
+
+    var __defProp$m = Object.defineProperty;
+    var __defNormalProp$m = (obj, key, value) => key in obj ? __defProp$m(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$m = (obj, key, value) => {
+      __defNormalProp$m(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class CrossLineDrawingRenderer {
+      constructor() {
+        __publicField$m(this, "type", "cross-line");
+      }
+      render(ctx) {
+        const { drawing, pixelPoints, isSelected, coordSys } = ctx;
+        const [px, py] = pixelPoints[0];
+        const color = drawing.style?.color || "#d1d4dc";
+        const left = coordSys.x;
+        const right = coordSys.x + coordSys.width;
+        const top = coordSys.y;
+        const bottom = coordSys.y + coordSys.height;
+        return {
+          type: "group",
+          children: [
+            // Horizontal line
+            {
+              type: "line",
+              name: "line-h",
+              shape: { x1: left, y1: py, x2: right, y2: py },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            // Vertical line
+            {
+              type: "line",
+              name: "line-v",
+              shape: { x1: px, y1: top, x2: px, y2: bottom },
+              style: {
+                stroke: color,
+                lineWidth: drawing.style?.lineWidth || 1
+              }
+            },
+            // Center point
+            {
+              type: "circle",
+              name: "point-0",
+              shape: { cx: px, cy: py, r: 4 },
+              style: { fill: "#fff", stroke: color, lineWidth: 1, opacity: isSelected ? 1 : 0 }
+            }
+          ]
+        };
+      }
+    }
+
+    var __defProp$l = Object.defineProperty;
+    var __defNormalProp$l = (obj, key, value) => key in obj ? __defProp$l(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+    var __publicField$l = (obj, key, value) => {
+      __defNormalProp$l(obj, typeof key !== "symbol" ? key + "" : key, value);
+      return value;
+    };
+    class CrossLineTool extends AbstractPlugin {
+      constructor(options = {}) {
+        super({
+          id: "cross-line-tool",
+          name: options?.name || "Cross Line",
+          icon: options?.icon || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>`
+        });
+        __publicField$l(this, "zr");
+        __publicField$l(this, "onClick", (params) => {
+          const point = this.getPoint(params);
+          if (!point)
+            return;
+          const data = this.context.coordinateConversion.pixelToData({
+            x: point[0],
+            y: point[1]
+          });
+          if (data) {
+            this.context.addDrawing({
+              id: `crossline-${Date.now()}`,
+              type: "cross-line",
+              points: [data],
+              paneIndex: data.paneIndex || 0,
+              style: { color: "#d1d4dc", lineWidth: 1 }
+            });
+          }
+          this.context.disableTools();
+        });
+      }
+      onInit() {
+        this.zr = this.chart.getZr();
+        this.context.registerDrawingRenderer(new CrossLineDrawingRenderer());
+      }
+      onActivate() {
+        this.chart.getZr().setCursorStyle("crosshair");
+        this.zr.on("click", this.onClick);
+      }
+      onDeactivate() {
+        this.chart.getZr().setCursorStyle("default");
+        this.zr.off("click", this.onClick);
+      }
+      onDestroy() {
       }
     }
 
@@ -9170,9 +10474,13 @@ ${timeString}`;
     exports.ABCDPatternDrawingRenderer = ABCDPatternDrawingRenderer;
     exports.ABCDPatternTool = ABCDPatternTool;
     exports.AbstractPlugin = AbstractPlugin;
+    exports.CrossLineDrawingRenderer = CrossLineDrawingRenderer;
+    exports.CrossLineTool = CrossLineTool;
     exports.CypherPatternDrawingRenderer = CypherPatternDrawingRenderer;
     exports.CypherPatternTool = CypherPatternTool;
     exports.DrawingRendererRegistry = DrawingRendererRegistry;
+    exports.ExtendedLineDrawingRenderer = ExtendedLineDrawingRenderer;
+    exports.ExtendedLineTool = ExtendedLineTool;
     exports.FibSpeedResistanceFanDrawingRenderer = FibSpeedResistanceFanDrawingRenderer;
     exports.FibSpeedResistanceFanTool = FibSpeedResistanceFanTool;
     exports.FibTrendExtensionDrawingRenderer = FibTrendExtensionDrawingRenderer;
@@ -9183,15 +10491,27 @@ ${timeString}`;
     exports.FibonacciTool = FibonacciTool;
     exports.HeadAndShouldersDrawingRenderer = HeadAndShouldersDrawingRenderer;
     exports.HeadAndShouldersTool = HeadAndShouldersTool;
+    exports.HorizontalLineDrawingRenderer = HorizontalLineDrawingRenderer;
+    exports.HorizontalLineTool = HorizontalLineTool;
+    exports.HorizontalRayDrawingRenderer = HorizontalRayDrawingRenderer;
+    exports.HorizontalRayTool = HorizontalRayTool;
+    exports.InfoLineDrawingRenderer = InfoLineDrawingRenderer;
+    exports.InfoLineTool = InfoLineTool;
     exports.LineDrawingRenderer = LineDrawingRenderer;
     exports.LineTool = LineTool;
     exports.MeasureTool = MeasureTool;
     exports.QFChart = QFChart;
+    exports.RayDrawingRenderer = RayDrawingRenderer;
+    exports.RayTool = RayTool;
     exports.ThreeDrivesPatternDrawingRenderer = ThreeDrivesPatternDrawingRenderer;
     exports.ThreeDrivesPatternTool = ThreeDrivesPatternTool;
     exports.ToolGroup = ToolGroup;
+    exports.TrendAngleDrawingRenderer = TrendAngleDrawingRenderer;
+    exports.TrendAngleTool = TrendAngleTool;
     exports.TrianglePatternDrawingRenderer = TrianglePatternDrawingRenderer;
     exports.TrianglePatternTool = TrianglePatternTool;
+    exports.VerticalLineDrawingRenderer = VerticalLineDrawingRenderer;
+    exports.VerticalLineTool = VerticalLineTool;
     exports.XABCDPatternDrawingRenderer = XABCDPatternDrawingRenderer;
     exports.XABCDPatternTool = XABCDPatternTool;
 

@@ -1397,22 +1397,22 @@ export class QFChart implements ChartContext {
         });
         drawingsByPane.forEach((paneDrawings) => {
             drawingSeriesUpdates.push({
-                data: paneDrawings.map((d) => [
-                    d.points[0].timeIndex + this.dataIndexOffset,
-                    d.points[0].value,
-                    d.points[1].timeIndex + this.dataIndexOffset,
-                    d.points[1].value,
-                ]),
+                data: paneDrawings.map((d) => {
+                    const row: number[] = [];
+                    d.points.forEach((p) => {
+                        row.push(p.timeIndex + this.dataIndexOffset, p.value);
+                    });
+                    return row;
+                }),
             });
         });
 
         // 6. Merge update — preserves drag/interaction state
         const updateOption: any = {
             xAxis: currentOption.xAxis.map(() => ({ data: categoryData })),
-            dataZoom: [
-                { start: newStart, end: newEnd },
-                { start: newStart, end: newEnd },
-            ],
+            dataZoom: (currentOption.dataZoom || []).map(() => ({
+                start: newStart, end: newEnd,
+            })),
             series: [
                 { data: coloredCandlestickData, markLine: candlestickSeries.markLine },
                 ...indicatorSeries.map((s) => {
@@ -1668,6 +1668,7 @@ export class QFChart implements ChartContext {
                         pixelPoints,
                         isSelected: drawing.id === this.selectedDrawingId,
                         api,
+                        coordSys: params.coordSys,
                     });
                 },
                 data: drawings.map((d) => {
