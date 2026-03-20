@@ -146,7 +146,7 @@ export class SeriesBuilder {
                 let plotOverlay = plot.options.overlay;
 
                 // Fill plots inherit overlay from their referenced plots.
-                // If both referenced plots are overlay, the fill should render on the
+                // If either referenced plot is overlay, the fill should render on the
                 // overlay pane too — otherwise its price-scale data stretches the
                 // indicator sub-pane's y-axis to extreme ranges.
                 if (plot.options.style === 'fill' && plotOverlay === undefined) {
@@ -155,7 +155,7 @@ export class SeriesBuilder {
                     if (p1Name && p2Name) {
                         const p1 = indicator.plots[p1Name];
                         const p2 = indicator.plots[p2Name];
-                        if (p1?.options?.overlay === true && p2?.options?.overlay === true) {
+                        if (p1?.options?.overlay === true || p2?.options?.overlay === true) {
                             plotOverlay = true;
                         }
                     }
