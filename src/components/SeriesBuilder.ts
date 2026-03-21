@@ -309,21 +309,28 @@ export class SeriesBuilder {
                     }
                 }
 
-                // Skip fully transparent plots — they exist only as data sources for fills.
+                // Skip fully transparent / invisible plots — they exist only as data sources for fills.
                 // Their data is already stored in plotDataArrays for fill references.
-                if (plot.options.color && typeof plot.options.color === 'string') {
-                    const parsed = ColorUtils.parseColor(plot.options.color);
-                    if (parsed.opacity < 0.01) {
-                        // Check that ALL per-bar colors are also transparent (or absent)
-                        const hasVisibleBarColor = colorArray.some((c: any) => {
-                            if (c == null) return false;
-                            const pc = ColorUtils.parseColor(c);
-                            return pc.opacity >= 0.01;
-                        });
-                        if (!hasVisibleBarColor) {
-                            return; // Skip rendering — data already in plotDataArrays for fills
+                // Covers: color(na) → null, color.new(x, 100) → fully transparent string, etc.
+                {
+                    const plotColor = plot.options.color;
+                    let skipPlot = false;
+                    if (plotColor == null) {
+                        // color(na) — plot-level color is null/undefined; skip if no bar has a visible color
+                        const hasVisibleBarColor = colorArray.some((c: any) => c != null);
+                        skipPlot = !hasVisibleBarColor;
+                    } else if (typeof plotColor === 'string') {
+                        const parsed = ColorUtils.parseColor(plotColor);
+                        if (parsed.opacity < 0.01) {
+                            const hasVisibleBarColor = colorArray.some((c: any) => {
+                                if (c == null) return false;
+                                const pc = ColorUtils.parseColor(c);
+                                return pc.opacity >= 0.01;
+                            });
+                            skipPlot = !hasVisibleBarColor;
                         }
                     }
+                    if (skipPlot) return;
                 }
 
                 // Use Factory to get appropriate renderer
