@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3] - 2026-03-22 - Drawing Y-Axis Range, Fill Overlay & Gradient Fill
+
+### Added
+
+- **Drawing Object Y-Axis Range Hints** (`_buildDrawingRangeHints`): When PineTS emits drawing objects (lines, boxes, labels, polylines), their Y-coordinates can sit outside the candlestick / plot range, so ECharts auto-scale would clip them. QFChart now scans all indicator drawing data, computes per-pane min/max Y, and injects **invisible scatter series** carrying those extrema so the Y-axis expands to include drawings. Applied during full render and on incremental updates (e.g. lazy padding).
+
+### Fixed
+
+- **Fill Overlay Inheritance (OR semantics)**: `fill()` between two plots now uses **either** referenced plot’s overlay flag — if **either** plot is overlay, the fill is treated as overlay. Previously both had to be overlay (`AND`), which wrongly placed some fills in a sub-pane.
+- **Gradient / Invisible Source Plots**: Improved skipping logic for plots that exist only as fill sources: plot-level `color` of `null`/`undefined` (e.g. `color(na)`) is now handled consistently with fully transparent string colors, so gradient fills still resolve reference data without rendering a spurious visible line.
+
+---
+
 ## [0.8.2] - 2026-03-19 - Line Drawing Tools, Layout Fixes & DataZoom Stability
 
 ### Added
