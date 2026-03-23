@@ -984,6 +984,9 @@ export class QFChart implements ChartContext {
             return candle;
         });
 
+        // Build drawing range hints for Y-axis scaling
+        const updateDrawingRangeHints = this._buildDrawingRangeHints(layout, paddingPoints);
+
         // Update only the data arrays in the option, not the full config
         const updateOption: any = {
             xAxis: currentOption.xAxis.map((axis: any, index: number) => ({
@@ -995,6 +998,7 @@ export class QFChart implements ChartContext {
                     markLine: candlestickSeries.markLine, // Ensure markLine is updated
                 },
                 ...indicatorSeries,
+                ...updateDrawingRangeHints,
             ],
         };
 
@@ -1230,6 +1234,132 @@ export class QFChart implements ChartContext {
     public resize(): void {
         this.chart.resize();
         this._renderTableOverlays();
+    }
+
+    /**
+     * Build invisible "scatter" series that carry the min/max Y values of Pine
+     * Script drawing objects (lines, boxes, labels, polylines).  ECharts includes
+     * these points in its automatic Y-axis range calculation so drawings below
+     * or above the candlestick range are no longer clipped.
+     *
+     * Returns one hidden series per pane that has drawing objects with Y-values
+     * outside the default data range.
+     */
+    private _buildDrawingRangeHints(layout: any, paddingPoints: number): any[] {
+        const hintSeries: any[] = [];
+
+        // Collect Y-value bounds per pane from all indicator drawing objects
+        const boundsPerPane = new Map<number, { yMin: number; yMax: number }>();
+
+        for (const indicator of this.indicators) {
+            if (!indicator.plots) continue;
+            const paneIndex = indicator.paneIndex ?? 0;
+            if (!boundsPerPane.has(paneIndex)) {
+                boundsPerPane.set(paneIndex, { yMin: Infinity, yMax: -Infinity });
+            }
+            const bounds = boundsPerPane.get(paneIndex)!;
+
+            for (const [plotName, plot] of Object.entries(indicator.plots as Record<string, any>)) {
+                if (!plot || !plot.options) continue;
+                const style = plot.options?.style;
+
+                // Lines: y1, y2
+                if (style === 'drawing_line' && plot.data) {
+                    for (const entry of plot.data) {
+                        const items = entry?.value ? (Array.isArray(entry.value) ? entry.value : [entry.value]) : [];
+                        for (const ln of items) {
+                            if (!ln || ln._deleted) continue;
+                            if (typeof ln.y1 === 'number' && isFinite(ln.y1)) {
+                                bounds.yMin = Math.min(bounds.yMin, ln.y1);
+                                bounds.yMax = Math.max(bounds.yMax, ln.y1);
+                            }
+                            if (typeof ln.y2 === 'number' && isFinite(ln.y2)) {
+                                bounds.yMin = Math.min(bounds.yMin, ln.y2);
+                                bounds.yMax = Math.max(bounds.yMax, ln.y2);
+                            }
+                        }
+                    }
+                }
+
+                // Boxes: top, bottom
+                if (style === 'drawing_box' && plot.data) {
+                    for (const entry of plot.data) {
+                        const items = entry?.value ? (Array.isArray(entry.value) ? entry.value : [entry.value]) : [];
+                        for (const bx of items) {
+                            if (!bx || bx._deleted) continue;
+                            if (typeof bx.top === 'number' && isFinite(bx.top)) {
+                                bounds.yMin = Math.min(bounds.yMin, bx.top);
+                                bounds.yMax = Math.max(bounds.yMax, bx.top);
+                            }
+                            if (typeof bx.bottom === 'number' && isFinite(bx.bottom)) {
+                                bounds.yMin = Math.min(bounds.yMin, bx.bottom);
+                                bounds.yMax = Math.max(bounds.yMax, bx.bottom);
+                            }
+                        }
+                    }
+                }
+
+                // Labels: y
+                if (style === 'label' && plot.data) {
+                    for (const entry of plot.data) {
+                        const items = entry?.value ? (Array.isArray(entry.value) ? entry.value : [entry.value]) : [];
+                        for (const lbl of items) {
+                            if (!lbl || lbl._deleted) continue;
+                            if (typeof lbl.y === 'number' && isFinite(lbl.y)) {
+                                bounds.yMin = Math.min(bounds.yMin, lbl.y);
+                                bounds.yMax = Math.max(bounds.yMax, lbl.y);
+                            }
+                        }
+                    }
+                }
+
+                // Polylines: points[].price
+                if (style === 'drawing_polyline' && plot.data) {
+                    for (const entry of plot.data) {
+                        const items = entry?.value ? (Array.isArray(entry.value) ? entry.value : [entry.value]) : [];
+                        for (const pl of items) {
+                            if (!pl || pl._deleted || !pl._points) continue;
+                            for (const pt of pl._points) {
+                                if (typeof pt?.price === 'number' && isFinite(pt.price)) {
+                                    bounds.yMin = Math.min(bounds.yMin, pt.price);
+                                    bounds.yMax = Math.max(bounds.yMax, pt.price);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Create a hidden scatter series per pane with min/max Y values
+        const midIndex = paddingPoints + Math.floor((this.marketData?.length || 0) / 2);
+        boundsPerPane.forEach((bounds, paneIndex) => {
+            if (!isFinite(bounds.yMin) || !isFinite(bounds.yMax)) return;
+
+            // Determine Y-axis index for this pane
+            const yAxisIndex = paneIndex === 0
+                ? 0
+                : (layout.separatePaneYAxisOffset || 1) + (paneIndex - 1);
+
+            hintSeries.push({
+                name: `_drawingRange_pane${paneIndex}`,
+                type: 'scatter',
+                xAxisIndex: paneIndex,
+                yAxisIndex,
+                symbol: 'none',
+                symbolSize: 0,
+                silent: true,
+                animation: false,
+                // Two invisible points at min and max Y — ECharts includes them in axis scaling
+                data: [
+                    [midIndex, bounds.yMin],
+                    [midIndex, bounds.yMax],
+                ],
+                tooltip: { show: false },
+            });
+        });
+
+        return hintSeries;
     }
 
     /**
@@ -1602,6 +1732,10 @@ export class QFChart implements ChartContext {
             layout.separatePaneYAxisOffset, // Pass Y-axis offset for separate panes
         );
 
+        // Create hidden range-hint series so Pine Script drawing objects
+        // (lines, boxes, labels, polylines) contribute to Y-axis auto-scaling.
+        const drawingRangeHints = this._buildDrawingRangeHints(layout, paddingPoints);
+
         // Apply barColors (TradingView: barcolor() only changes body fill, borders/wicks stay default)
         candlestickSeries.data = candlestickSeries.data.map((candle: any, i: number) => {
             if (barColors[i]) {
@@ -1770,7 +1904,7 @@ export class QFChart implements ChartContext {
             xAxis: layout.xAxis,
             yAxis: layout.yAxis,
             dataZoom: layout.dataZoom,
-            series: [candlestickSeries, ...indicatorSeries, ...drawingSeriesList],
+            series: [candlestickSeries, ...indicatorSeries, ...drawingRangeHints, ...drawingSeriesList],
         };
 
         this.chart.setOption(option, true); // true = not merge, replace.
