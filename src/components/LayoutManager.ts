@@ -553,12 +553,17 @@ export class LayoutManager {
                         const visualOnlyStyles = ['background', 'barcolor', 'char'];
 
                         // Check if this is a shape with price-relative positioning
+                        // Includes abovebar/belowbar (relative to candle) and absolute (exact Y value)
                         const isShapeWithPriceLocation =
                             plot.options.style === 'shape' &&
                             (plot.options.location === 'abovebar' ||
                                 plot.options.location === 'AboveBar' ||
+                                plot.options.location === 'ab' ||
                                 plot.options.location === 'belowbar' ||
-                                plot.options.location === 'BelowBar');
+                                plot.options.location === 'BelowBar' ||
+                                plot.options.location === 'bl' ||
+                                plot.options.location === 'absolute' ||
+                                plot.options.location === 'Absolute');
 
                         if (visualOnlyStyles.includes(plot.options.style)) {
                             // Assign these to a separate Y-axis so they don't affect price scale
