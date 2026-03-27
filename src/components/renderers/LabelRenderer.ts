@@ -77,11 +77,14 @@ export class LabelRenderer implements SeriesRenderer {
                 let labelTextOffset: [number, number] = [0, 0];
 
                 if (isBubble) {
-                    // Approximate text width: chars * fontSize * avgCharWidthRatio (bold)
-                    const textWidth = text.length * fontSize * 0.65;
+                    // For multi-line text, size based on the longest line and number of lines
+                    const lines = text.split('\n');
+                    const longestLine = lines.reduce((a: string, b: string) => a.length > b.length ? a : b, '');
+                    const textWidth = longestLine.length * fontSize * 0.65;
                     const minWidth = fontSize * 2.5;
                     const bubbleWidth = Math.max(minWidth, textWidth + fontSize * 1.6);
-                    const bubbleHeight = fontSize * 2.8;
+                    const lineHeight = fontSize * 1.4;
+                    const bubbleHeight = Math.max(fontSize * 2.8, lines.length * lineHeight + fontSize * 1.2);
 
                     // SVG pointer takes 3/24 = 12.5% of the path dimension
                     const pointerRatio = 3 / 24;

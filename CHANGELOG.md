@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.4] - 2026-03-27 - Shapes, X-Axis Layout & Multiline Labels
+
+### Fixed
+
+- **`ShapeRenderer` Absolute Positioning**: Corrected coordinate handling for `plotshape` / character markers when using absolute positioning so shapes land on the intended bar/price instead of drifting (with supporting `LayoutManager` updates).
+- **Shape Plot (`ScatterRenderer`) & X-Axis Placement**: Fixed shape rendering in multi-pane layouts. **X-axis** is now forced to the **bottom** of each grid so category labels and time scale stay visually anchored under the chart instead of floating with split panes.
+- **Multiline Labels (`LabelRenderer`)**: Bubble-style labels with `\n` in the text now size correctly — width from the **longest line**, height from **line count × line height** — instead of treating the whole string as one line (which clipped or mis-centered multi-line copy).
+
+---
+
 ## [0.8.3] - 2026-03-22 - Drawing Y-Axis Range, Fill Overlay & Gradient Fill
 
 ### Added
