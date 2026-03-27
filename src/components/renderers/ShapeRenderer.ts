@@ -40,6 +40,8 @@ export class ShapeRenderer implements SeriesRenderer {
                 // Positioning based on location
                 let yValue = val; // Default to absolute value
                 let symbolOffset: (string | number)[] = [0, 0];
+                const isLabelUp = shape.includes('label_up') || shape === 'labelup';
+                const isLabelDown = shape.includes('label_down') || shape === 'labeldown';
 
                 if (location === 'abovebar' || location === 'AboveBar' || location === 'ab') {
                     // Shape above the candle
@@ -83,6 +85,15 @@ export class ShapeRenderer implements SeriesRenderer {
                     }
                 }
 
+                // Anchor labelup/labeldown so the arrow tip sits at the data point.
+                // labelup: arrow tip points up (at top of shape) → shift shape down
+                // labeldown: arrow tip points down (at bottom of shape) → shift shape up
+                if (isLabelUp) {
+                    symbolOffset = [symbolOffset[0], '50%'];
+                } else if (isLabelDown) {
+                    symbolOffset = [symbolOffset[0], '-50%'];
+                }
+
                 // Get label configuration based on location
                 const labelConfig = ShapeUtils.getLabelConfig(shape, location);
 
@@ -115,6 +126,7 @@ export class ShapeRenderer implements SeriesRenderer {
             type: 'scatter',
             xAxisIndex: xAxisIndex,
             yAxisIndex: yAxisIndex,
+            z: 10, // Render shapes in front of candles (z: 5)
             data: shapeData,
         };
     }

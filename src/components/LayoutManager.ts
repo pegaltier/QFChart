@@ -418,7 +418,10 @@ export class LayoutManager {
         const xAxis: any[] = [];
 
         // Main X-Axis
+        // Hide date labels on the main chart when indicator panes exist below —
+        // the bottom-most pane's x-axis will show them instead.
         const isMainBottom = paneConfigs.length === 0;
+        const showMainXLabels = !isMainCollapsed && isMainBottom;
         xAxis.push({
             type: 'category',
             data: [], // Will be filled by SeriesBuilder or QFChart
@@ -435,7 +438,7 @@ export class LayoutManager {
                 lineStyle: { color: gridLineColor, opacity: gridLineOpacity },
             },
             axisLabel: {
-                show: !isMainCollapsed,
+                show: showMainXLabels,
                 color: '#94a3b8',
                 fontFamily: options.fontFamily || 'sans-serif',
                 formatter: (value: number) => {
@@ -447,7 +450,7 @@ export class LayoutManager {
                     return AxisUtils.formatValue(value, decimals);
                 },
             },
-            axisTick: { show: !isMainCollapsed },
+            axisTick: { show: showMainXLabels },
             axisPointer: {
                 label: {
                     show: isMainBottom,
@@ -458,15 +461,21 @@ export class LayoutManager {
         });
 
         // Separate Panes X-Axes
+        // Show date labels only on the bottom-most pane
         paneConfigs.forEach((pane, i) => {
             const isBottom = i === paneConfigs.length - 1;
+            const showLabels = isBottom && !pane.isCollapsed;
             xAxis.push({
                 type: 'category',
                 gridIndex: i + 1, // 0 is main
                 data: [], // Shared data
-                axisLabel: { show: false }, // Hide labels on indicator panes
+                axisLabel: {
+                    show: showLabels,
+                    color: '#94a3b8',
+                    fontFamily: options.fontFamily || 'sans-serif',
+                },
                 axisLine: { show: !pane.isCollapsed && gridBorderShow, lineStyle: { color: gridBorderColor } },
-                axisTick: { show: false },
+                axisTick: { show: showLabels },
                 splitLine: { show: false },
                 axisPointer: {
                     label: {
@@ -549,16 +558,21 @@ export class LayoutManager {
                         const plotKey = `${id}::${plotName}`;
 
                         // Skip visual-only plot types that should never affect Y-axis scaling
-                        // EXCEPTION: shapes with abovebar/belowbar must stay on main Y-axis
-                        const visualOnlyStyles = ['background', 'barcolor', 'char'];
+                        // EXCEPTION: shapes/chars with price-relative locations must stay on main Y-axis
+                        const visualOnlyStyles = ['background', 'barcolor'];
 
-                        // Check if this is a shape with price-relative positioning
+                        // Check if this is a shape/char with price-relative positioning
+                        // Includes abovebar/belowbar (relative to candle) and absolute (exact Y value)
                         const isShapeWithPriceLocation =
-                            plot.options.style === 'shape' &&
+                            (plot.options.style === 'shape' || plot.options.style === 'char') &&
                             (plot.options.location === 'abovebar' ||
                                 plot.options.location === 'AboveBar' ||
+                                plot.options.location === 'ab' ||
                                 plot.options.location === 'belowbar' ||
-                                plot.options.location === 'BelowBar');
+                                plot.options.location === 'BelowBar' ||
+                                plot.options.location === 'bl' ||
+                                plot.options.location === 'absolute' ||
+                                plot.options.location === 'Absolute');
 
                         if (visualOnlyStyles.includes(plot.options.style)) {
                             // Assign these to a separate Y-axis so they don't affect price scale
@@ -569,8 +583,8 @@ export class LayoutManager {
                             return; // Skip further processing for this plot
                         }
 
-                        // If it's a shape but NOT with price-relative positioning, treat as visual-only
-                        if (plot.options.style === 'shape' && !isShapeWithPriceLocation) {
+                        // If it's a shape/char but NOT with price-relative positioning, treat as visual-only
+                        if ((plot.options.style === 'shape' || plot.options.style === 'char') && !isShapeWithPriceLocation) {
                             if (!overlayYAxisMap.has(plotKey)) {
                                 overlayYAxisMap.set(plotKey, nextYAxisIndex);
                                 nextYAxisIndex++;
