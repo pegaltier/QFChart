@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.5] - 2026-04-02 - Bar-Time Drawing Coords, Gradient Fill Boundaries & Layout Polish
+
+### Added
+
+- **`xloc.bar_time` / timestamp X coordinates**: New **`resolveXCoord()`** flow converts drawing X values from **bar time** to **ECharts bar indices** via **`timeToIndex`** plus **future-timestamp interpolation** when the time is past the last candle. Wired through **`RenderContext`** (`timeToIndex`, raw market data) and applied in **Box**, **drawing line**, **label**, **linefill**, and **polyline** renderers.
+
+### Fixed
+
+- **Gradient fills (`FillRenderer`)**: **`renderGradientFill`** now uses **per-bar** `top_value` / `bottom_value` from PineTS as the Y band instead of raw reference plot samples, and **suppresses the fill** when either boundary is **`na`**.
+- **`label.style_label_center` & shape sizing**: Corrected centering and marker size handling in **`LabelRenderer`** and **`ShapeUtils`** so centered labels and shapes match intended layout.
+
+### Changed
+
+- **Multi-pane separator**: Horizontal split between the main and indicator panes is **more visible** (**`GraphicBuilder`**).
+
+---
+
 ## [0.8.4] - 2026-03-27 - Shapes, X-Axis Layout & Multiline Labels
 
 ### Fixed
