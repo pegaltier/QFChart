@@ -1,9 +1,9 @@
-import { SeriesRenderer, RenderContext } from './SeriesRenderer';
+import { SeriesRenderer, RenderContext, resolveXCoord } from './SeriesRenderer';
 import { ShapeUtils } from '../../utils/ShapeUtils';
 
 export class LabelRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, dataArray, candlestickData, dataIndexOffset } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, candlestickData, dataIndexOffset, timeToIndex, marketData } = context;
         const offset = dataIndexOffset || 0;
 
         // Collect all non-null, non-deleted label objects from the sparse dataArray.
@@ -42,7 +42,8 @@ export class LabelRenderer implements SeriesRenderer {
                 const shape = this.styleToShape(styleRaw);
 
                 // Determine X position using label's own x coordinate
-                const xPos = (lbl.xloc === 'bar_index' || lbl.xloc === 'bi') ? (lbl.x + offset) : lbl.x;
+                const xPos = resolveXCoord(lbl.x, lbl.xloc, offset, timeToIndex, marketData);
+                if (isNaN(xPos)) return null;
 
                 // Determine Y value based on yloc
                 let yValue = lbl.y;
