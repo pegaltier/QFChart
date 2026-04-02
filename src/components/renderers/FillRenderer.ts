@@ -201,8 +201,9 @@ export class FillRenderer implements SeriesRenderer {
 
     /**
      * Render a gradient fill between two plots.
-     * Uses a vertical linear gradient from top_color (at the upper boundary)
-     * to bottom_color (at the lower boundary) for each polygon segment.
+     * Uses per-bar top_value/bottom_value as the actual Y boundaries (not the raw plot values).
+     * A vertical linear gradient goes from top_color (at top_value) to bottom_color (at bottom_value).
+     * When top_value or bottom_value is na/NaN, the fill is hidden for that bar.
      */
     private renderGradientFill(
         seriesName: string,
@@ -214,40 +215,52 @@ export class FillRenderer implements SeriesRenderer {
         optionsArray: any[],
         plotOptions: any
     ): any {
-        // Build per-bar gradient color arrays from optionsArray
-        // Each entry in optionsArray has: { top_value, bottom_value, top_color, bottom_color }
-        const gradientColors: { topColor: string; topOpacity: number; bottomColor: string; bottomOpacity: number }[] = [];
+        // Build per-bar gradient data from optionsArray
+        // Each entry has: { top_value, bottom_value, top_color, bottom_color }
+        interface GradientBar {
+            topValue: number | null;
+            bottomValue: number | null;
+            topColor: string;
+            topOpacity: number;
+            bottomColor: string;
+            bottomOpacity: number;
+        }
+        const gradientBars: (GradientBar | null)[] = [];
 
         for (let i = 0; i < totalDataLength; i++) {
             const opts = optionsArray?.[i];
             if (opts && opts.top_color !== undefined) {
+                const tv = opts.top_value;
+                const bv = opts.bottom_value;
+                // na/NaN/null/undefined → null (hidden bar)
+                const topVal = (tv == null || (typeof tv === 'number' && isNaN(tv))) ? null : tv;
+                const btmVal = (bv == null || (typeof bv === 'number' && isNaN(bv))) ? null : bv;
+
                 const top = ColorUtils.parseColor(opts.top_color);
                 const bottom = ColorUtils.parseColor(opts.bottom_color);
-                gradientColors[i] = {
+                gradientBars[i] = {
+                    topValue: topVal,
+                    bottomValue: btmVal,
                     topColor: top.color,
                     topOpacity: top.opacity,
                     bottomColor: bottom.color,
                     bottomOpacity: bottom.opacity,
                 };
             } else {
-                // Fallback: use a default semi-transparent fill
-                gradientColors[i] = {
-                    topColor: 'rgba(128,128,128,0.2)',
-                    topOpacity: 0.2,
-                    bottomColor: 'rgba(128,128,128,0.2)',
-                    bottomOpacity: 0.2,
-                };
+                gradientBars[i] = null;
             }
         }
 
-        // Create fill data with previous values
-        const fillDataWithPrev: any[] = [];
+        // Create fill data using top_value/bottom_value as Y boundaries
+        const fillData: any[] = [];
         for (let i = 0; i < totalDataLength; i++) {
-            const y1 = plot1Data[i];
-            const y2 = plot2Data[i];
-            const prevY1 = i > 0 ? plot1Data[i - 1] : null;
-            const prevY2 = i > 0 ? plot2Data[i - 1] : null;
-            fillDataWithPrev.push([i, y1, y2, prevY1, prevY2]);
+            const gb = gradientBars[i];
+            const prevGb = i > 0 ? gradientBars[i - 1] : null;
+            const topY = gb?.topValue ?? null;
+            const btmY = gb?.bottomValue ?? null;
+            const prevTopY = prevGb?.topValue ?? null;
+            const prevBtmY = prevGb?.bottomValue ?? null;
+            fillData.push([i, topY, btmY, prevTopY, prevBtmY]);
         }
 
         return {
@@ -263,57 +276,53 @@ export class FillRenderer implements SeriesRenderer {
                 const index = params.dataIndex;
                 if (index === 0) return null;
 
-                const y1 = api.value(1);
-                const y2 = api.value(2);
-                const prevY1 = api.value(3);
-                const prevY2 = api.value(4);
+                const topY = api.value(1);
+                const btmY = api.value(2);
+                const prevTopY = api.value(3);
+                const prevBtmY = api.value(4);
 
+                // Skip when any boundary is na (hidden bar)
                 if (
-                    y1 === null || y2 === null || prevY1 === null || prevY2 === null ||
-                    isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)
+                    topY == null || btmY == null || prevTopY == null || prevBtmY == null ||
+                    isNaN(topY) || isNaN(btmY) || isNaN(prevTopY) || isNaN(prevBtmY)
                 ) {
                     return null;
                 }
 
-                const p1Prev = api.coord([index - 1, prevY1]);
-                const p1Curr = api.coord([index, y1]);
-                const p2Curr = api.coord([index, y2]);
-                const p2Prev = api.coord([index - 1, prevY2]);
-
                 // Get gradient colors for this bar
-                const gc = gradientColors[index] || gradientColors[index - 1];
-                if (!gc) return null;
+                const gb = gradientBars[index];
+                if (!gb) return null;
 
                 // Skip fully transparent gradient fills
-                if (gc.topOpacity < 0.01 && gc.bottomOpacity < 0.01) return null;
+                if (gb.topOpacity < 0.01 && gb.bottomOpacity < 0.01) return null;
 
-                // Convert colors to rgba strings with their opacities
-                const topRgba = ColorUtils.toRgba(gc.topColor, gc.topOpacity);
-                const bottomRgba = ColorUtils.toRgba(gc.bottomColor, gc.bottomOpacity);
+                const topRgba = ColorUtils.toRgba(gb.topColor, gb.topOpacity);
+                const bottomRgba = ColorUtils.toRgba(gb.bottomColor, gb.bottomOpacity);
 
-                // Determine if plot1 is above plot2 (in value space, higher value = higher on chart)
-                // We want top_color at the higher value, bottom_color at the lower value
-                const plot1IsAbove = y1 >= y2;
+                const pTopPrev = api.coord([index - 1, prevTopY]);
+                const pTopCurr = api.coord([index, topY]);
+                const pBtmCurr = api.coord([index, btmY]);
+                const pBtmPrev = api.coord([index - 1, prevBtmY]);
 
                 return {
                     type: 'polygon',
                     shape: {
-                        points: [p1Prev, p1Curr, p2Curr, p2Prev],
+                        points: [pTopPrev, pTopCurr, pBtmCurr, pBtmPrev],
                     },
                     style: {
                         fill: {
                             type: 'linear',
-                            x: 0, y: 0, x2: 0, y2: 1, // vertical gradient
+                            x: 0, y: 0, x2: 0, y2: 1,
                             colorStops: [
-                                { offset: 0, color: plot1IsAbove ? topRgba : bottomRgba },
-                                { offset: 1, color: plot1IsAbove ? bottomRgba : topRgba },
+                                { offset: 0, color: topRgba },
+                                { offset: 1, color: bottomRgba },
                             ],
                         },
                     },
                     silent: true,
                 };
             },
-            data: fillDataWithPrev,
+            data: fillData,
             silent: true,
         };
     }

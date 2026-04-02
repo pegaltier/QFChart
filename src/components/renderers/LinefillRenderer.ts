@@ -1,4 +1,4 @@
-import { SeriesRenderer, RenderContext } from './SeriesRenderer';
+import { SeriesRenderer, RenderContext, resolveXCoord } from './SeriesRenderer';
 import { ColorUtils } from '../../utils/ColorUtils';
 
 /**
@@ -9,7 +9,7 @@ import { ColorUtils } from '../../utils/ColorUtils';
  */
 export class LinefillRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset, timeToIndex, marketData } = context;
         const offset = dataIndexOffset || 0;
 
         // Collect all non-deleted linefill objects from the sparse dataArray.
@@ -60,13 +60,16 @@ export class LinefillRenderer implements SeriesRenderer {
                     const line2 = lf.line2;
                     if (!line1 || !line2 || line1._deleted || line2._deleted) continue;
 
-                    const xOff1 = (line1.xloc === 'bar_index' || line1.xloc === 'bi') ? offset : 0;
-                    const xOff2 = (line2.xloc === 'bar_index' || line2.xloc === 'bi') ? offset : 0;
+                    const l1x1 = resolveXCoord(line1.x1, line1.xloc, offset, timeToIndex, marketData);
+                    const l1x2 = resolveXCoord(line1.x2, line1.xloc, offset, timeToIndex, marketData);
+                    const l2x1 = resolveXCoord(line2.x1, line2.xloc, offset, timeToIndex, marketData);
+                    const l2x2 = resolveXCoord(line2.x2, line2.xloc, offset, timeToIndex, marketData);
+                    if (isNaN(l1x1) || isNaN(l1x2) || isNaN(l2x1) || isNaN(l2x2)) continue;
 
-                    let p1Start = api.coord([line1.x1 + xOff1, line1.y1]);
-                    let p1End = api.coord([line1.x2 + xOff1, line1.y2]);
-                    let p2Start = api.coord([line2.x1 + xOff2, line2.y1]);
-                    let p2End = api.coord([line2.x2 + xOff2, line2.y2]);
+                    let p1Start = api.coord([l1x1, line1.y1]);
+                    let p1End = api.coord([l1x2, line1.y2]);
+                    let p2Start = api.coord([l2x1, line2.y1]);
+                    let p2End = api.coord([l2x2, line2.y2]);
 
                     // Handle line extensions
                     const extend1 = line1.extend || 'none';

@@ -104,6 +104,9 @@ export class SeriesBuilder {
         const series: any[] = [];
         const barColors: (string | null)[] = new Array(totalDataLength).fill(null);
 
+        // Extract raw (non-null) market data for resolving xloc.bar_time coordinates
+        const rawMarketData = candlestickData?.filter((d): d is OHLCV => d != null && d.time !== undefined);
+
         // Store plot data arrays for fill plots to reference
         const plotDataArrays = new Map<string, number[]>();
 
@@ -348,6 +351,8 @@ export class SeriesBuilder {
                     indicatorId: id,
                     plotName: plotName,
                     dataIndexOffset,
+                    timeToIndex,
+                    marketData: rawMarketData,
                 });
 
                 if (seriesConfig) {

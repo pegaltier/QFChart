@@ -184,6 +184,50 @@ export class GraphicBuilder {
             }
         }
 
+        // Pane Separator Lines (between main chart and indicator panes, and between indicators)
+        // Offset upward from center so the line doesn't overlap the lower pane's y-axis labels
+        if (!maximizedPaneId && layout.paneBoundaries.length > 0) {
+            const sepOffset = -8 * pixelToPercent; // shift 8px up from gap center
+            for (const boundary of layout.paneBoundaries) {
+                graphic.push({
+                    type: 'group',
+                    left: '10%',
+                    top: (boundary.yPercent + sepOffset) + '%',
+                    children: [
+                        // Invisible wide hit target for easier hover/drag
+                        {
+                            type: 'rect',
+                            shape: { width: 5000, height: 12, y: -6 },
+                            style: { fill: 'transparent' },
+                            cursor: 'row-resize',
+                        },
+                        // Visible line — moderately visible default, bright on hover
+                        {
+                            type: 'rect',
+                            shape: { width: 5000, height: 2, y: -1 },
+                            style: { fill: '#475569', opacity: 0.7 },
+                            cursor: 'row-resize',
+                        },
+                    ],
+                    z: 50,
+                    onmouseover: function () {
+                        const line = this.children()[1];
+                        if (line) {
+                            line.setStyle({ fill: '#94a3b8', opacity: 1.0 });
+                            line.setShape({ height: 3, y: -1.5 });
+                        }
+                    },
+                    onmouseout: function () {
+                        const line = this.children()[1];
+                        if (line) {
+                            line.setStyle({ fill: '#475569', opacity: 0.7 });
+                            line.setShape({ height: 2, y: -1 });
+                        }
+                    },
+                });
+            }
+        }
+
         // Indicator Panes
         layout.paneLayout.forEach((pane) => {
             // If maximizedPaneId is set, and this is NOT the maximized pane, skip rendering its controls
