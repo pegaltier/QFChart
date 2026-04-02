@@ -127,6 +127,18 @@ export class LabelRenderer implements SeriesRenderer {
                             labelTextOffset = [0, totalHeight * pointerRatio * 0.5];
                         }
                     }
+                } else if (shape === 'labelcenter') {
+                    // label_center: no pointer, centered at exact coordinate.
+                    // Size the bubble body to fit text but apply NO offset.
+                    const lines = text.split('\n');
+                    const longestLine = lines.reduce((a: string, b: string) => a.length > b.length ? a : b, '');
+                    const textWidth = longestLine.length * fontSize * 0.65;
+                    const minWidth = fontSize * 2.5;
+                    const bubbleWidth = Math.max(minWidth, textWidth + fontSize * 1.6);
+                    const lineHeight = fontSize * 1.4;
+                    const bubbleHeight = Math.max(fontSize * 2.8, lines.length * lineHeight + fontSize * 1.2);
+                    finalSize = [bubbleWidth, bubbleHeight];
+                    // No symbolOffset — center exactly at the coordinate
                 } else if (shape === 'none') {
                     finalSize = 0;
                 } else {
@@ -229,7 +241,7 @@ export class LabelRenderer implements SeriesRenderer {
             case 'label_upper_right':
                 return 'labelup';
             case 'label_center':
-                return 'labeldown';
+                return 'labelcenter';
             case 'circle':
                 return 'circle';
             case 'square':
@@ -290,16 +302,16 @@ export class LabelRenderer implements SeriesRenderer {
             case 'tiny':
                 return 8;
             case 'small':
-                return 9;
+                return 11;
             case 'normal':
             case 'auto':
-                return 10;
-            case 'large':
-                return 12;
-            case 'huge':
                 return 14;
+            case 'large':
+                return 20;
+            case 'huge':
+                return 36;
             default:
-                return 10;
+                return 14;
         }
     }
 }
