@@ -1,4 +1,4 @@
-import { SeriesRenderer, RenderContext } from './SeriesRenderer';
+import { SeriesRenderer, RenderContext, resolveXCoord } from './SeriesRenderer';
 
 /**
  * Renderer for Pine Script line.* drawing objects.
@@ -9,7 +9,7 @@ import { SeriesRenderer, RenderContext } from './SeriesRenderer';
  */
 export class DrawingLineRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset, timeToIndex, marketData } = context;
         const offset = dataIndexOffset || 0;
         const defaultColor = '#2962ff';
 
@@ -55,10 +55,12 @@ export class DrawingLineRenderer implements SeriesRenderer {
 
                 for (const ln of lineObjects) {
                     if (ln._deleted) continue;
-                    const xOff = (ln.xloc === 'bar_index' || ln.xloc === 'bi') ? offset : 0;
+                    const x1Resolved = resolveXCoord(ln.x1, ln.xloc, offset, timeToIndex, marketData);
+                    const x2Resolved = resolveXCoord(ln.x2, ln.xloc, offset, timeToIndex, marketData);
+                    if (isNaN(x1Resolved) || isNaN(x2Resolved)) continue;
 
-                    let p1 = api.coord([ln.x1 + xOff, ln.y1]);
-                    let p2 = api.coord([ln.x2 + xOff, ln.y2]);
+                    let p1 = api.coord([x1Resolved, ln.y1]);
+                    let p2 = api.coord([x2Resolved, ln.y2]);
 
                     // Handle extend (none/n | left/l | right/r | both/b)
                     const extend = ln.extend || 'none';

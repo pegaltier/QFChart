@@ -1,4 +1,4 @@
-import { SeriesRenderer, RenderContext } from './SeriesRenderer';
+import { SeriesRenderer, RenderContext, resolveXCoord } from './SeriesRenderer';
 
 /**
  * Convert any color string to a format ECharts canvas can render with opacity.
@@ -60,7 +60,7 @@ function luminance(r: number, g: number, b: number): number {
  */
 export class BoxRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset, timeToIndex, marketData } = context;
         const offset = dataIndexOffset || 0;
 
         // Collect all non-deleted box objects from the sparse dataArray.
@@ -103,9 +103,11 @@ export class BoxRenderer implements SeriesRenderer {
                 for (const bx of boxObjects) {
                     if (bx._deleted) continue;
 
-                    const xOff = (bx.xloc === 'bar_index' || bx.xloc === 'bi') ? offset : 0;
-                    const pTopLeft = api.coord([bx.left + xOff, bx.top]);
-                    const pBottomRight = api.coord([bx.right + xOff, bx.bottom]);
+                    const leftX = resolveXCoord(bx.left, bx.xloc, offset, timeToIndex, marketData);
+                    const rightX = resolveXCoord(bx.right, bx.xloc, offset, timeToIndex, marketData);
+                    if (isNaN(leftX) || isNaN(rightX)) continue;
+                    const pTopLeft = api.coord([leftX, bx.top]);
+                    const pBottomRight = api.coord([rightX, bx.bottom]);
 
                     let x = pTopLeft[0];
                     let y = pTopLeft[1];

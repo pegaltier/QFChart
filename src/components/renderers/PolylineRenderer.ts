@@ -1,4 +1,4 @@
-import { SeriesRenderer, RenderContext } from './SeriesRenderer';
+import { SeriesRenderer, RenderContext, resolveXCoord } from './SeriesRenderer';
 import { ColorUtils } from '../../utils/ColorUtils';
 
 /**
@@ -10,7 +10,7 @@ import { ColorUtils } from '../../utils/ColorUtils';
  */
 export class PolylineRenderer implements SeriesRenderer {
     render(context: RenderContext): any {
-        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset } = context;
+        const { seriesName, xAxisIndex, yAxisIndex, dataArray, dataIndexOffset, timeToIndex, marketData } = context;
         const offset = dataIndexOffset || 0;
 
         // Collect all non-deleted polyline objects from the sparse dataArray.
@@ -57,15 +57,22 @@ export class PolylineRenderer implements SeriesRenderer {
                     if (!points || points.length < 2) continue;
 
                     const useBi = pl.xloc === 'bi' || pl.xloc === 'bar_index';
-                    const xOff = useBi ? offset : 0;
 
                     // Convert chart.point objects to pixel coordinates
                     const pixelPoints: number[][] = [];
+                    let skipPoly = false;
                     for (const pt of points) {
-                        const x = useBi ? (pt.index ?? 0) + xOff : (pt.time ?? 0);
+                        let x: number;
+                        if (useBi) {
+                            x = (pt.index ?? 0) + offset;
+                        } else {
+                            x = resolveXCoord(pt.time ?? 0, 'bt', offset, timeToIndex, marketData);
+                            if (isNaN(x)) { skipPoly = true; break; }
+                        }
                         const y = pt.price ?? 0;
                         pixelPoints.push(api.coord([x, y]));
                     }
+                    if (skipPoly) continue;
 
                     if (pixelPoints.length < 2) continue;
 

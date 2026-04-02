@@ -47,6 +47,11 @@ export class ShapeUtils {
             case 'shape_label_up':
                 return 'path://M12 1l2 3h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-20a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1h8z';
 
+            case 'labelcenter':
+            case 'shape_label_center':
+                // Rounded rectangle with no pointer — centered at anchor
+                return 'path://M1 1h22a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-22a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1z';
+
             case 'square':
             case 'shape_square':
                 return 'rect';
