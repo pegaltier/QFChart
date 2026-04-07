@@ -36,10 +36,11 @@ export class ColorUtils {
             };
         }
 
-        // For 6-digit hex or named colors, default opacity to 0.3 for fill areas
+        // For 6-digit hex or named colors, return full opacity.
+        // Individual renderers (fill, gradient) apply their own opacity as needed.
         return {
             color: colorStr,
-            opacity: 0.3,
+            opacity: 1.0,
         };
     }
 
@@ -73,5 +74,36 @@ export class ColorUtils {
 
         // Fallback: return color as-is
         return color;
+    }
+
+    /**
+     * Parse a color string into {r, g, b} components.
+     */
+    private static toRGB(color: string): { r: number; g: number; b: number } {
+        const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) return { r: +rgbMatch[1], g: +rgbMatch[2], b: +rgbMatch[3] };
+
+        const hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})/);
+        if (hexMatch) return { r: parseInt(hexMatch[1], 16), g: parseInt(hexMatch[2], 16), b: parseInt(hexMatch[3], 16) };
+
+        return { r: 128, g: 128, b: 128 };
+    }
+
+    /**
+     * Linearly interpolate between two colors at a given t (0 = colorA, 1 = colorB).
+     * Returns an rgba() string.
+     */
+    public static interpolateColor(
+        colorA: string, opacityA: number,
+        colorB: string, opacityB: number,
+        t: number,
+    ): string {
+        const a = this.toRGB(colorA);
+        const b = this.toRGB(colorB);
+        const r = Math.round(a.r + (b.r - a.r) * t);
+        const g = Math.round(a.g + (b.g - a.g) * t);
+        const bl = Math.round(a.b + (b.b - a.b) * t);
+        const op = opacityA + (opacityB - opacityA) * t;
+        return `rgba(${r},${g},${bl},${op})`;
     }
 }
