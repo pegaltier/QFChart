@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.6] - 2026-04-07 - Fill Plot Crossings, TradingView Gradient Semantics & Color Opacity
+
+### Fixed
+
+- **`fill()` when the two series cross between bars**: Simple and **batched** fill rendering now **splits the quad at the intersection** (two polygons) when `plot1` and `plot2` swap vertical order from one bar to the next, instead of a self-crossing polygon with wrong coverage.
+- **Gradient `fill()` (`FillRenderer`)**: Re-aligned with **TradingView-style semantics** — the **polygon** is always bounded by the **two reference plots**, while **`top_value` / `bottom_value`** drive only the **color ramp** (mapped by where plot values sit in that range). Supports **one-sided `na`** top/bottom colors via ramp falloff; skips bars where both colors are **`na`** or gradient range values are invalid.
+
+### Added
+
+- **`ColorUtils.interpolateColor()`**: RGB **linear interpolation** between two parsed colors (with per-side opacity) for per-segment gradient fills.
+
+### Changed
+
+- **`ColorUtils.parseColor()`**: For **6-digit hex and named** colors, default **opacity is now `1.0`** (was **`0.3`**). Fill and gradient renderers apply transparency explicitly so plot `fill()` colors match Pine / TradingView strength instead of appearing washed out.
+
+---
+
 ## [0.8.5] - 2026-04-02 - Bar-Time Drawing Coords, Gradient Fill Boundaries & Layout Polish
 
 ### Added

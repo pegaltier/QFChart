@@ -105,6 +105,33 @@ export class FillRenderer implements SeriesRenderer {
                 const fillOpacity = fc ? fc.opacity : defaultFillOpacity;
                 if (fillOpacity < 0.01) return null;
 
+                const fillColor = fc ? fc.color : defaultFillColor;
+
+                // Check if plots cross between bars
+                const diff1Prev = prevY1 - prevY2;
+                const diff1Curr = y1 - y2;
+                const plotsCross = (diff1Prev > 0 && diff1Curr < 0) || (diff1Prev < 0 && diff1Curr > 0);
+
+                if (plotsCross) {
+                    const t = diff1Prev / (diff1Prev - diff1Curr);
+                    const crossX = index - 1 + t;
+                    const crossY = prevY1 + t * (y1 - prevY1);
+                    const pCross = api.coord([crossX, crossY]);
+                    const p1Prev = api.coord([index - 1, prevY1]);
+                    const p1Curr = api.coord([index, y1]);
+                    const p2Curr = api.coord([index, y2]);
+                    const p2Prev = api.coord([index - 1, prevY2]);
+
+                    return {
+                        type: 'group',
+                        children: [
+                            { type: 'polygon', shape: { points: [p1Prev, pCross, p2Prev] }, style: { fill: fillColor, opacity: fillOpacity }, silent: true },
+                            { type: 'polygon', shape: { points: [pCross, p1Curr, p2Curr] }, style: { fill: fillColor, opacity: fillOpacity }, silent: true },
+                        ],
+                        silent: true,
+                    };
+                }
+
                 const p1Prev = api.coord([index - 1, prevY1]);
                 const p1Curr = api.coord([index, y1]);
                 const p2Curr = api.coord([index, y2]);
@@ -116,7 +143,7 @@ export class FillRenderer implements SeriesRenderer {
                         points: [p1Prev, p1Curr, p2Curr, p2Prev],
                     },
                     style: {
-                        fill: fc ? fc.color : defaultFillColor,
+                        fill: fillColor,
                         opacity: fillOpacity,
                     },
                     silent: true,
@@ -179,17 +206,36 @@ export class FillRenderer implements SeriesRenderer {
                     const fc = fill.barColors[index];
                     if (!fc || fc.opacity < 0.01) continue;
 
-                    const p1Prev = api.coord([index - 1, prevY1]);
-                    const p1Curr = api.coord([index, y1]);
-                    const p2Curr = api.coord([index, y2]);
-                    const p2Prev = api.coord([index - 1, prevY2]);
+                    const fillStyle = { fill: fc.color, opacity: fc.opacity };
 
-                    children.push({
-                        type: 'polygon',
-                        shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
-                        style: { fill: fc.color, opacity: fc.opacity },
-                        silent: true,
-                    });
+                    // Check if plots cross between bars
+                    const dPrev = (prevY1 as number) - (prevY2 as number);
+                    const dCurr = (y1 as number) - (y2 as number);
+                    const crosses = (dPrev > 0 && dCurr < 0) || (dPrev < 0 && dCurr > 0);
+
+                    if (crosses) {
+                        const t = dPrev / (dPrev - dCurr);
+                        const crossX = index - 1 + t;
+                        const crossY = (prevY1 as number) + t * ((y1 as number) - (prevY1 as number));
+                        const pCross = api.coord([crossX, crossY]);
+                        const p1Prev = api.coord([index - 1, prevY1]);
+                        const p1Curr = api.coord([index, y1]);
+                        const p2Curr = api.coord([index, y2]);
+                        const p2Prev = api.coord([index - 1, prevY2]);
+                        children.push({ type: 'polygon', shape: { points: [p1Prev, pCross, p2Prev] }, style: fillStyle, silent: true });
+                        children.push({ type: 'polygon', shape: { points: [pCross, p1Curr, p2Curr] }, style: fillStyle, silent: true });
+                    } else {
+                        const p1Prev = api.coord([index - 1, prevY1]);
+                        const p1Curr = api.coord([index, y1]);
+                        const p2Curr = api.coord([index, y2]);
+                        const p2Prev = api.coord([index - 1, prevY2]);
+                        children.push({
+                            type: 'polygon',
+                            shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
+                            style: fillStyle,
+                            silent: true,
+                        });
+                    }
                 }
 
                 return children.length > 0 ? { type: 'group', children, silent: true } : null;
@@ -201,9 +247,15 @@ export class FillRenderer implements SeriesRenderer {
 
     /**
      * Render a gradient fill between two plots.
-     * Uses per-bar top_value/bottom_value as the actual Y boundaries (not the raw plot values).
-     * A vertical linear gradient goes from top_color (at top_value) to bottom_color (at bottom_value).
-     * When top_value or bottom_value is na/NaN, the fill is hidden for that bar.
+     *
+     * TradingView gradient fill semantics:
+     * - The polygon is ALWAYS clipped to the area between plot1 and plot2
+     * - top_value / bottom_value define the COLOR GRADIENT RANGE, not the polygon bounds
+     * - top_color maps to top_value, bottom_color maps to bottom_value
+     * - When top_color or bottom_color is na, that bar is hidden
+     *
+     * So the polygon shape uses plot1/plot2 data, but the gradient color ramp
+     * is mapped based on where the plot values fall within [bottom_value, top_value].
      */
     private renderGradientFill(
         seriesName: string,
@@ -215,52 +267,72 @@ export class FillRenderer implements SeriesRenderer {
         optionsArray: any[],
         plotOptions: any
     ): any {
-        // Build per-bar gradient data from optionsArray
-        // Each entry has: { top_value, bottom_value, top_color, bottom_color }
+        // Build per-bar gradient info
         interface GradientBar {
-            topValue: number | null;
-            bottomValue: number | null;
+            topValue: number;       // Color gradient range top
+            bottomValue: number;    // Color gradient range bottom
             topColor: string;
             topOpacity: number;
             bottomColor: string;
             bottomOpacity: number;
+            topIsNa: boolean;
+            btmIsNa: boolean;
         }
         const gradientBars: (GradientBar | null)[] = [];
 
+        const isNaColor = (c: any): boolean => {
+            if (c === null || c === undefined) return true;
+            if (typeof c === 'number' && isNaN(c)) return true;
+            if (c === 'na' || c === 'NaN' || c === '') return true;
+            return false;
+        };
+
         for (let i = 0; i < totalDataLength; i++) {
             const opts = optionsArray?.[i];
-            if (opts && opts.top_color !== undefined) {
+            if (opts && (opts.top_color !== undefined || opts.bottom_color !== undefined)) {
+                const topIsNa = isNaColor(opts.top_color);
+                const btmIsNa = isNaColor(opts.bottom_color);
+
+                if (topIsNa && btmIsNa) {
+                    gradientBars[i] = null;
+                    continue;
+                }
+
+                const topC = topIsNa ? { color: 'rgba(0,0,0,0)', opacity: 0 } : ColorUtils.parseColor(opts.top_color);
+                const btmC = btmIsNa ? { color: 'rgba(0,0,0,0)', opacity: 0 } : ColorUtils.parseColor(opts.bottom_color);
+
                 const tv = opts.top_value;
                 const bv = opts.bottom_value;
-                // na/NaN/null/undefined → null (hidden bar)
                 const topVal = (tv == null || (typeof tv === 'number' && isNaN(tv))) ? null : tv;
                 const btmVal = (bv == null || (typeof bv === 'number' && isNaN(bv))) ? null : bv;
+                if (topVal == null || btmVal == null) {
+                    gradientBars[i] = null;
+                    continue;
+                }
 
-                const top = ColorUtils.parseColor(opts.top_color);
-                const bottom = ColorUtils.parseColor(opts.bottom_color);
                 gradientBars[i] = {
                     topValue: topVal,
                     bottomValue: btmVal,
-                    topColor: top.color,
-                    topOpacity: top.opacity,
-                    bottomColor: bottom.color,
-                    bottomOpacity: bottom.opacity,
+                    topColor: topC.color,
+                    topOpacity: topC.opacity,
+                    bottomColor: btmC.color,
+                    bottomOpacity: btmC.opacity,
+                    topIsNa,
+                    btmIsNa,
                 };
             } else {
                 gradientBars[i] = null;
             }
         }
 
-        // Create fill data using top_value/bottom_value as Y boundaries
+        // Build fill data using PLOT values as polygon boundaries
         const fillData: any[] = [];
         for (let i = 0; i < totalDataLength; i++) {
-            const gb = gradientBars[i];
-            const prevGb = i > 0 ? gradientBars[i - 1] : null;
-            const topY = gb?.topValue ?? null;
-            const btmY = gb?.bottomValue ?? null;
-            const prevTopY = prevGb?.topValue ?? null;
-            const prevBtmY = prevGb?.bottomValue ?? null;
-            fillData.push([i, topY, btmY, prevTopY, prevBtmY]);
+            const y1 = plot1Data[i];
+            const y2 = plot2Data[i];
+            const prevY1 = i > 0 ? plot1Data[i - 1] : null;
+            const prevY2 = i > 0 ? plot2Data[i - 1] : null;
+            fillData.push([i, y1, y2, prevY1, prevY2]);
         }
 
         return {
@@ -276,51 +348,99 @@ export class FillRenderer implements SeriesRenderer {
                 const index = params.dataIndex;
                 if (index === 0) return null;
 
-                const topY = api.value(1);
-                const btmY = api.value(2);
-                const prevTopY = api.value(3);
-                const prevBtmY = api.value(4);
+                const y1 = api.value(1);
+                const y2 = api.value(2);
+                const prevY1 = api.value(3);
+                const prevY2 = api.value(4);
 
-                // Skip when any boundary is na (hidden bar)
                 if (
-                    topY == null || btmY == null || prevTopY == null || prevBtmY == null ||
-                    isNaN(topY) || isNaN(btmY) || isNaN(prevTopY) || isNaN(prevBtmY)
+                    y1 == null || y2 == null || prevY1 == null || prevY2 == null ||
+                    isNaN(y1) || isNaN(y2) || isNaN(prevY1) || isNaN(prevY2)
                 ) {
                     return null;
                 }
 
-                // Get gradient colors for this bar
                 const gb = gradientBars[index];
                 if (!gb) return null;
 
-                // Skip fully transparent gradient fills
-                if (gb.topOpacity < 0.01 && gb.bottomOpacity < 0.01) return null;
+                const gradRange = gb.topValue - gb.bottomValue;
+                const hasNaSide = gb.topIsNa || gb.btmIsNa;
 
-                const topRgba = ColorUtils.toRgba(gb.topColor, gb.topOpacity);
-                const bottomRgba = ColorUtils.toRgba(gb.bottomColor, gb.bottomOpacity);
+                // Compute gradient color stops for the polygon's y-range
+                const colorAtY = (yVal: number): string => {
+                    let t: number;
+                    if (Math.abs(gradRange) < 1e-10) { t = 0.5; }
+                    else { t = 1 - (yVal - gb.bottomValue) / gradRange; }
+                    t = Math.max(0, Math.min(1, t));
 
-                const pTopPrev = api.coord([index - 1, prevTopY]);
-                const pTopCurr = api.coord([index, topY]);
-                const pBtmCurr = api.coord([index, btmY]);
-                const pBtmPrev = api.coord([index - 1, prevBtmY]);
+                    if (gb.topIsNa) {
+                        return ColorUtils.toRgba(gb.bottomColor, gb.bottomOpacity * t);
+                    }
+                    if (gb.btmIsNa) {
+                        return ColorUtils.toRgba(gb.topColor, gb.topOpacity * (1 - t));
+                    }
+                    return ColorUtils.interpolateColor(gb.topColor, gb.topOpacity, gb.bottomColor, gb.bottomOpacity, t);
+                };
 
-                return {
+                // Build polygon between the two plot lines
+                const p1Prev = api.coord([index - 1, prevY1]);
+                const p1Curr = api.coord([index, y1]);
+                const p2Curr = api.coord([index, y2]);
+                const p2Prev = api.coord([index - 1, prevY2]);
+
+                // Vertical gradient: top of polygon to bottom of polygon
+                const polyTop = Math.max(y1, y2, prevY1, prevY2);
+                const polyBot = Math.min(y1, y2, prevY1, prevY2);
+
+                const polygon: any = {
                     type: 'polygon',
-                    shape: {
-                        points: [pTopPrev, pTopCurr, pBtmCurr, pBtmPrev],
-                    },
+                    shape: { points: [p1Prev, p1Curr, p2Curr, p2Prev] },
                     style: {
                         fill: {
                             type: 'linear',
                             x: 0, y: 0, x2: 0, y2: 1,
                             colorStops: [
-                                { offset: 0, color: topRgba },
-                                { offset: 1, color: bottomRgba },
+                                { offset: 0, color: colorAtY(polyTop) },
+                                { offset: 1, color: colorAtY(polyBot) },
                             ],
                         },
                     },
                     silent: true,
                 };
+
+                // When one color is na, clip the polygon to only the valid side of plot2.
+                if (hasNaSide) {
+                    const cs = params.coordSys;
+                    const zeroPixelPrev = api.coord([index - 1, prevY2])[1];
+                    const zeroPixelCurr = api.coord([index, y2])[1];
+                    // Use the average zero-line pixel position for this segment
+                    const zeroPixelY = (zeroPixelPrev + zeroPixelCurr) / 2;
+
+                    let clipY: number, clipH: number;
+                    if (gb.btmIsNa) {
+                        // Only draw above plot2
+                        clipY = cs.y;
+                        clipH = zeroPixelY - cs.y;
+                    } else {
+                        // Only draw below plot2
+                        clipY = zeroPixelY;
+                        clipH = cs.y + cs.height - zeroPixelY;
+                    }
+
+                    if (clipH <= 0) return null;
+
+                    return {
+                        type: 'group',
+                        children: [polygon],
+                        clipPath: {
+                            type: 'rect',
+                            shape: { x: cs.x, y: clipY, width: cs.width, height: clipH },
+                        },
+                        silent: true,
+                    };
+                }
+
+                return polygon;
             },
             data: fillData,
             silent: true,
