@@ -64,7 +64,9 @@ export class PolylineRenderer implements SeriesRenderer {
                     for (const pt of points) {
                         let x: number;
                         if (useBi) {
-                            x = (pt.index ?? 0) + offset;
+                            const idx = pt.index;
+                            if (idx == null || (typeof idx === 'number' && isNaN(idx))) { skipPoly = true; break; }
+                            x = idx + offset;
                         } else {
                             x = resolveXCoord(pt.time ?? 0, 'bt', offset, timeToIndex, marketData);
                             if (isNaN(x)) { skipPoly = true; break; }
